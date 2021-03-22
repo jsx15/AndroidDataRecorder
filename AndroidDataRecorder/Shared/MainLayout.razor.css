@@ -6,11 +6,10 @@
 
 .main {
     flex: 1;
-
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(122, 205, 38) 0%, #dfd9e0 70%);
+    background-color: #202239;
 }
 
 @media (min-width: 641px) {
@@ -24,7 +23,6 @@
         position: sticky;
         top: 0;
     }
-
 
     .main > div {
         padding-left: 2rem !important;

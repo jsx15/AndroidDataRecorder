@@ -1,10 +1,13 @@
 .navbar-brand {
     height: 2.5rem;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 2rem;
 }
+
 .nav-item {
     font-size: 1rem;
     padding-bottom: 0.5rem;
-    color: black;
 }
 
 .nav-item:first-of-type {
@@ -15,15 +18,27 @@
     padding-bottom: 1rem;
 }
 
+.nav-item ::deep a.active {
+    background-color: rgba(255,255,255,0.30);
+    border-radius: 15px;
+}
+
+.nav-item ::deep a:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 15px;
+}
+
 .oi {
-    top: 50%;
+    top:2px;
     width: 2rem;
     font-size: 1.1rem;
     vertical-align: middle;
 }
 
-.nav-link{
-    color:black;
-    text-decoration: none
+.nav-top {
+    background-color: #202239;
+    color:white;
 }
+
+
    
