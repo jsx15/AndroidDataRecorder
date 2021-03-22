@@ -1,0 +1,22 @@
+@page "/"
+@using AndroidDataRecorder
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AndroidDataRecorder</title>
+    <base href="~/"/>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css"/>
+    <link href="css/site.css" rel="stylesheet"/>
+    <link href="AndroidDataRecorder.styles.css" rel="stylesheet"/>
+</head>
+
+<body>
+<component type="typeof(App)" render-mode="ServerPrerendered"/>
+<script src="_framework/blazor.server.js"></script>
+
+</body>
+</html>
