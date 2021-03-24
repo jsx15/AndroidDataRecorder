@@ -4,4 +4,10 @@
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <None Update="Pages\Dashboard.razor.css">
+        <DependentUpon>Dashboard.razor</DependentUpon>
+      </None>
+    </ItemGroup>
+
 </Project>
