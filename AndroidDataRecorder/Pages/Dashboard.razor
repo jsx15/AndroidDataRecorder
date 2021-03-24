@@ -1,4 +1,5 @@
 @page "/Dashboard"
+@using System.Threading;
 
 <header>
     <br>
@@ -20,15 +21,14 @@
                             <div class="col-md">
                                 <p class="card-text">Current Device: </p>
                                 <p class="card-text">Connection: </p>
-                                <p class="card-text">IP-Adress: </p>
+                                <p class="card-text">IP-Address: </p>
                             </div>
                             <div class="col-md text-left">
-                                <p class="card-text">AndroidPhone123456 </p>
+                                <p class="card-text">Current Device</p>
                                 <p class="card-text">USB/Ethernet</p>
                                 <p class="card-text">123.123.432.45</p>
                             </div>
                         </div>
-                        
                     </div>
                     <div class="card-footer text-muted">
                         <p style="color: #1e7e34">Connected</p>
@@ -38,37 +38,30 @@
             <div class="col-md">
                 <div class="card text-center side-cards">
                     <div class="card-header" style="color: white">
-                        System Status
+                        Functions
                     </div>
-                    <div class="card-body">
+                    <div class="card-body text-left">
                         <div class="row">
-                            <div class="col-md-3 text-left">
-                                <p style="font-size: x-large">CPU: </p>
-                                <p style="font-size: x-large">Memory: </p>
-                                <p style="font-size: x-large">Battery: </p>
+                            <div class="col-md">
+                                <p><btn class="btn @LogBtnColor " @onclick="Logbtnclick"> @LogBtnValue</btn></p>
+                                <p><button type="button" class="btn btn-primary" >Set Marker</button></p>
                             </div>
-                            <div class="col-md-7">
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width:@increaseProgress()" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="col-md text-left">
+                                <div style="visibility: @ProcessTextValue">
+                                    <div class="spinner-border text-danger" role="status"></div>
+                                    <span> Logging in Progress...</span>
                                 </div>
+                                
                                 <br>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @memoryUsage" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <br>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @batterylevel" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <p style="font-size: x-large">@increaseProgress()</p>
-                                <p style="font-size: x-large">@memoryUsage</p>
-                                <p style="font-size: x-large">@batterylevel</p>
+                                
+                                <p class="card-text">@CurrDateTime</p>
+             
                             </div>
                         </div>
+                        
                     </div>
                     <div class="card-footer text-muted">
-                        <p style="color: #1e7e34">Systems Stats: Check</p>
+                        <p style="color: #1e7e34">Connected</p>
                     </div>
                 </div>
             </div>
@@ -78,127 +71,39 @@
     <br>
 
     <section id="log_table">
-        <div class="card text-center">
+        <div class="card text-center side-cards">
             <div class="card-header" style="color: white">
-                Log Table
+                System Status
             </div>
-            
             <div class="card-body">
-                <div class="table-wrapper-scroll-y my-custom-scrollbar">
-                    <table class="table table-bordered table-striped mb-0">
-                    <thead>
-                      <tr>
-                        <th scope="col">Date</th>
-                        <th scope="col">Time</th>
-                        <th scope="col">Error Type</th>
-                        <th scope="col">Resource</th>
-                        <th scope="col">App</th>
-                        <th scope="col">Text</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td></td>
-                      </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td></td>
-                        </tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td></td>
-                    </tr>
-                      <tr>
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <th scope="row">4</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <th scope="row">5</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <th scope="row">6</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td></td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div class="row">
+                    <div class="col-md-3 text-left">
+                        <p style="font-size: x-large">CPU: </p>
+                        <p style="font-size: x-large">Memory: </p>
+                        <p style="font-size: x-large">Battery: </p>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width:@increaseProgress()" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <br>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @memoryUsage" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <br>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @batterylevel" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <p style="font-size: x-large">@increaseProgress()</p>
+                        <p style="font-size: x-large">@memoryUsage</p>
+                        <p style="font-size: x-large">@batterylevel</p>
+                    </div>
                 </div>
             </div>
             <div class="card-footer text-muted">
-                <p style="color: #1e7e34">Fetching Log-Data successful</p>
+                <p style="color: #1e7e34">Systems Stats: Check</p>
             </div>
         </div>
     </section>
@@ -206,6 +111,52 @@
 
 
 @code {
+    
+    ///
+    ///Time Display
+    /// 
+    private Timer _timer;
+    public string CurrDateTime { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _timer = new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        }
+    }
+
+    private async void DateTimeCallback(object state)
+    {
+        CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("dd MMMM yyyy hh:mm:ss tt");
+        await InvokeAsync((StateHasChanged));
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+    
+    ///
+    ///Log Button Toggle
+    /// 
+    private bool _togglebtn;
+    private bool _togglebtncolor;
+    
+    private bool _toggleprocesstxt;
+    
+    private string LogBtnValue => _togglebtn ? "Stop Logging" : "Start Logging";
+    private string ProcessTextValue => _toggleprocesstxt ? "visible" : "hidden";
+    private string LogBtnColor => _togglebtncolor ? "btn-danger" : "btn-success";
+    
+    void Logbtnclick()
+    {
+        _togglebtn = !_togglebtn;
+        _togglebtncolor = !_togglebtncolor;
+        _toggleprocesstxt = !_toggleprocesstxt;
+    }
+    
+
     
     
     string cpuPercentage = "25%";
