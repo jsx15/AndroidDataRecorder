@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Threading;
+using AndroidDataRecorder.Backend.LogCat;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
@@ -9,21 +13,31 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// The AdbServer
         /// </summary>
-        private static readonly AdbServer _server;
+        private static readonly AdbServer _server = new AdbServer();
         
         /// <summary>
         /// The AdbClient
         /// </summary>
-        private static readonly AdbClient _client;
+        private static readonly AdbClient _client = new AdbClient();
 
         /// <summary>
-        /// Initialize the Adb Server and Client
+        /// Initialize Adb Server and Monitor
         /// </summary>
         static ADBServer()
         {
-            _server = new AdbServer();
-            var result = _server.StartServer(@"C:\Program Files (x86)\platform-tools\adb.exe", restartServerIfNewer: false);
-            _client = new AdbClient();
+            if (OperatingSystem.IsLinux())
+            {
+                var result = _server.StartServer(Path.GetFullPath(Path.Combine("/usr/bin/adb")), restartServerIfNewer: false);
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                var result = _server.StartServer(Path.GetFullPath(Path.Combine(@"C:\Program Files (x86)\platform-tools\adb.exe")), restartServerIfNewer: false);
+            }
+            
+            var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
+            monitor.DeviceConnected += OnDeviceConnected;
+            monitor.DeviceDisconnected += OnDeviceDisconnected;
+            monitor.Start();
         }
 
         /// <summary>
@@ -31,7 +45,7 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <param name="ipAddressDevice"> The IP address of the Android device </param>
         /// <returns> true for a succeed and false for failure </returns>
-        static bool ConnectWirelessCLient(String ipAddressDevice)
+        public static bool ConnectWirelessCLient(String ipAddressDevice)
         {
             try
             {
@@ -49,7 +63,7 @@ namespace AndroidDataRecorder.Backend
         /// Get the connected devices
         /// </summary>
         /// <returns> List of the devices for succeed and null for failure </returns>
-        static List<DeviceData> GetConnectedDevices()
+        public static List<DeviceData> GetConnectedDevices()
         {
             try
             {
@@ -60,6 +74,27 @@ namespace AndroidDataRecorder.Backend
                 Console.WriteLine(e);
                 return null;
             }
+        }
+        
+        /// <summary>
+        /// Start logging when a new device connects and display a toast
+        /// </summary>
+        /// <param name="sender"> The sender </param>
+        /// <param name="e"> Event to reccognize devices </param>
+        static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
+        {
+            new Thread(() => LogcatOutput.startLogcat(e.Device.Serial, e.Device.Name)).Start();
+            Console.WriteLine($"The device {e.Device.Name} has connected to this PC");
+        }
+
+        /// <summary>
+        /// Display a toast
+        /// </summary>
+        /// <param name="sender"> The sender </param>
+        /// <param name="e"> Event to reccognize devices </param>
+        static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
+        {
+            Console.WriteLine($"The device {e.Device.Name} has disconnected from this PC");
         }
     }
 }
