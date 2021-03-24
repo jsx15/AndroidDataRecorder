@@ -1,10 +1,59 @@
 @inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu/>
+    <div class="@NavMenuCssClass">
+        <div class="navbar">
+            <btn class="icon" @onclick="ToggleNavMenu">
+                <span class="oi oi-menu"></span>
+            </btn>
+            <span class="appname">AndroidDR</span>
+        </div>
+        
+        
+        <ul class="nav flex-column">
+            <li class="nav-item px-3" >
+                <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                    <span class="oi oi-home"></span>
+                    <span class="item-text pl-2">Status</span>
+                    
+                </NavLink>
+            </li>
+            <li class="nav-item px-3" >
+                <NavLink class="nav-link" href="/Logger" Match="NavLinkMatch.All">
+                    <span class="oi oi-book"></span>
+                    <span class="item-text pl-2">Logger</span>
+                </NavLink>
+            </li>
+            <li class="nav-item px-3" >
+                <NavLink class="nav-link" href="/Screen" Match="NavLinkMatch.All">
+                    <span class="oi oi-book"></span>
+                    <span class="item-text pl-2">Screen</span>
+                </NavLink>
+            </li>
+            <li class="nav-item px-3" >
+                <NavLink class="nav-link" href="/Config" Match="NavLinkMatch.All">
+                    <span class="oi oi-book"></span>
+                    <span class="item-text pl-2">Config</span>
+                </NavLink>
+            </li>
+        </ul>
     </div>
-    <div class="container-fluid">
+    
+
+    <div class="@Content content container-fluid">
         @Body
     </div>
 </div>
+
+@code{
+    private bool _collapseNavMenu;
+
+    private string NavMenuCssClass => _collapseNavMenu ? "sidebar-min" : "sidebar";
+    private string Content => _collapseNavMenu ? "content-max" : "content-min";
+
+    private void ToggleNavMenu()
+    {
+        _collapseNavMenu = !_collapseNavMenu;
+    }
+
+}
