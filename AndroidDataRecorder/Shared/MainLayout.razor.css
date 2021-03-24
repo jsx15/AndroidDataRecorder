@@ -2,7 +2,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #2F4858;
 }
 
 .main {
@@ -37,13 +36,14 @@
     position: absolute;
     width: auto;
     right:0;
+    background-color: #2F4858;
 }
 
     .content-max {
-        left: 6em;
+        left: 5em;
     }
     .content-min {
-        left: 12em;
+        left: 11em;
     }
 
 .item-text {
