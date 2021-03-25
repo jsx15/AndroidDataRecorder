@@ -1,5 +1,7 @@
 @page "/Dashboard"
 @using System.Threading;
+@using System.Collections
+@inject IToastService toastService;
 
 <header>
     <br>
@@ -44,7 +46,7 @@
                         <div class="row">
                             <div class="col-md">
                                 <p><btn class="btn @LogBtnColor " @onclick="Logbtnclick"> @LogBtnValue</btn></p>
-                                <p><button type="button" class="btn btn-primary" >Set Marker</button></p>
+                                <p><button class="btn btn-success" @onclick="getMarkerTime">Set Marker</button></p>
                             </div>
                             <div class="col-md text-left">
                                 <div style="visibility: @ProcessTextValue">
@@ -96,7 +98,7 @@
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <p style="font-size: x-large">@increaseProgress()</p>
+                        <p style="font-size: x-large"></p>
                         <p style="font-size: x-large">@memoryUsage</p>
                         <p style="font-size: x-large">@batterylevel</p>
                     </div>
@@ -117,6 +119,9 @@
     /// 
     private Timer _timer;
     public string CurrDateTime { get; set; }
+    private string markerTime;
+    
+    ArrayList list = new ArrayList();
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -135,6 +140,16 @@
     public void Dispose()
     {
         _timer?.Dispose();
+    }
+    
+    ///<summary>
+    /// Gets the time the marker was set and saves it in a list
+    /// </summary>
+    public void getMarkerTime()
+    {
+        markerTime = CurrDateTime;
+        list.Add(markerTime);
+        toastService.ShowSuccess("Marker set at " + CurrDateTime, "Success");
     }
     
     ///
@@ -172,10 +187,7 @@
         {
             counter++;
         }
-
         return counter + "%";
     }
-
-
 
 }
