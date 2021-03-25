@@ -8,16 +8,16 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
-        private string dataSource = "C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
+        private string datasource = "Data Source = C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
 
         /// <summary>
         /// Create a variable for the Connection to the Database, the method needs the path to the database
         /// </summary>
         /// <param name="datasource"></param>
         /// <returns> connection </returns>
-        public SQLiteConnection ConectionToDatabase(string datasource)
+        public SQLiteConnection ConectionToDatabase()
         {
-            var connection = new SQLiteConnection("Data Source = " + datasource);
+            var connection = new SQLiteConnection(datasource);
             connection.Open();
             return connection;
         }
@@ -33,11 +33,10 @@ namespace AndroidDataRecorder.Database
         /// <param name="cpu"></param>
         /// <param name="memory"></param>
         /// <param name="timestamp"></param>
-
-        public void InsertValuesInTableResources(string deviceName, int cpu, int memory, DateTime timestamp)
+        public void InsertValuesInTableResources(string deviceName)
         {
             // create connection to the database
-            var connection = ConectionToDatabase(dataSource);
+            var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
             
             //insert Query
@@ -46,7 +45,7 @@ namespace AndroidDataRecorder.Database
                 VALUES (@DeviceName, @CPU, @Memory, @Timestamp)";
             
             // Define paramters to insert new values in the table
-            SQLiteParameter p1 = new SQLiteParameter("@Devicename", DbType.String);
+            SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p2 = new SQLiteParameter("@CPU", DbType.Int32);
             SQLiteParameter p3 = new SQLiteParameter("@Memory", DbType.Int32);
             SQLiteParameter p4 = new SQLiteParameter("@Timestamp", DbType.DateTime);
@@ -63,7 +62,7 @@ namespace AndroidDataRecorder.Database
                 p1.Value = string.Concat(deviceName, i);
                 p2.Value = i;
                 p3.Value = i;
-                p3.Value = DateTime.Today;
+                p4.Value = DateTime.Now;
                 command.ExecuteNonQuery();
             }
             
@@ -72,10 +71,10 @@ namespace AndroidDataRecorder.Database
         /// <summary>
         /// Shows all Entries of the table Resources
         /// </summary>
-        public void showAllEntries()
+        public  void showAllEntries()
         {
             // create connection to the database
-            var connection = ConectionToDatabase(dataSource);
+            var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
             
             // Query to get the all values of the table
@@ -89,7 +88,8 @@ namespace AndroidDataRecorder.Database
             Console.WriteLine($"{reader.GetName(0), -3} " +
                               $"{reader.GetName(1), -9} " +
                               $"{reader.GetName(2), 8}" +
-                              $" {reader.GetName(3), 10}");
+                              $" {reader.GetName(3), 10}" +
+                              $"{reader.GetName(4)}");
             
             // print all entries
             while (reader.Read())
@@ -97,7 +97,8 @@ namespace AndroidDataRecorder.Database
                 Console.WriteLine($@"{reader.GetInt32(0), -3}" + 
                                   $"{reader.GetString(1), -9}" + 
                                   $"{reader.GetInt32(2), 8}" + 
-                                  $"{reader.GetInt32(3), 10}");
+                                  $"{reader.GetInt32(3), 10}" +
+                                  $"{reader.GetDateTime(4)}");
             }
         }
     }
