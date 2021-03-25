@@ -2,6 +2,8 @@
 @using System.Threading;
 @using System.Collections
 @inject IToastService toastService;
+@page "/"
+
 
 <header>
     <br>
@@ -26,7 +28,7 @@
                                 <p class="card-text">IP-Address: </p>
                             </div>
                             <div class="col-md text-left">
-                                <p class="card-text">Current Device</p>
+                                <p class="card-text">AndroidPhone123456 </p>
                                 <p class="card-text">USB/Ethernet</p>
                                 <p class="card-text">123.123.432.45</p>
                             </div>
@@ -187,7 +189,10 @@
         {
             counter++;
         }
+
         return counter + "%";
     }
+
+
 
 }

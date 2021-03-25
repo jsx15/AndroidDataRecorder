@@ -2,32 +2,127 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #2F4858;
 }
 
 .main {
     flex: 1;
 }
 
+
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(122, 205, 38) 0%, #dfd9e0 70%);
+    background-color: #cd2424;
+    height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 11em; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
+}
+.sidebar-min {
+    background-color: #cd2424;
+    height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 5em; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
-
-    .sidebar {
-        width: 200px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
-
-
-    .main > div {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+.content {
+    position: absolute;
+    width: auto;
+    right:0;
+    background-color: #2F4858;
 }
+
+    .content-max {
+        left: 5em;
+    }
+    .content-min {
+        left: 11em;
+    }
+
+.item-text {
+    color:white;
+    vertical-align: middle;
+}
+
+.sidebar-min .item-text  {
+    display: none;
+}
+
+.sidebar-min .icon {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.nav-link {
+    font-size: 2em;
+    text-decoration: none
+}
+
+.oi {
+    color: white;
+}
+
+.navbar-brand {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.navbar {
+    height: 2.5em;
+}
+
+.nav-item {
+    font-size: 1rem;
+    padding-bottom: 0.5rem;
+    color: white;
+    vertical-align: center;
+}
+
+    .nav-item:first-of-type {
+        padding-top: 1rem;
+    }
+    
+    .nav-item:last-of-type {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item ::deep a.active {
+        background-color: rgba(255,255,255,0.25);
+        color: white;
+        border-radius: 5px;
+    }
+    
+    .nav-item ::deep a:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+        border-radius: 5px;
+    }
+.appname {
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+}
+
+.sidebar-min .appname  {
+    display: none;
+}
+
+.btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 5px;
+}
+    
+
+   
+
+
+
+
