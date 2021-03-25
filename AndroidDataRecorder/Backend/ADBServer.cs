@@ -19,6 +19,16 @@ namespace AndroidDataRecorder.Backend
         /// The AdbClient
         /// </summary>
         private static readonly AdbClient _client = new AdbClient();
+        
+        /// <summary>
+        /// The Receiver
+        /// </summary>
+        private static ConsoleOutputReceiver _receiver = new ConsoleOutputReceiver();
+
+        /// <summary>
+        /// Object of AccessData
+        /// </summary>
+        private static AccessData _accessData = new AccessData();
 
         /// <summary>
         /// Initialize Adb Server and Monitor
@@ -83,7 +93,7 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to reccognize devices </param>
         static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            new Thread(() => LogcatOutput.startLogcat(e.Device.Serial, e.Device.Name)).Start();
+            new Thread(() => _accessData.initializeProcess(e.Device, _client, _receiver)).Start();
             Console.WriteLine($"The device {e.Device.Name} has connected to this PC");
         }
 

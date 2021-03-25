@@ -1,17 +1,31 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend.LogCat
 {
-    public static class LogcatOutput
+    public class AccessData
     {
         /// <summary>
+        /// Object to restrain the access on a file to only one Thread at a time
+        /// </summary>
+        private Object fileInUse = new object();
+
+        /// <summary>
+        /// The workload values
+        /// </summary>
+        private String cpuUsage, memTotal, memAvailiable, memUsed, batteryLevel;
+        
+        /// <summary>
         /// Creates a logcat process and calls saveLogs
+        /// Starts a new Thread to log the workload data of the device
         /// </summary>
         /// <param name="serialNumber"> The serial number of the device </param>
         /// <param name="deviceName"> The name of the device </param>
-        public static void startLogcat(String serialNumber, String deviceName)
+        public void initializeProcess(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
         {
             Process proc = null;
             
@@ -22,7 +36,7 @@ namespace AndroidDataRecorder.Backend.LogCat
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "/usr/bin/adb",
-                        Arguments = "-s " + serialNumber + " logcat",
+                        Arguments = "-s " + device.Serial + " logcat -v year",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
@@ -36,7 +50,7 @@ namespace AndroidDataRecorder.Backend.LogCat
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = @"C:\Program Files (x86)\platform-tools\adb.exe",
-                        Arguments = "-s " + serialNumber + " logcat",
+                        Arguments = "-s " + device.Serial + " logcat -v year",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
@@ -44,25 +58,73 @@ namespace AndroidDataRecorder.Backend.LogCat
                 };
             }
             
-            saveLogs(proc, deviceName);
+            new Thread(() => accessWorkload(device, client, receiver)).Start();
+            saveLogs(proc, device.Name);
         }
 
         /// <summary>
-        /// Save the logs to LogDaten.log
+        /// Save the logs to LogDaten.log located in home/user
         /// </summary>
         /// <param name="proc"> The process to be executed </param>
         /// <param name="deviceName"> The name of the device </param>
-        private static void saveLogs(Process proc, String deviceName)
+        private void saveLogs(Process proc, String deviceName)
         {
             proc.Start();
             while (!proc.StandardOutput.EndOfStream) {
-                string line = deviceName + " " + proc.StandardOutput.ReadLine();
-                using (StreamWriter w = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\LogDaten.log"))
+                string line = proc.StandardOutput.ReadLine();
+                if (line.Length != 0 && !line.StartsWith("---------"))
                 {
-                    w.WriteLine(line);
+                    line = deviceName + " " + line;
+                    lock (fileInUse)
+                    {
+                        using (StreamWriter w = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\LogDaten.log"))
+                        {
+                            w.WriteLine(line);
+                        }
+                        Console.WriteLine(line);
+                    }
                 }
-                Console.WriteLine(line);
             }
+        }
+
+        /// <summary>
+        /// Access the CpuUsage, MemoryUsage and the BatteryLevel periodically every 30 seconds
+        /// </summary>
+        /// <param name="device"> The device to be checked </param>
+        /// <param name="receiver"> The needed receiver </param>
+        /// <param name="client"> The AdbClient </param>
+        private void accessWorkload(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
+        {
+            client.ExecuteRemoteCommand("dumpsys cpuinfo", device, receiver);
+            var m = Regex.Match(receiver.ToString(), @"(\S+)\s+TOTAL");
+            if (m.Success) 
+            {
+                cpuUsage = m.Groups[1].Value;
+            }
+            
+            client.ExecuteRemoteCommand("cat /proc/meminfo", device, receiver);
+            m = Regex.Match(receiver.ToString(), @"MemTotal: +(\S+)\s");
+            if (m.Success) 
+            {
+                memTotal = m.Groups[1].Value;
+            }
+            
+            m = Regex.Match(receiver.ToString(), @"MemAvailable: +(\S+)\s");
+            if (m.Success) 
+            {
+                memAvailiable = m.Groups[1].Value;
+            }
+            
+            memUsed = ((float.Parse(memAvailiable)/float.Parse(memTotal))*100).ToString() + "%";
+            
+            client.ExecuteRemoteCommand("dumpsys battery", device, receiver);
+            m = Regex.Match(receiver.ToString(), @"level: +(\S+)\s");
+            if (m.Success) 
+            {
+                batteryLevel = m.Groups[1].Value + "%";
+            }
+            
+            Thread.Sleep(30000);
         }
     }
 }
