@@ -8,6 +8,9 @@
       <None Update="Pages\Dashboard.razor.css">
         <DependentUpon>Dashboard.razor</DependentUpon>
       </None>
+      <None Update="Pages\Logger.razor.css">
+        <DependentUpon>Logger.razor</DependentUpon>
+      </None>
     </ItemGroup>
 
     <ItemGroup>

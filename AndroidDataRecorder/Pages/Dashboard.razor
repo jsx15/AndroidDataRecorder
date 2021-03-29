@@ -6,7 +6,6 @@
 
 
 <header>
-    <br>
     <h1 class="text-center" style="color: white">Dashboard</h1>
 </header>
 
@@ -88,7 +87,7 @@
                     </div>
                     <div class="col-md-7">
                         <div class="progress">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width:@increaseProgress()" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width:@cpuPercentage" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                         <br>
                         <div class="progress">
@@ -100,7 +99,7 @@
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <p style="font-size: x-large"></p>
+                        <p style="font-size: x-large">@cpuPercentage</p>
                         <p style="font-size: x-large">@memoryUsage</p>
                         <p style="font-size: x-large">@batterylevel</p>
                     </div>
@@ -111,6 +110,9 @@
             </div>
         </div>
     </section>
+    
+    <br>
+    
 </main>
 
 
@@ -176,7 +178,7 @@
 
     
     
-    string cpuPercentage = "25%";
+    string cpuPercentage = "98%";
     string memoryUsage = "54%";
     string batterylevel = "86%";
 

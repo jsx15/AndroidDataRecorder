@@ -1,4 +1,4 @@
-.card-text{
+﻿.card-text{
     font-size: x-large;
 }
 
@@ -9,6 +9,15 @@
 
 .side-cards {
     height: 21rem;
+}
+
+.my-custom-scrollbar {
+    position: relative;
+    height: 500px;
+    overflow: auto;
+}
+.table-wrapper-scroll-y {
+    display: block;
 }
 
 .progress {
