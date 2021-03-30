@@ -69,6 +69,32 @@ namespace AndroidDataRecorder.Database
             
         }
 
+        public void InsertValuesInMarker(string DeviceName, DateTime Timestamp)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"INSERT INTO Marker(DeviceName, Timestamp)
+                VALUES (@DeviceName, @Timestamp)";
+            
+            // Define paramters to insert new values in the table
+            SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
+            SQLiteParameter p2 = new SQLiteParameter("@Timestamp", DbType.DateTime);
+            
+            // Add the paramters to the table
+            command.Parameters.Add(p1);
+            command.Parameters.Add(p2);
+            
+            // define the Values which will be insert to the table
+            p1.Value = DeviceName;
+            p2.Value = Timestamp;
+            command.ExecuteNonQuery();
+
+        }
+
         /// <summary>
         /// Shows all Entries of the table Resources
         /// </summary>
