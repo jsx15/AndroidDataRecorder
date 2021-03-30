@@ -33,7 +33,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Initialize Adb Server and Monitor
         /// </summary>
-        static ADBServer()
+        public static void initializeADBServer()
         {
             if (OperatingSystem.IsLinux())
             {
@@ -93,8 +93,15 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            new Thread(() => _accessData.initializeProcess(e.Device, _client, _receiver)).Start();
-            Console.WriteLine($"The device {e.Device.Name} has connected to this PC");
+            foreach (var device in GetConnectedDevices())
+            {
+                if (device.Serial.Equals(e.Device.Serial))
+                {
+                    _client.ExecuteRemoteCommand("logcat -b all -c", device, _receiver);
+                    new Thread(() => _accessData.initializeProcess(device, _client, _receiver)).Start();
+                }
+            }
+            Console.WriteLine($"The device {e.Device} has connected to this PC");
         }
 
         /// <summary>
@@ -104,7 +111,7 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
-            Console.WriteLine($"The device {e.Device.Name} has disconnected from this PC");
+            Console.WriteLine($"The device {e.Device} has disconnected from this PC");
         }
     }
 }

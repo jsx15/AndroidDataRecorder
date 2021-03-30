@@ -8,7 +8,7 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
-        private string datasource = "Data Source = C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
+        private string datasource = "Data Source = C:/Users/Konstantin/Documents/GitHub/AndroidDataRecorder/identifier.sqlite";
 
         /// <summary>
         /// Create a variable for the Connection to the Database, the method needs the path to the database

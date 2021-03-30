@@ -15,9 +15,27 @@ namespace AndroidDataRecorder.Backend.LogCat
         private Object fileInUse = new object();
 
         /// <summary>
-        /// The workload values
+        /// The needed values to calculate the workload variables
         /// </summary>
-        private String cpuUsage, memTotal, memAvailiable, memUsed, batteryLevel;
+        private String memTotal, memAvailiable;
+
+        /// <summary>
+        /// The workload variables
+        /// </summary>
+        private int cpuUsage, memUsed, batteryLevel;
+
+        /// <summary>
+        /// The database to write into
+        /// </summary>
+        private Database.Database _database = new Database.Database();
+
+        /// <summary>
+        /// Connect to the database
+        /// </summary>
+        /*public AccessData()
+        {
+            _database.ConectionToDatabase();
+        }*/
         
         /// <summary>
         /// Creates a logcat process and calls saveLogs
@@ -74,7 +92,7 @@ namespace AndroidDataRecorder.Backend.LogCat
                 string line = proc.StandardOutput.ReadLine();
                 if (line.Length != 0 && !line.StartsWith("---------"))
                 {
-                    line = deviceName + " " + line;
+                    line = deviceName + " " + DateTime.Now + " " + line;
                     lock (fileInUse)
                     {
                         using (StreamWriter w = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\LogDaten.log"))
@@ -95,36 +113,43 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// <param name="client"> The AdbClient </param>
         private void accessWorkload(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
         {
-            client.ExecuteRemoteCommand("dumpsys cpuinfo", device, receiver);
-            var m = Regex.Match(receiver.ToString(), @"(\S+)\s+TOTAL");
-            if (m.Success) 
+            while (device.State == DeviceState.Online)
             {
-                cpuUsage = m.Groups[1].Value;
+                client.ExecuteRemoteCommand("dumpsys cpuinfo", device, receiver);
+                var m = Regex.Match(receiver.ToString(), @"(\S+)\s+TOTAL");
+                if (m.Success) 
+                {
+                    cpuUsage = Convert.ToInt32(float.Parse(m.Groups[1].Value.Remove(m.Groups[1].Value.Length - 1, 1)));
+                }
+            
+                client.ExecuteRemoteCommand("cat /proc/meminfo", device, receiver);
+                m = Regex.Match(receiver.ToString(), @"MemTotal: +(\S+)\s");
+                if (m.Success) 
+                {
+                    memTotal = m.Groups[1].Value;
+                }
+            
+                m = Regex.Match(receiver.ToString(), @"MemAvailable: +(\S+)\s");
+                if (m.Success) 
+                {
+                    memAvailiable = m.Groups[1].Value;
+                }
+            
+                memUsed = Convert.ToInt32((float.Parse(memAvailiable)/float.Parse(memTotal))*100);
+            
+                client.ExecuteRemoteCommand("dumpsys battery", device, receiver);
+                m = Regex.Match(receiver.ToString(), @"level: +(\S+)\s");
+                if (m.Success)
+                {
+                    batteryLevel = Int32.Parse(m.Groups[1].Value);
+                }
+                
+                var name = device.Name;
+                Console.WriteLine(device.Name + "          KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
+                _database.InsertValuesInTableResources(device.Name, cpuUsage, memUsed, batteryLevel, DateTime.Now);
+            
+                Thread.Sleep(30000);
             }
-            
-            client.ExecuteRemoteCommand("cat /proc/meminfo", device, receiver);
-            m = Regex.Match(receiver.ToString(), @"MemTotal: +(\S+)\s");
-            if (m.Success) 
-            {
-                memTotal = m.Groups[1].Value;
-            }
-            
-            m = Regex.Match(receiver.ToString(), @"MemAvailable: +(\S+)\s");
-            if (m.Success) 
-            {
-                memAvailiable = m.Groups[1].Value;
-            }
-            
-            memUsed = ((float.Parse(memAvailiable)/float.Parse(memTotal))*100).ToString() + "%";
-            
-            client.ExecuteRemoteCommand("dumpsys battery", device, receiver);
-            m = Regex.Match(receiver.ToString(), @"level: +(\S+)\s");
-            if (m.Success) 
-            {
-                batteryLevel = m.Groups[1].Value + "%";
-            }
-            
-            Thread.Sleep(30000);
         }
     }
 }

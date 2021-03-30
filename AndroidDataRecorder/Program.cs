@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AndroidDataRecorder.Backend;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -21,7 +22,9 @@ namespace AndroidDataRecorder
             //database.ConectionToDatabase();
             //database.InsertValuesInTableResources("device000", 22, 54, 66,DateTime.Now);
             //database.showAllEntries();
-           
+            
+            ADBServer.initializeADBServer();
+
             CreateHostBuilder(args).Build().Run();
            
         }
