@@ -90,7 +90,7 @@ namespace AndroidDataRecorder.Backend
         /// Start logging when a new device connects and display a toast
         /// </summary>
         /// <param name="sender"> The sender </param>
-        /// <param name="e"> Event to reccognize devices </param>
+        /// <param name="e"> Event to recognize devices </param>
         static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
             new Thread(() => _accessData.initializeProcess(e.Device, _client, _receiver)).Start();
@@ -101,7 +101,7 @@ namespace AndroidDataRecorder.Backend
         /// Display a toast
         /// </summary>
         /// <param name="sender"> The sender </param>
-        /// <param name="e"> Event to reccognize devices </param>
+        /// <param name="e"> Event to recognize devices </param>
         static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
             Console.WriteLine($"The device {e.Device.Name} has disconnected from this PC");
