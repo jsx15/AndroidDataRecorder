@@ -16,10 +16,11 @@ namespace AndroidDataRecorder
         {
              
             // test Connection to database
-            // Database.Database database = new Database.Database();
-            // database.ConectionToDatabase();
-            // database.InsertValuesInTableResources("device");
-            // database.showAllEntries();
+            
+            //Database.Database database = new Database.Database();
+            //database.ConectionToDatabase();
+            //database.InsertValuesInTableResources("device000", 22, 54, 66,DateTime.Now);
+            //database.showAllEntries();
            
             CreateHostBuilder(args).Build().Run();
            
