@@ -14,17 +14,33 @@ namespace AndroidDataRecorder
     {
         public static void Main(string[] args)
         {
-             
-            // test Connection to database
+            ///<summary>
+            /// test connection for the database
+            /// </summary>
+            //Database.Database database = new Database.Database();
+            //database.ConectionToDatabase();
             
-            Database.Database database = new Database.Database();
-            database.ConectionToDatabase();
-            database.InsertValuesInTableResources("device000", 22, 54, 66,DateTime.Now);
+            ///<summary>
+            /// Methods for the Table Resource
+            /// </summary>
+            //database.InsertValuesInTableResources("device001", 22, 54, 66,DateTime.Now);
             //database.showAllEntries();
-            database.InsertValuesInMarker("device000", DateTime.Now);
-           
-         //   CreateHostBuilder(args).Build().Run();
-           
+            
+            ///<summary>
+            /// Methods for the table Marker
+            /// </summary>
+            //database.InsertValuesInMarker("device00222", DateTime.Now);
+            //database.SearchMarkerTableByDeviceName("device00222");
+
+            /*
+            foreach (var marker in database.ListWithMarker("device00222"))
+            {
+                Console.WriteLine(marker.MarkerId.ToString() + " " + marker.DeviceName + " " + marker.Timestamp.ToString());
+            } 
+            */
+            
+            CreateHostBuilder(args).Build().Run();
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
 
@@ -8,6 +10,19 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
+        /// <summary>
+        /// Class for the Marker table to generate a list
+        /// </summary>
+        public class Marker
+        {
+            public int MarkerId { get; set; }
+            public string DeviceName { get; set; }
+            public DateTime Timestamp { get; set; }
+        }
+        
+        /// <summary>
+        /// Path for the Database
+        /// </summary>
         private string datasource = "Data Source = C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
 
         /// <summary>
@@ -21,10 +36,7 @@ namespace AndroidDataRecorder.Database
             connection.Open();
             return connection;
         }
-
-
-      
-    
+        
         /// <summary>
         /// Insert the Values devicename, cpu, memory, timestamp to the table Resource.
         /// Just for testing
@@ -59,16 +71,21 @@ namespace AndroidDataRecorder.Database
             command.Parameters.Add(p5);
             
             // define the Values which will be insert to the table
-            p1.Value = string.Concat(deviceName);
-                p2.Value = CPU;
-                p3.Value = Memory;
-                p4.Value = Battery;
-                p5.Value = Timestamp;
-                command.ExecuteNonQuery();
-            
-            
+            p1.Value = deviceName;
+            p2.Value = CPU;
+            p3.Value = Memory;
+            p4.Value = Battery;
+            p5.Value = Timestamp;
+                
+            //Execute Query
+            command.ExecuteNonQuery();
         }
-
+        
+        /// <summary>
+        /// Insert the Values devicname and Timestamp into the table Marker
+        /// </summary>
+        /// <param name="DeviceName"></param>
+        /// <param name="Timestamp"></param>
         public void InsertValuesInMarker(string DeviceName, DateTime Timestamp)
         {
             // create connection to the database
@@ -91,8 +108,72 @@ namespace AndroidDataRecorder.Database
             // define the Values which will be insert to the table
             p1.Value = DeviceName;
             p2.Value = Timestamp;
+            
+            // Execute Query
             command.ExecuteNonQuery();
+        }
 
+        /// <summary>
+        /// Search for every entry in the database where the DeviceName equal the param DeviceName;
+        /// </summary>
+        /// <param name="DeviceName"></param>
+        public void SearchMarkerTableByDeviceName(string DeviceName)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Marker
+                WHERE DeviceName =  '@DeciveName'";
+            
+            // Define paramter for which are searching for
+            SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
+            
+            // define Value for which are seraching for
+            p1.Value = DeviceName;
+            
+            // Execute Query
+            command.ExecuteNonQuery();
+        }
+        
+        /// <summary>
+        /// Method which generate a List of Marker by searching specific Marker and return it
+        /// </summary>
+        /// <param name="DeviceName"></param>
+        /// <returns> ListOfMarker </returns>
+        public List<Marker> ListWithMarker(string DeviceName)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Marker
+               WHERE DeviceName LIKE @DeviceName";
+            
+            // use the Parameter DeviceName to search for it
+            command.Parameters.AddWithValue("@DeviceName", DeviceName);
+            
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actuall values of database
+            List<Marker> MarkerList = new List<Marker>();
+            while (reader.Read())
+            {
+                MarkerList.Add(new Marker()
+                {
+                    MarkerId = reader.GetInt32(0),
+                    DeviceName = reader.GetString(1),
+                    Timestamp = reader.GetDateTime(2)
+
+                });
+            }
+
+            return MarkerList;
         }
 
         /// <summary>
@@ -121,11 +202,11 @@ namespace AndroidDataRecorder.Database
             // print all entries
             while (reader.Read())
             {
-                Console.WriteLine($@"{reader.GetString(0), -3}" + 
-                                  $"{reader.GetInt32(1), -9}" + 
+                Console.WriteLine($@"{reader.GetInt32(0), -3}" + 
+                                  $"{reader.GetString(1), -9}" + 
                                   $"{reader.GetInt32(2), 8}" + 
                                   $"{reader.GetInt32(3), 10}" +
-                                  $"{reader.GetDateTime(4)}");
+                                  $"{reader.GetInt32(4)}");
             }
         }
     }
