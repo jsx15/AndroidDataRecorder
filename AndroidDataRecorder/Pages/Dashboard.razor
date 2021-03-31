@@ -1,6 +1,7 @@
 @page "/Dashboard"
 @using System.Threading;
-@using System.Collections
+@using AndroidDataRecorder.Misc
+
 @inject IToastService toastService;
 @page "/"
 
@@ -47,24 +48,24 @@
                         <div class="row">
                             <div class="col-md">
                                 <p><btn class="btn @LogBtnColor " @onclick="Logbtnclick"> @LogBtnValue</btn></p>
-                                <p><button class="btn btn-success" @onclick="getMarkerTime">Set Marker</button></p>
                             </div>
                             <div class="col-md text-left">
                                 <div style="visibility: @ProcessTextValue">
                                     <div class="spinner-border text-danger" role="status"></div>
                                     <span> Logging in Progress...</span>
                                 </div>
-                                
-                                <br>
-                                
-                                <p class="card-text">@CurrDateTime</p>
-             
                             </div>
                         </div>
-                        
-                    </div>
-                    <div class="card-footer text-muted">
-                        <p style="color: #1e7e34">Connected</p>
+                        <div class="row col">
+                            <textarea id="marker_message" type="text" class="form-control" name="marker_message" placeholder="Marker Message..." rows="2" @bind="_markerSetMessage"></textarea>
+                        </div>
+                        <div class="row col">
+                            <p class="card-text">@CurrDateTime</p>
+                        </div>
+                        <br>
+                        <div class="row col justify-content-center">
+                            <p><button class="btn btn-success" @onclick="GetMarkerTime">Set Marker</button></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -113,6 +114,32 @@
     
     <br>
     
+    <section id="testsection">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Marker</h3>
+            </div>
+            <div class="card-body">
+                <table>
+                    <tr>
+                        <th>Time</th>
+                        <th>Message</th>
+                    </tr>
+
+                    @foreach (var marker in MarkerList)
+                    {
+                        <tr>
+                            <td>@marker._markerTime</td>
+                            <td>@marker._markerMessage</td>
+                        </tr>
+                    }
+
+                </table>
+
+            </div>
+        </div>
+    </section>
+    
 </main>
 
 
@@ -123,10 +150,7 @@
     /// 
     private Timer _timer;
     public string CurrDateTime { get; set; }
-    private string markerTime;
     
-    ArrayList list = new ArrayList();
-
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -137,7 +161,7 @@
 
     private async void DateTimeCallback(object state)
     {
-        CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("dd MMMM yyyy hh:mm:ss tt");
+        CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("dd.MM.yyyy hh:mm:ss tt");
         await InvokeAsync((StateHasChanged));
     }
 
@@ -146,15 +170,38 @@
         _timer?.Dispose();
     }
     
+    
+    ///
+    ///Marker things.....
+    /// 
+    private string _markerSetTime;
+    private string _markerSetMessage;
+
+    public IList<Marker> MarkerList = new List<Marker>();
+    
+    
     ///<summary>
     /// Gets the time the marker was set and saves it in a list
     /// </summary>
-    public void getMarkerTime()
+    public void GetMarkerTime()
     {
-        markerTime = CurrDateTime;
-        list.Add(markerTime);
-        toastService.ShowSuccess("Marker set at " + CurrDateTime, "Success");
+        _markerSetTime = CurrDateTime;
+
+        if (!String.IsNullOrWhiteSpace(_markerSetMessage))
+        {
+            MarkerList.Add(new Marker(_markerSetTime, _markerSetMessage));
+            
+            toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime);
+            
+            _markerSetMessage = string.Empty;
+        }
+        else
+        {
+            toastService.ShowError("Please put in a message", "Error");
+        }
+      
     }
+    
     
     ///
     ///Log Button Toggle
@@ -175,26 +222,9 @@
         _toggleprocesstxt = !_toggleprocesstxt;
     }
     
-
-    
-    
     string cpuPercentage = "98%";
     string memoryUsage = "54%";
     string batterylevel = "86%";
-
-
-
-    string increaseProgress()
-    {
-        int counter = 0;
-        for (int i = 0; i < 90; i++)
-        {
-            counter++;
-        }
-
-        return counter + "%";
-    }
-
-
+    
 
 }

@@ -1,3 +1,4 @@
+@using Blazored.Toast.Configuration
 @inherits LayoutComponentBase
 
 <div class="page">
@@ -40,7 +41,7 @@
     </div>
     
 
-    <div class="@Content content container-fluid">
+    <div class="@Content content container-fluid pb-2">
         <BlazoredToasts></BlazoredToasts>
         @Body
     </div>
