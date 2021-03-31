@@ -2,12 +2,13 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    background-color: #2F4858;
+    height: 100vh;
 }
 
 .main {
     flex: 1;
 }
-
 
 .sidebar {
     background-color: #cd2424;
@@ -68,11 +69,6 @@
 
 .oi {
     color: white;
-}
-
-.navbar-brand {
-    font-size: 1em;
-    font-weight: bold;
 }
 
 .navbar {
