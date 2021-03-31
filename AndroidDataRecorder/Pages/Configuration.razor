@@ -1,0 +1,145 @@
+﻿@page "/Config"
+
+<header>
+    <h1 class="text-center" style="color: white">Configuration</h1>
+</header>
+
+<br>
+
+    <section id="device_information">
+        <div class="row">
+            <div class="col-md">
+                <div class="card text-center side-cards">
+                    <div class="card-header" style="color: white">
+                        Attached Devices
+                    </div>
+                    <div class="card-body text-left">
+                        <table class="table">
+                            <tbody>
+                            <tr class="table-active">
+                                <td>
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault1"
+                                        />
+                                        <label class="form-check-label" for="flexRadioDefault1"> Androind Device 1</label>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <!-- Default checked radio -->
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault2"
+                                            checked
+                                        />
+                                        <label class="form-check-label" for="flexRadioDefault2"> Android Device 2 </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <!-- Default checked radio -->
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault2"
+                                            checked
+                                        />
+                                        <label class="form-check-label" for="flexRadioDefault2"> Android Device 3 </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <!-- Default checked radio -->
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="flexRadioDefault"
+                                            id="flexRadioDefault2"
+                                            checked
+                                        />
+                                        <label class="form-check-label" for="flexRadioDefault2"> Android Device 4 </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <p style="color: #1e7e34"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="card text-center side-cards card-text ">
+                    <div class="card-header" style="color: white">
+                        Add Device
+                    </div>
+                    <div class="card-body text-left side-cards">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p>IP-Address: </p>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p>Port: </p>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555">
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row justify-content-center">
+                            <button type="submit" class="btn btn-success ">Add Device</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <br>
+    
+    <section>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card justify-content-center side-cards">
+                    <div class="card-header text-center" style="background: darkred; color: white">
+                        DANGER ZONE
+                    </div>
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-danger btn-block danger-buttons">Restart ADB server</button>
+                        <button type="submit" class="btn btn-danger btn-block danger-buttons">Kill ADB server</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-right side-cards">
+                    <div class="card-footer">
+                        <p>ABD Version 1.0.23.4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+@code {
+    
+}
