@@ -11,22 +11,10 @@
       <None Update="Pages\Logger.razor.css">
         <DependentUpon>Logger.razor</DependentUpon>
       </None>
-      <None Update="Pages\MarkerPage.razor.css">
-        <DependentUpon>Marker.razor</DependentUpon>
-      </None>
-      <None Update="Pages\Configuration.razor.css">
-        <DependentUpon>Configuration.razor</DependentUpon>
-      </None>
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Blazored.Toast" Version="3.1.2" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Update="Pages\MarkerPage.razor.css">
-        <DependentUpon>MarkerPage.razor</DependentUpon>
-      </Content>
     </ItemGroup>
 
 </Project>
