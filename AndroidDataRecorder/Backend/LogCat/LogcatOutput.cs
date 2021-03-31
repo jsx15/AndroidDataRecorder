@@ -30,14 +30,6 @@ namespace AndroidDataRecorder.Backend.LogCat
         private Database.Database _database = new Database.Database();
 
         /// <summary>
-        /// Connect to the database
-        /// </summary>
-        /*public AccessData()
-        {
-            _database.ConectionToDatabase();
-        }*/
-        
-        /// <summary>
         /// Creates a logcat process and calls saveLogs
         /// Starts a new Thread to log the workload data of the device
         /// </summary>
@@ -144,8 +136,6 @@ namespace AndroidDataRecorder.Backend.LogCat
                     batteryLevel = Int32.Parse(m.Groups[1].Value);
                 }
                 
-                var name = device.Name;
-                Console.WriteLine(device.Name + "          KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK");
                 _database.InsertValuesInTableResources(device.Name, cpuUsage, memUsed, batteryLevel, DateTime.Now);
             
                 Thread.Sleep(30000);

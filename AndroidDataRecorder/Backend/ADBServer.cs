@@ -33,17 +33,9 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Initialize Adb Server and Monitor
         /// </summary>
-        public static void initializeADBServer()
+        public static void initializeADBServer(string path)
         {
-            if (OperatingSystem.IsLinux())
-            {
-                var result = _server.StartServer(Path.GetFullPath(Path.Combine("/usr/bin/adb")), restartServerIfNewer: false);
-            }
-            else if (OperatingSystem.IsWindows())
-            {
-                var result = _server.StartServer(Path.GetFullPath(Path.Combine(@"C:\Program Files (x86)\platform-tools\adb.exe")), restartServerIfNewer: false);
-            }
-            
+            var result = _server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
             monitor.DeviceConnected += OnDeviceConnected;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
@@ -93,15 +85,23 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            foreach (var device in GetConnectedDevices())
+            try
             {
-                if (device.Serial.Equals(e.Device.Serial))
+                foreach (var device in GetConnectedDevices())
                 {
-                    _client.ExecuteRemoteCommand("logcat -b all -c", device, _receiver);
-                    new Thread(() => _accessData.initializeProcess(device, _client, _receiver)).Start();
+                    if (device.Serial.Equals(e.Device.Serial))
+                    {
+                        _client.ExecuteRemoteCommand("logcat -b all -c", device, _receiver);
+                        new Thread(() => _accessData.initializeProcess(device, _client, _receiver)).Start();
+                    }
                 }
+                Console.WriteLine($"The device {e.Device} has connected to this PC");
             }
-            Console.WriteLine($"The device {e.Device} has connected to this PC");
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
         }
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace AndroidDataRecorder
             database.InsertValuesInTableResources("device000", 22, 54, 66,DateTime.Now);
             //database.showAllEntries();
             
-            ADBServer.initializeADBServer();
+            Config.loadConfig();
 
             //CreateHostBuilder(args).Build().Run();
             database.InsertValuesInMarker("device000", DateTime.Now);
