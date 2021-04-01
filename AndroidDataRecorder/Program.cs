@@ -14,6 +14,7 @@ namespace AndroidDataRecorder
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
+            Screenrecord.Screenrecord.StartScreenrecord();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
