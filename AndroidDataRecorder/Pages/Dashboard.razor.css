@@ -1,0 +1,31 @@
+.card-text{
+    size: auto;
+}
+
+.card-header{
+    font-size: 2vw;
+    background-color: #295C07;
+}
+
+.side-cards {
+    height: 19rem;
+}
+
+.progress {
+    border-radius: 10px;
+    width: 100%;
+    height: 31px;
+    text-align:center;
+}
+
+.progress-bar {
+    border-radius: 0px;
+    padding: 5px;
+}
+
+.wrapper > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: center;
+}
