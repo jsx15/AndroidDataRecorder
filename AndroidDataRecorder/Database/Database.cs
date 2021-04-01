@@ -20,6 +20,7 @@ namespace AndroidDataRecorder.Database
             public DateTime Timestamp { get; set; }
         }
         
+        
         /// <summary>
         /// Path for the Database
         /// </summary>
@@ -86,7 +87,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="DeviceName"></param>
         /// <param name="Timestamp"></param>
-        public void InsertValuesInMarker(string DeviceName, DateTime Timestamp)
+        public void InsertValuesInTableMarker(string DeviceName, DateTime Timestamp)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -175,6 +176,64 @@ namespace AndroidDataRecorder.Database
 
             return MarkerList;
         }
+        
+        /// <summary>
+        /// Insert Values Into the Table Logs
+        /// </summary>
+        /// <param name="DeviceName"></param>
+        /// <param name="SystemTimestamp"></param>
+        /// <param name="DeviceTimestamp"></param>
+        /// <param name="PID"></param>
+        /// <param name="TID"></param>
+        /// <param name="Loglevel"></param>
+        /// <param name="APP"></param>
+        /// <param name="LogMessage"></param>
+        public void InsertValuesInTableLogs(string DeviceName, DateTime SystemTimestamp, DateTime DeviceTimestamp, 
+            int PID, int TID, string Loglevel, string APP, string LogMessage)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"INSERT INTO Logs(DeviceName, SystemTimestamp, DeviceTimestamp, PID, TID, Loglevel, APP, LogMessage)
+                VALUES (@DeviceName, @SystemTimestamp, @DeviceTimestamp,@PID, @TID, @Loglevel, @APP, @LogMessage)";
+            
+            // Define paramters to insert new values in the table
+            SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
+            SQLiteParameter p2 = new SQLiteParameter("@SystemTimestamp", DbType.DateTime);
+            SQLiteParameter p3 = new SQLiteParameter("@DeviceTimestamp", DbType.DateTime);
+            SQLiteParameter p4 = new SQLiteParameter("PID", DbType.Int32);
+            SQLiteParameter p5 = new SQLiteParameter("@TID", DbType.Int32);
+            SQLiteParameter p6 = new SQLiteParameter("@Loglevel", DbType.String);
+            SQLiteParameter p7 = new SQLiteParameter("@APP", DbType.String);
+            SQLiteParameter p8 = new SQLiteParameter("@LogMessage", DbType.String);
+
+            // Add the paramters to the table
+            command.Parameters.Add(p1);
+            command.Parameters.Add(p2);
+            command.Parameters.Add(p3);
+            command.Parameters.Add(p4);
+            command.Parameters.Add(p5);
+            command.Parameters.Add(p6);
+            command.Parameters.Add(p7);
+            command.Parameters.Add(p8);
+            
+            // define the Values which will be insert to the table
+            p1.Value = DeviceName;
+            p2.Value = SystemTimestamp;
+            p3.Value = DeviceTimestamp;
+            p4.Value = PID;
+            p5.Value = TID;
+            p6.Value = Loglevel;
+            p7.Value = APP;
+            p8.Value = LogMessage;
+                
+            //Execute Query
+            command.ExecuteNonQuery();
+        }
+
 
         /// <summary>
         /// Shows all Entries of the table Resources

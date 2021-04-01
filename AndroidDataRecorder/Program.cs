@@ -17,8 +17,8 @@ namespace AndroidDataRecorder
             ///<summary>
             /// test connection for the database
             /// </summary>
-            //Database.Database database = new Database.Database();
-            //database.ConectionToDatabase();
+            // Database.Database database = new Database.Database();
+            // database.ConectionToDatabase();
             
             ///<summary>
             /// Methods for the Table Resource
@@ -29,7 +29,7 @@ namespace AndroidDataRecorder
             ///<summary>
             /// Methods for the table Marker
             /// </summary>
-            //database.InsertValuesInMarker("device00222", DateTime.Now);
+            //database.InsertValuesInTableMarker("device00222", DateTime.Now);
             //database.SearchMarkerTableByDeviceName("device00222");
 
             /*
@@ -38,6 +38,7 @@ namespace AndroidDataRecorder
                 Console.WriteLine(marker.MarkerId.ToString() + " " + marker.DeviceName + " " + marker.Timestamp.ToString());
             } 
             */
+            //database.InsertValuesInTableLogs("device123", DateTime.Now, DateTime.Now, 12342, 34521, "I", "App","Message" );
             
             CreateHostBuilder(args).Build().Run();
 
