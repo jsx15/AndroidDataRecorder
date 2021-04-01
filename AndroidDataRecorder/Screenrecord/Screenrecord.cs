@@ -9,10 +9,10 @@ namespace AndroidDataRecorder.Screenrecord
     public static class Screenrecord
     {
         //length of video snippets
-        private const int VideoLength = 5000;
+        private const int VideoLength = 30000;
 
         //number of videos that will not be deleted
-        private const int NumOfVideos = 3;
+        private const int NumOfVideos = 4;
 
         //bool whether the recording should run or not 
         private static bool _record;
