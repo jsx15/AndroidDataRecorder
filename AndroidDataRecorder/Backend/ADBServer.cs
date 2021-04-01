@@ -8,34 +8,34 @@ using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
 {
-    public static class ADBServer
+    public static class AdbServer
     {
         /// <summary>
         /// The AdbServer
         /// </summary>
-        private static readonly AdbServer _server = new AdbServer();
+        private static readonly SharpAdbClient.AdbServer Server = new SharpAdbClient.AdbServer();
         
         /// <summary>
         /// The AdbClient
         /// </summary>
-        private static readonly AdbClient _client = new AdbClient();
+        private static readonly AdbClient Client = new AdbClient();
         
         /// <summary>
         /// The Receiver
         /// </summary>
-        private static ConsoleOutputReceiver _receiver = new ConsoleOutputReceiver();
+        private static readonly ConsoleOutputReceiver Receiver = new ConsoleOutputReceiver();
 
         /// <summary>
         /// Object of AccessData
         /// </summary>
-        private static AccessData _accessData = new AccessData();
+        private static readonly AccessData AccessData = new AccessData();
 
         /// <summary>
         /// Initialize Adb Server and Monitor
         /// </summary>
-        public static void initializeADBServer(string path)
+        public static void InitializeAdbServer(string path)
         {
-            var result = _server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
+            var result = Server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
             monitor.DeviceConnected += OnDeviceConnected;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
@@ -51,9 +51,9 @@ namespace AndroidDataRecorder.Backend
         {
             try
             {
-                _client.Connect(ipAddressDevice);
+                Client.Connect(ipAddressDevice);
             }
-            catch (System.InvalidOperationException e)
+            catch (InvalidOperationException e)
             {
                 Console.WriteLine(e);
                 return false;
@@ -64,18 +64,45 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Get the connected devices
         /// </summary>
-        /// <returns> List of the devices for succeed and null for failure </returns>
-        public static List<DeviceData> GetConnectedDevices()
+        /// <returns> List of the devices </returns>
+        public static List<DeviceData> GetConnectedDevices() => Client.GetDevices();
+
+        /// <summary>
+        /// Restart the AdbServer
+        /// </summary>
+        /// <returns> true for success and false for failure </returns>
+        public static bool RestartAdbServer()
         {
             try
             {
-                return _client.GetDevices();
+                Server.RestartServer();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return null;
+                return false;
             }
+
+            return true;
+        }
+        
+        /// <summary>
+        /// Kill the AdbServer
+        /// </summary>
+        /// <returns> true for success and false for failure </returns>
+        public static bool KillAdbServer()
+        {
+            try
+            {
+                Client.KillAdb();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            return true;
         }
         
         /// <summary>
@@ -83,7 +110,7 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <param name="sender"> The sender </param>
         /// <param name="e"> Event to recognize devices </param>
-        static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
+        private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
             try
             {
@@ -91,8 +118,8 @@ namespace AndroidDataRecorder.Backend
                 {
                     if (device.Serial.Equals(e.Device.Serial))
                     {
-                        _client.ExecuteRemoteCommand("logcat -b all -c", device, _receiver);
-                        new Thread(() => _accessData.initializeProcess(device, _client, _receiver)).Start();
+                        Client.ExecuteRemoteCommand("logcat -b all -c", e.Device, Receiver);
+                        new Thread(() => AccessData.InitializeProcess(device, Client, Receiver)).Start();
                     }
                 }
                 Console.WriteLine($"The device {e.Device} has connected to this PC");
@@ -100,7 +127,6 @@ namespace AndroidDataRecorder.Backend
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                throw;
             }
         }
 
@@ -109,7 +135,7 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <param name="sender"> The sender </param>
         /// <param name="e"> Event to recognize devices </param>
-        static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
+        private static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
         }

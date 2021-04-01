@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AndroidDataRecorder.Backend;
 using Microsoft.AspNetCore.Hosting;
@@ -23,13 +24,13 @@ namespace AndroidDataRecorder
             database.InsertValuesInTableResources("device000", 22, 54, 66,DateTime.Now);
             //database.showAllEntries();
             
-            Config.loadConfig();
+            Config.LoadConfig();
 
             //CreateHostBuilder(args).Build().Run();
             database.InsertValuesInMarker("device000", DateTime.Now);
-           
-         //   CreateHostBuilder(args).Build().Run();
-           
+
+            //CreateHostBuilder(args).Build().Run();
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

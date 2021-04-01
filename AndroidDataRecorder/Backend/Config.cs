@@ -11,7 +11,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// The path to the config.json file
         /// </summary>
-        private static string _path = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"src\config.json"));
+        private static readonly string Path = System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, @"src\config.json"));
 
         /// <summary>
         /// The Source class object
@@ -21,56 +21,64 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Bool variable to check if connected to the AdbServer
         /// </summary>
-        private static bool connected = false;
+        private static bool _connected;
         
         /// <summary>
         /// Load the config.json file into the Source class object
         /// Initialize the ADBServer with the given path to the adb.exe
         /// Connect to known devices
         /// </summary>
-        public static void loadConfig()
+        public static void LoadConfig()
         {
-            _source = JsonConvert.DeserializeObject<Source>(File.ReadAllText(_path, Encoding.Default));
+            _source = JsonConvert.DeserializeObject<Source>(File.ReadAllText(Path, Encoding.Default));
 
-            while (!connected)
+            while (!_connected)
             {
                 try
                 {
-                    ADBServer.initializeADBServer(_source.adbPath);
-                    connected = true;
+                    if (_source != null) AdbServer.InitializeAdbServer(_source.AdbPath);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("No valid path to the adb.exe \n Please define one: \n");
-                    _source.adbPath = Console.ReadLine();
+                    Console.WriteLine(e);
+                    Console.WriteLine("No valid path to the adb.exe \nPlease define one: \n");
+                    if (_source != null) _source.AdbPath = Console.ReadLine();
                 }
+                
+                _connected = true;
             }
 
-            connectKnownDevices();
+            ConnectKnownDevices();
         }
 
         /// <summary>
         /// Write the content of the source class object into the config.json file
         /// </summary>
-        public static void saveConfig()
+        public static void SaveConfig()
         {
             var jsonResult = JsonConvert.SerializeObject(_source);
-            using (StreamWriter w = File.CreateText(_path))
+            using (StreamWriter w = File.CreateText(Path))
             {
                 w.WriteLine(jsonResult);
             }
         }
+
+        /// <summary>
+        /// Get the path to the adb.exe
+        /// </summary>
+        /// <returns> The path to adb.exe </returns>
+        public static string getAdbPath() => _source.AdbPath;
         
         /// <summary>
         /// Connect to already known devices
         /// </summary>
-        private static void connectKnownDevices()
+        private static void ConnectKnownDevices()
         {
             try
             {
-                for (int i = 0; i < _source.knownDevices.Count - 1; i++)
+                for (int i = 0; i < _source.KnownDevices.Count - 1; i++)
                 {
-                    ADBServer.ConnectWirelessCLient(_source.knownDevices[i]);
+                    AdbServer.ConnectWirelessCLient(_source.KnownDevices[i]);
                 }
             }
             catch (Exception e)
@@ -80,14 +88,84 @@ namespace AndroidDataRecorder.Backend
         }
 
         /// <summary>
+        /// Change the value in adbPath
+        /// </summary>
+        /// <param name="path"> The path to the adb.exe </param>
+        public static void ChangeAdbPath(string path)
+        {
+            _source.AdbPath = path;
+        }
+        
+        /// <summary>
+        /// Change the value in ffmpegPath
+        /// </summary>
+        /// <param name="path"> The path to the ffmpeg.exe </param>
+        public static void ChangeFfMpegPath(string path)
+        {
+            _source.FfmpegPath = path;
+        }
+
+        /// <summary>
+        /// Add a device to the knownDevices list
+        /// </summary>
+        /// <param name="ipAddress"> The ip address of the device </param>
+        public static void AddKnownDevice(string ipAddress)
+        {
+            _source.KnownDevices.Add(ipAddress);
+        }
+        
+        /// <summary>
+        /// Remove a device from the knownDevices list
+        /// </summary>
+        /// <param name="index"> The index of the device </param>
+        public static void DeleteKnownDevice(int index)
+        {
+            _source.KnownDevices.RemoveAt(index);
+        }
+
+        /// <summary>
+        /// Clear the whole knownDevices list
+        /// </summary>
+        public static void ClearKnownDevices()
+        {
+            _source.KnownDevices.Clear();
+        }
+        
+        /// <summary>
+        /// Add a recording device
+        /// </summary>
+        /// <param name="name"> The name of the device </param>
+        public static void AddRecordingDevice(string name)
+        {
+            _source.RecordingDevices.Add(name, true);
+        }
+        
+        /// <summary>
+        /// Remove a device from the recordingDevices list
+        /// </summary>
+        /// <param name="name"> The name of the device </param>
+        public static void DeleteRecordingDevice(string name)
+        {
+            _source.RecordingDevices.Remove(name);
+        }
+        
+        /// <summary>
+        /// Clear the whole recordingDevices list
+        /// </summary>
+        public static void ClearRecordingDevices()
+        {
+            _source.RecordingDevices.Clear();
+        }
+        
+        /// <summary>
         /// The representation of the config.json file as a c# class
         /// </summary>
         private class Source
         {
-            public string adbPath { get; set; }
-            public string ffmpegPath { get; set; }
-            public List<string> knownDevices { get; set; }
-            public Dictionary<string, bool> recordingDevices { get; set; }
+            public string AdbPath { get; set; }
+            public string FfmpegPath { get; set; }
+            public List<string> KnownDevices { get; set; }
+            public Dictionary<string, bool> RecordingDevices { get; set; }
         }
     }
 }
