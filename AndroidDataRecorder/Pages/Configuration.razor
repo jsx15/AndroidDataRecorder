@@ -1,4 +1,7 @@
 ﻿@page "/Config"
+@using System.ComponentModel.DataAnnotations
+
+@inject IToastService toastService;
 
 <header>
     <h1 class="text-center" style="color: white">Configuration</h1>
@@ -13,77 +16,54 @@
                     <div class="card-header" style="color: white">
                         Attached Devices
                     </div>
-                    <div class="card-body text-left">
-                        <table class="table">
-                            <tbody>
-                            <tr class="table-active">
-                                <td>
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault1"
-                                        />
-                                        <label class="form-check-label" for="flexRadioDefault1"> Androind Device 1</label>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <!-- Default checked radio -->
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault2"
-                                            checked
-                                        />
-                                        <label class="form-check-label" for="flexRadioDefault2"> Android Device 2 </label>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <!-- Default checked radio -->
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault2"
-                                            checked
-                                        />
-                                        <label class="form-check-label" for="flexRadioDefault2"> Android Device 3 </label>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <!-- Default checked radio -->
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="flexRadioDefault2"
-                                            checked
-                                        />
-                                        <label class="form-check-label" for="flexRadioDefault2"> Android Device 4 </label>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <div class="card-body">
+                        <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
+                            <table class="table table-bordered mb-0 text-left">
+                                <tbody>
+                                @foreach (var item in new string[] {"AspNetCore", "AspNet", "SomeJsThingWhatever"})
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(RadioValue.Equals(item, StringComparison.OrdinalIgnoreCase))/>
+                                            <label for="@item">@item</label>
+                                            <!--<button class="btn btn-danger float-right">Remove</button>-->
+                                        </td>
+                                    </tr>
+                                }
+
+                                <label>Selected Value is @RadioValue</label>
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="card-footer text-muted">
-                        <p style="color: #1e7e34"></p>
+                    <div class="card-footer">
+                    </div>
+                </div>
+                
+                <br>
+                
+                <div class="row">
+                    <div class="col-md">
+                        <div class="card justify-content-center side-cards">
+                            <div class="card-header text-center" style="background: darkred; color: white">
+                                DANGER ZONE
+                            </div>
+                            <div class="card-body">
+                                <button type="submit" class="btn btn-danger btn-block danger-buttons">Restart ADB server</button>
+                                <button type="submit" class="btn btn-danger btn-block danger-buttons">Kill ADB server</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md">
-                <div class="card text-center side-cards card-text ">
+
+
+
+
+
+            <div class="col-md-6">
+                <div class="card text-center card-text h-100">
                     <div class="card-header" style="color: white">
                         Add Device
                     </div>
@@ -93,7 +73,7 @@
                                 <p>IP-Address: </p>
                             </div>
                             <div class="col-md-8">
-                                <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349">
+                                <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349" @bind="ipAdress">
                             </div>
                         </div>
                         <div class="row">
@@ -101,13 +81,44 @@
                                 <p>Port: </p>
                             </div>
                             <div class="col-md-8">
-                                <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555">
+                                <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555" @bind="portAddress">
                             </div>
                         </div>
                         <br>
                         <div class="row justify-content-center">
-                            <button type="submit" class="btn btn-success ">Add Device</button>
+                            <button type="submit" class="btn btn-success" @onclick="addButtonPressed">Add Device</button>
                         </div>
+
+                        <br>
+
+                        <h4 class="text-center">Known Devices</h4>
+                        <div class="table-wrapper-scroll-y known-devices-table table-hover" style="overflow-x: hidden">
+                            <table class="table table-bordered mb-0 text-left">
+                                <tbody>
+                                @foreach (var item in new string[] {"Android Device 1", "Android Device 2", "Android Device 3", "Android Device 4", "Android Device 5", "Android Device 1", "Android Device 1"})
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <p>@item <br>
+                                                    123.123.123.123
+                                                    </p>
+                                                </div>
+                                                <div class="col-6 text-right">
+                                                <button class="btn btn-success">Attach</button> <button class="btn btn-danger">Remove</button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer text-right">
+                        ADB Versiion 1.0.40.23.1349
                     </div>
                 </div>
             </div>
@@ -115,31 +126,41 @@
     </section>
     
     <br>
-    
-    <section>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card justify-content-center side-cards">
-                    <div class="card-header text-center" style="background: darkred; color: white">
-                        DANGER ZONE
-                    </div>
-                    <div class="card-body">
-                        <button type="submit" class="btn btn-danger btn-block danger-buttons">Restart ADB server</button>
-                        <button type="submit" class="btn btn-danger btn-block danger-buttons">Kill ADB server</button>
-                    </div>
 
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card text-right side-cards">
-                    <div class="card-footer">
-                        <p>ABD Version 1.0.23.4</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
 @code {
+    
+    string RadioValue = "aspnetcore";
+    void RadioSelection(ChangeEventArgs args)
+    {
+        RadioValue = args.Value.ToString();
+    }
+
+    private string ipAdress;
+    private string deviceName;
+    private string portAddress;
+    
+    private bool successAdd = true;
+    
+    void addButtonPressed()
+    {
+        string[] splitValues = ipAdress.Split('.');
+        
+        if (splitValues.Length != 4)
+        {
+            toastService.ShowError("That is not an IP-Address!", "Error");
+            successAdd = false;
+        } 
+        
+        if (successAdd)
+        {
+            toastService.ShowSuccess("Device " + deviceName + " with IP-Address: " + ipAdress + " at port: " + portAddress + " successfully added!", "Success");
+        }
+        else
+        {
+            toastService.ShowError("Could not add device!", "Error");
+        }
+       
+    }
     
 }

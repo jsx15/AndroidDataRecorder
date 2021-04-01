@@ -1,5 +1,5 @@
 .card-text{
-    font-size: 1vw;
+    size: auto;
 }
 
 .card-header{
@@ -8,7 +8,7 @@
 }
 
 .side-cards {
-    height: auto;
+    height: 19rem;
 }
 
 .progress {
