@@ -11,7 +11,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// The path to the config.json file
         /// </summary>
-        private static readonly string Path = System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, @"src\config.json"));
+        private static readonly string Path = System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, @"src" + System.IO.Path.DirectorySeparatorChar + "config.json"));
 
         /// <summary>
         /// The Source class object

@@ -32,7 +32,7 @@ namespace AndroidDataRecorder
 
             //database.InsertValuesInMarker("device000", DateTime.Now);
 
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 			
             ///<summary>
             /// Methods for the table Marker
