@@ -18,7 +18,7 @@ namespace AndroidDataRecorder.Screenrecord
         private static volatile bool _record;
 
         //list of video files
-        private static readonly List<String> FileList = new();
+        private static readonly List<String> FileList = new List<string>();
 
         /// <summary>
         /// start thread for screenrecord
