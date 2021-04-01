@@ -1,5 +1,5 @@
 ﻿.card-text{
-    font-size: 1vw;
+    size: auto;
 }
 
 .card-header{
@@ -8,10 +8,44 @@
 }
 
 .side-cards {
-    height: auto;
+    height: 19rem;
 }
 
 .danger-buttons{
     font-size: x-large;
     height: auto;
+}
+
+.my-custom-scrollbar {
+    position: relative;
+    height: 12rem;
+    overflow: auto;
+}
+.table-wrapper-scroll-y {
+    display: block;
+}
+
+.progress {
+    border-radius: 10px;
+    width: 100%;
+    height: 31px;
+    text-align:center;
+}
+
+.progress-bar {
+    border-radius: 0px;
+    padding: 5px;
+}
+
+.wrapper > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: center;
+}
+
+.known-devices-table{
+    position: relative;
+    height: 18rem;
+    overflow: auto;
 }

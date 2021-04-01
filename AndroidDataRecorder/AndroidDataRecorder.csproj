@@ -17,4 +17,10 @@
       <PackageReference Include="Blazored.Toast" Version="3.1.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Pages\Configuration.razor.css">
+        <DependentUpon>Configuration.razor</DependentUpon>
+      </Content>
+    </ItemGroup>
+
 </Project>
