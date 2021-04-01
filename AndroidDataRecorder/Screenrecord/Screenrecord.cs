@@ -15,7 +15,7 @@ namespace AndroidDataRecorder.Screenrecord
         private const int NumOfVideos = 4;
 
         //bool whether the recording should run or not 
-        private static bool _record;
+        private static volatile bool _record;
 
         //list of video files
         private static readonly List<String> FileList = new();
