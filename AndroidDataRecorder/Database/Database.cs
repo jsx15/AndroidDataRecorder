@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
+using AndroidDataRecorder.Misc;
 
 namespace AndroidDataRecorder.Database
 {
@@ -12,15 +13,7 @@ namespace AndroidDataRecorder.Database
     {
         private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
         
-        /// <summary>
-        /// Class for the Marker table to generate a list
-        /// </summary>
-        public class Marker
-        {
-            public int MarkerId { get; set; }
-            public string DeviceName { get; set; }
-            public DateTime Timestamp { get; set; }
-        }
+      
         
         
         /// <summary>
@@ -169,9 +162,9 @@ namespace AndroidDataRecorder.Database
             {
                 MarkerList.Add(new Marker()
                 {
-                    MarkerId = reader.GetInt32(0),
-                    DeviceName = reader.GetString(1),
-                    Timestamp = reader.GetDateTime(2)
+                    _deviceName = reader.GetString(0),
+                    _markerTimestamp = reader.GetDateTime(1),
+                    _markerMessage = reader.GetString(2)
 
                 });
             }
