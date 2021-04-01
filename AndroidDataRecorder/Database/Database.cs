@@ -10,7 +10,9 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
-        private string datasource = "Data Source = C:/Users/Konstantin/Documents/GitHub/AndroidDataRecorder/identifier.sqlite
+        private string datasource =
+            "Data Source = C:/Users/Konstantin/Documents/GitHub/AndroidDataRecorder/identifier.sqlite";
+        
         /// <summary>
         /// Class for the Marker table to generate a list
         /// </summary>

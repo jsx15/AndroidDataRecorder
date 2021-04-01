@@ -78,7 +78,7 @@ namespace AndroidDataRecorder.Backend.LogCat
                     var grokResult = grok.Parse(line);
                     foreach (var item in grokResult)
                     {
-                        //Console.WriteLine($"{item.Key} : {item.Value}");
+                        Console.WriteLine($"{item.Key} : {item.Value}");
                     }
 
                     /*lock (fileInUse)
