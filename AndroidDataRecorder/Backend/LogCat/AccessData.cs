@@ -49,7 +49,7 @@ namespace AndroidDataRecorder.Backend.LogCat
             {
                 StartInfo = new ProcessStartInfo 
                 {
-                    FileName = Config.getAdbPath(), 
+                    FileName = Config.GetAdbPath(), 
                     Arguments = "-s " + device.Serial + " logcat -v year", 
                     UseShellExecute = false, 
                     RedirectStandardOutput = true, 
