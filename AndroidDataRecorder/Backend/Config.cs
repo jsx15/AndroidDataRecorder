@@ -67,7 +67,19 @@ namespace AndroidDataRecorder.Backend
         /// Get the path to the adb.exe
         /// </summary>
         /// <returns> The path to adb.exe </returns>
-        public static string getAdbPath() => _source.AdbPath;
+        public static string GetAdbPath() => _source.AdbPath;
+
+        /// <summary>
+        /// Get the path to the ffmpeg.exe
+        /// </summary>
+        /// <returns> The path to the ffmpeg.exe </returns>
+        public static string GetFfmpegPath() => _source.FfmpegPath;
+
+        /// <summary>
+        /// Get the path to the video directory
+        /// </summary>
+        /// <returns> The path to the video directory </returns>
+        public static string GetVideoDirPath => _source.VideoDirPath;
         
         /// <summary>
         /// Connect to already known devices
@@ -164,6 +176,7 @@ namespace AndroidDataRecorder.Backend
         {
             public string AdbPath { get; set; }
             public string FfmpegPath { get; set; }
+            public string VideoDirPath { get; set; }
             public List<string> KnownDevices { get; set; }
             public Dictionary<string, bool> RecordingDevices { get; set; }
         }
