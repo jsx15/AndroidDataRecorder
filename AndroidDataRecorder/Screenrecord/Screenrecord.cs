@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using AndroidDataRecorder.Backend;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -47,7 +48,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to adb.exe
-                    FileName = @"C:\Users\robin\OneDriveTHU\OneDrive - bwedu\Studium\platform-tools\adb.exe",
+                    FileName = Config.getAdbPath(),
                     //add arguments for screenrecord
                     Arguments = "exec-out screenrecord --output-format=h264 - ",
                     //redirect standard input

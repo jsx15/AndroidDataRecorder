@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using AndroidDataRecorder.Backend;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -75,7 +76,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to ffmpeg.exe
-                    FileName = @"C:\Users\robin\OneDriveTHU\OneDrive - bwedu\Studium\platform-tools\ffmpeg\bin\ffmpeg.exe",
+                    FileName = Config.getFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
                     Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+"video.mp4",
                     //redirect standard input

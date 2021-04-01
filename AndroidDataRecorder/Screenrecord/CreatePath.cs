@@ -12,7 +12,7 @@ namespace AndroidDataRecorder.Screenrecord
         public static string HandlePath()
         {
             // directory to create
-            var path = @"C:\Users\robin\Desktop\Screenrecord_"+Timestamp.GetTimestamp()+@"\";
+            var path = @"C:\Users\robin\Desktop\Screenrecord_"+Timestamp.GetTimestamp()+System.IO.Path.DirectorySeparatorChar;
 
             try
             {
