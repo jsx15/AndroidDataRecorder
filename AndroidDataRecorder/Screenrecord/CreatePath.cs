@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using AndroidDataRecorder.Backend;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -12,7 +13,7 @@ namespace AndroidDataRecorder.Screenrecord
         public static string HandlePath()
         {
             // directory to create
-            var path = @"C:\Users\robin\Desktop\Screenrecord_"+Timestamp.GetTimestamp()+@"\";
+            var path = Config.GetVideoDirPath+"Screenrecord_"+Timestamp.GetTimestamp()+Path.DirectorySeparatorChar;
 
             try
             {

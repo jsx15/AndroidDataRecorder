@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using AndroidDataRecorder.Backend;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -17,7 +18,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to adb.exe
-                    FileName = @"C:\Users\robin\OneDriveTHU\OneDrive - bwedu\Studium\platform-tools\adb.exe",
+                    FileName = Config.GetAdbPath(),
                     //add arguments for getting touch setting
                     Arguments = "exec-out settings get system show_touches",
                     //redirect standard input
@@ -63,7 +64,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to adb.exe
-                    FileName = @"C:\Users\robin\OneDriveTHU\OneDrive - bwedu\Studium\platform-tools\adb.exe",
+                    FileName = Config.GetAdbPath(),
                     //add arguments for showing touches
                     Arguments = "exec-out settings put system show_touches 1",
                     //redirect standard input
@@ -96,7 +97,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to adb.exe
-                    FileName = @"C:\Users\robin\OneDriveTHU\OneDrive - bwedu\Studium\platform-tools\adb.exe",
+                    FileName = Config.GetAdbPath(),
                     //add arguments for showing touches
                     Arguments = "exec-out settings put system show_touches 0",
                     //redirect standard input
