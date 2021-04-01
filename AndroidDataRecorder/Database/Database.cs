@@ -10,8 +10,7 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
-        private string datasource =
-            "Data Source = C:/Users/Konstantin/Documents/GitHub/AndroidDataRecorder/identifier.sqlite";
+        private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
         
         /// <summary>
         /// Class for the Marker table to generate a list
@@ -36,7 +35,7 @@ namespace AndroidDataRecorder.Database
         /// <returns> connection </returns>
         public SQLiteConnection ConectionToDatabase()
         {
-            var connection = new SQLiteConnection(datasource);
+            var connection = new SQLiteConnection(_datasource);
             connection.Open();
             return connection;
         }
