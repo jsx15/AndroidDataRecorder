@@ -76,7 +76,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to ffmpeg.exe
-                    FileName = Config.getFfmpegPath(),
+                    FileName = Config.GetFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
                     Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+"video.mp4",
                     //redirect standard input

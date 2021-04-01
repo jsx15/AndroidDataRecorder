@@ -48,7 +48,7 @@ namespace AndroidDataRecorder.Screenrecord
                 StartInfo =
                 {
                     //path to adb.exe
-                    FileName = Config.getAdbPath(),
+                    FileName = Config.GetAdbPath(),
                     //add arguments for screenrecord
                     Arguments = "exec-out screenrecord --output-format=h264 - ",
                     //redirect standard input
