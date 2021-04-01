@@ -82,7 +82,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="DeviceName"></param>
         /// <param name="Timestamp"></param>
-        public void InsertValuesInTableMarker(string DeviceName, DateTime Timestamp)
+        public void InsertValuesInTableMarker(string DeviceName, DateTime Timestamp, string markerMessage)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -90,20 +90,23 @@ namespace AndroidDataRecorder.Database
             
             //insert Query
             command.CommandText =
-                @"INSERT INTO Marker(DeviceName, Timestamp)
-                VALUES (@DeviceName, @Timestamp)";
+                @"INSERT INTO Marker(DeviceName, Timestamp, MarkerMessage)
+                VALUES (@DeviceName, @Timestamp, @MarkerMessage)";
             
             // Define paramters to insert new values in the table
             SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p2 = new SQLiteParameter("@Timestamp", DbType.DateTime);
+            SQLiteParameter p3 = new SQLiteParameter("@MarkerMessage", DbType.String);
             
             // Add the paramters to the table
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
+            command.Parameters.Add(p3);
             
             // define the Values which will be insert to the table
             p1.Value = DeviceName;
             p2.Value = Timestamp;
+            p3.Value = markerMessage;
             
             // Execute Query
             command.ExecuteNonQuery();
