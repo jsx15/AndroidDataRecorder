@@ -165,9 +165,9 @@ namespace AndroidDataRecorder.Database
             {
                 MarkerList.Add(new Marker()
                 {
-                    _deviceName = reader.GetString(0),
-                    _markerTimestamp = reader.GetDateTime(1),
-                    _markerMessage = reader.GetString(2)
+                    _deviceName = reader.GetString(1),
+                    _markerTimestamp = reader.GetDateTime(2),
+                    _markerMessage = reader.GetString(3)
 
                 });
             }
