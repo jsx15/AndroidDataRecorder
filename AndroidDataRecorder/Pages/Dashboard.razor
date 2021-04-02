@@ -47,7 +47,9 @@
                     <div class="card-body text-left">
                         <div class="row">
                             <div class="col-md">
-                                <p><btn class="btn @LogBtnColor " @onclick="Logbtnclick"> @LogBtnValue</btn></p>
+                                <p>
+                                    <btn class="btn @LogBtnColor " @onclick="Logbtnclick"> @LogBtnValue</btn>
+                                </p>
                             </div>
                             <div class="col-md text-left">
                                 <div style="visibility: @ProcessTextValue">
@@ -63,7 +65,9 @@
                             <p class="card-text">@CurrDateTime</p>
                         </div>
                         <div class="row col justify-content-center">
-                            <p><button class="btn btn-success" @onclick="GetMarkerTime">Set Marker</button></p>
+                            <p>
+                                <button class="btn btn-success" @onclick="GetMarkerTime">Set Marker</button>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -110,9 +114,9 @@
             </div>
         </div>
     </section>
-    
+
     <br>
-    
+
     <section id="testsection">
         <div class="card">
             <div class="card-header">
@@ -138,18 +142,20 @@
             </div>
         </div>
     </section>
-    
+
 </main>
 
 
 @code {
-    
-///
+
+    ///
     ///Time Display
+    ///
     /// 
     private Timer _timer;
+
     public DateTime CurrDateTime { get; set; }
-    
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -157,75 +163,80 @@
             _timer = new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
     }
- 
+
     private async void DateTimeCallback(object state)
     {
-        //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("dd.MM.yyyy hh:mm:ss tt");
+    //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("dd.MM.yyyy hh:mm:ss tt");
         CurrDateTime = DateTime.Now;
         await InvokeAsync((StateHasChanged));
     }
- 
+
     public void Dispose()
     {
         _timer?.Dispose();
     }
- 
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
         MarkerList = data.ListWithMarker("whyred");
     }
- 
+
     AndroidDataRecorder.Database.Database data = new AndroidDataRecorder.Database.Database();
-    
+
     ///
     private DateTime _markerSetTime;
+
     private string _markerSetMessage;
- 
+
     public List<Marker> MarkerList = new List<Marker>();
-    
+
     ///<summary>
     /// Gets the time the marker was set and saves it in a list
     /// </summary>
     public void GetMarkerTime()
     {
         _markerSetTime = CurrDateTime;
- 
+
         if (!String.IsNullOrWhiteSpace(_markerSetMessage))
         {
-            //MarkerList.Add(new Marker(_markerSetTime, _markerSetMessage));
-            
+    //MarkerList.Add(new Marker(_markerSetTime, _markerSetMessage));
+
+            data.InsertValuesInTableMarker("whyred", _markerSetTime, _markerSetMessage);
+
             toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
-            
+
             _markerSetMessage = string.Empty;
+
+            MarkerList = data.ListWithMarker("whyred");
         }
         else
         {
             toastService.ShowError("Please put in a message", "Error");
         }
-      
     }
-    
-    
+
+
     ///
     ///Log Button Toggle
     /// 
     private bool _togglebtn;
+
     private bool _togglebtncolor;
-    
+
     private bool _toggleprocesstxt;
-    
+
     private string LogBtnValue => _togglebtn ? "Stop Logging" : "Start Logging";
     private string ProcessTextValue => _toggleprocesstxt ? "visible" : "hidden";
     private string LogBtnColor => _togglebtncolor ? "btn-danger" : "btn-success";
-    
+
     void Logbtnclick()
     {
         _togglebtn = !_togglebtn;
         _togglebtncolor = !_togglebtncolor;
         _toggleprocesstxt = !_toggleprocesstxt;
     }
-    
+
     string cpuPercentage = "98%";
     string memoryUsage = "54%";
     string batterylevel = "86%";
