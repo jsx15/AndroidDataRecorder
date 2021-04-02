@@ -27,7 +27,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var marker in liste)
+                        @foreach (var marker in markerList)
                         {
                             <tr>
                                 <td>@marker._markerMessage</td>
@@ -72,22 +72,28 @@
 
 
 @code {
-    private bool _togglebtn;
-    private string BtnColor => _togglebtn ? "btn-danger" : "btn-success";
-    private string BtnText => _togglebtn ? "Stop Logging" : "Start Logging";
+    /*
+     * Bool for logging button
+     */
+    private bool _toggleLoggingBtn;
 
+    /*
+     * Adjusting CSS
+     */
+    private string BtnColor => _toggleLoggingBtn ? "btn-danger" : "btn-success";
 
+    private string BtnText => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
+
+    /*
+     * Toggle logging button
+     */
     private void toggleBtn()
     {
-        _togglebtn = !_togglebtn;
+        _toggleLoggingBtn = !_toggleLoggingBtn;
     }
 
-    List<Marker> liste = new List<Marker>();
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-    }
-
+    /*
+     * List of marker
+     */
+    List<Marker> markerList = new List<Marker>();
 }

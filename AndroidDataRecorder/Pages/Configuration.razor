@@ -1,5 +1,6 @@
 ﻿@page "/Config"
 @using System.ComponentModel.DataAnnotations
+@using System.Net
 
 @inject IToastService toastService;
 
@@ -9,158 +10,189 @@
 
 <br>
 
-    <section id="device_information">
-        <div class="row">
-            <div class="col-md">
-                <div class="card text-center side-cards">
-                    <div class="card-header" style="color: white">
-                        Attached Devices
-                    </div>
-                    <div class="card-body">
-                        <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
-                            <table class="table table-bordered mb-0 text-left">
-                                <tbody>
-                                @foreach (var item in new string[] {"AspNetCore", "AspNet", "SomeJsThingWhatever"})
-                                {
-                                    <tr>
-                                        <td>
-                                            <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(RadioValue.Equals(item, StringComparison.OrdinalIgnoreCase))/>
-                                            <label for="@item">@item</label>
-                                            <!--<button class="btn btn-danger float-right">Remove</button>-->
-                                        </td>
-                                    </tr>
-                                }
+<section id="device_information">
+    <div class="row">
+        <div class="col-md">
+            <div class="card text-center side-cards">
+                <div class="card-header" style="color: white">
+                    Attached Devices
+                </div>
+                <div class="card-body">
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
+                        <table class="table table-bordered mb-0 text-left">
+                            <tbody>
+                            @foreach (var item in new string[] {"Device 1", "Device 2", "Device 3"})
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(_selectedDevice.Equals(item, StringComparison.OrdinalIgnoreCase))/>
+                                        <label for="@item">@item</label>
+                                        <!--<button class="btn btn-danger float-right">Remove</button>-->
+                                    </td>
+                                </tr>
+                            }
 
-                                <label>Selected Value is @RadioValue</label>
+                            <label>Selected Value is @_selectedDevice</label>
 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <br>
-                
-                <div class="row">
-                    <div class="col-md">
-                        <div class="card justify-content-center side-cards">
-                            <div class="card-header text-center" style="background: darkred; color: white">
-                                DANGER ZONE
-                            </div>
-                            <div class="card-body">
-                                <button type="submit" class="btn btn-danger btn-block danger-buttons">Restart ADB server</button>
-                                <button type="submit" class="btn btn-danger btn-block danger-buttons">Kill ADB server</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="card-footer">
                 </div>
             </div>
 
+            <br>
 
-
-
-
-            <div class="col-md-6">
-                <div class="card text-center card-text h-100">
-                    <div class="card-header" style="color: white">
-                        Add Device
-                    </div>
-                    <div class="card-body text-left side-cards">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <p>IP-Address: </p>
-                            </div>
-                            <div class="col-md-8">
-                                <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349" @bind="ipAdress">
-                            </div>
+            <div class="row">
+                <div class="col-md">
+                    <div class="card justify-content-center side-cards">
+                        <div class="card-header text-center" style="background: darkred; color: white">
+                            DANGER ZONE
                         </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <p>Port: </p>
-                            </div>
-                            <div class="col-md-8">
-                                <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555" @bind="portAddress">
-                            </div>
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-danger btn-block danger-buttons">Restart ADB server</button>
+                            <button type="submit" class="btn btn-danger btn-block danger-buttons">Kill ADB server</button>
                         </div>
-                        <br>
-                        <div class="row justify-content-center">
-                            <button type="submit" class="btn btn-success" @onclick="addButtonPressed">Add Device</button>
-                        </div>
-
-                        <br>
-
-                        <h4 class="text-center">Known Devices</h4>
-                        <div class="table-wrapper-scroll-y known-devices-table table-hover" style="overflow-x: hidden">
-                            <table class="table table-bordered mb-0 text-left">
-                                <tbody>
-                                @foreach (var item in new string[] {"Android Device 1", "Android Device 2", "Android Device 3", "Android Device 4", "Android Device 5", "Android Device 1", "Android Device 1"})
-                                {
-                                    <tr>
-                                        <td>
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <p>@item <br>
-                                                    123.123.123.123
-                                                    </p>
-                                                </div>
-                                                <div class="col-6 text-right">
-                                                <button class="btn btn-success">Attach</button> <button class="btn btn-danger">Remove</button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                                
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer text-right">
-                        ADB Versiion 1.0.40.23.1349
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <br>
+
+
+        <div class="col-md-6">
+            <div class="card text-center card-text h-100">
+                <div class="card-header" style="color: white">
+                    Add Device
+                </div>
+                <div class="card-body text-left side-cards">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p>IP-Address: </p>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349" @bind="ipAddress">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p>Port: </p>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555" @bind="portAddress">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row justify-content-center">
+                        <button type="submit" class="btn btn-success" @onclick="AddButtonPressed">Add Device</button>
+                    </div>
+
+                    <br>
+
+                    <h4 class="text-center">Known Devices</h4>
+                    <div class="table-wrapper-scroll-y known-devices-table table-hover" style="overflow-x: hidden">
+                        <table class="table table-bordered mb-0 text-left">
+                            <tbody>
+                            @foreach (var item in new string[] {"Android Device 1", "Android Device 2", "Android Device 3", "Android Device 4", "Android Device 5", "Android Device 1", "Android Device 1"})
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <p>
+                                                    @item <br>
+                                                    123.123.123.123
+                                                </p>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <button class="btn btn-success">Attach</button> <button class="btn btn-danger">Remove</button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-right">
+                    @_adbVersion
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<br>
 
 
 @code {
-    
-    string RadioValue = "aspnetcore";
-    void RadioSelection(ChangeEventArgs args)
+    /*
+     * List of attached devices
+     */
+    List<string> _tempDeviceList;
+
+    /*
+     * Selected device
+     */
+    string _selectedDevice;
+
+    /*
+     * ADB version used
+     */
+    private string _adbVersion;
+
+    /*
+     * Set device list
+     */
+
+    protected override void OnInitialized()
     {
-        RadioValue = args.Value.ToString();
+        base.OnInitialized();
+        _tempDeviceList = new List<string>() {"Device 1", "Device 2", "Device 3"};
+        _selectedDevice = _tempDeviceList[0];
+        _adbVersion = "version 1.04.23";
     }
 
-    private string ipAdress;
+    /*
+     * Change selected device
+     */
+
+    void RadioSelection(ChangeEventArgs args)
+    {
+        _selectedDevice = args.Value?.ToString();
+    }
+
+    /*
+     * Binded values
+     */
+    private string ipAddress;
     private string deviceName;
     private string portAddress;
-    
+
     private bool successAdd = true;
-    
-    void addButtonPressed()
+
+    /*
+     * Add device to known devices
+     */
+
+    void AddButtonPressed()
     {
-        string[] splitValues = ipAdress.Split('.');
-        
-        if (splitValues.Length != 4)
+        IPAddress address;
+
+    // Check for 3 dots and valid range
+        if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out address))
         {
-            toastService.ShowError("That is not an IP-Address!", "Error");
-            successAdd = false;
-        } 
-        
-        if (successAdd)
-        {
-            toastService.ShowSuccess("Device " + deviceName + " with IP-Address: " + ipAdress + " at port: " + portAddress + " successfully added!", "Success");
+            toastService.ShowSuccess("Device " + deviceName + " with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
         }
         else
         {
+            toastService.ShowError("That is not an IP-Address!", "Error");
             toastService.ShowError("Could not add device!", "Error");
         }
-       
     }
-    
+
+
+
 }

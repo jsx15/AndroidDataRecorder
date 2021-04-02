@@ -5,12 +5,17 @@
 <button @onclick="StopRecord">stop</button>
 
 @code {
-
+    /*
+     * Start recording
+     */
     public void StartRecord()
     {
         Screenrecord.StartScreenrecord();
     }
     
+    /*
+     * Stop recording
+     */
     public void StopRecord()
     {
         Screenrecord.StopRecording();

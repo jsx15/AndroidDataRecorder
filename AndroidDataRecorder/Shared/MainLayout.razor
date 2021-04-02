@@ -48,11 +48,20 @@
 </div>
 
 @code{
+    /*
+     * Bool for showing navigation menu
+     */
     private bool _collapseNavMenu;
 
+    /*
+     * Adjusting CSS
+     */
     private string NavMenuCssClass => _collapseNavMenu ? "sidebar-min" : "sidebar";
     private string Content => _collapseNavMenu ? "content-max" : "content-min";
 
+    /*
+     * Toggle navigation menu
+     */
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
