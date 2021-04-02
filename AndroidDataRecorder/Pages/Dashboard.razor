@@ -123,20 +123,22 @@
                 <h3 class="text-center">Marker</h3>
             </div>
             <div class="card-body">
-                <table>
-                    <tr>
-                        <th>Time</th>
-                        <th>Message</th>
-                    </tr>
-
-                    @foreach (var marker in _markerList)
-                    {
+                <div style="height: 250px" class="table-wrapper-scroll-y scroll-bar">
+                    <table class="table table-bordered table-striped">
                         <tr>
-                            <td>@marker._markerTimestamp</td>
-                            <td>@marker._markerMessage</td>
+                            <th>Time</th>
+                            <th>Message</th>
                         </tr>
-                    }
-                </table>
+
+                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                        {
+                            <tr>
+                                <td>@marker._markerTimestamp</td>
+                                <td>@marker._markerMessage</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
             </div>
         </div>
     </section>
@@ -169,7 +171,7 @@
     /*
      * List of marker
      */
-    private List<Marker> _markerList = new List<Marker>();
+    private MarkerList _markerList = new MarkerList();
     
     /*
      * System stats (temporarily) 
@@ -184,7 +186,6 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        // MarkerList = data.ListWithMarker();
         _timer = new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
@@ -204,10 +205,10 @@
     {
         if (!string.IsNullOrWhiteSpace(_markerSetMessage))
         {
-            // data.InsertValuesInTableMarker("DEVICE_NAME", _markerSetTime, _markerSetMessage);
+            data.InsertValuesInTableMarker("whyred", CurrDateTime, _markerSetMessage);
             toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
-            // _markerList = data.ListWithMarker("DEVICE_NAME");
+            _markerList.Update();
         }
         else
         {

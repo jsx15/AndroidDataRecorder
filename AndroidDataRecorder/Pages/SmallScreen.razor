@@ -1,16 +1,17 @@
 @page "/Pi"
 @using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Database
 @layout PiLayout
 <div class="master">
     <div class="row p-3">
         <div class="col-sm-6">
             <div class="card">
-                <button class="btn @BtnColor text-center top-row" @onclick="toggleBtn">@BtnText</button>
+                <button class="btn @BtnColor text-center top-row" @onclick="toggleBtn">@LoggingBtnText</button>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="card">
-                <button class="btn btn-primary text-center top-row">Set Marker</button>
+                <button class="btn btn-primary text-center top-row" @onclick="createMarker">Set Marker</button>
             </div>
         </div>
     </div>
@@ -27,9 +28,11 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var marker in markerList)
+                        @* Reverse list so last entry is at top *@
+                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
+                                <td width="30%">@marker._markerTimestamp</td>
                                 <td>@marker._markerMessage</td>
                             </tr>
                         }
@@ -76,13 +79,23 @@
      * Bool for logging button
      */
     private bool _toggleLoggingBtn;
+    
+    /*
+     * Database
+     */
+    Database _database = new Database();
+    
+    /*
+     * MarkerList
+     */
+    MarkerList _markerList = new MarkerList();
 
     /*
      * Adjusting CSS
      */
     private string BtnColor => _toggleLoggingBtn ? "btn-danger" : "btn-success";
 
-    private string BtnText => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
+    private string LoggingBtnText => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
 
     /*
      * Toggle logging button
@@ -92,8 +105,11 @@
         _toggleLoggingBtn = !_toggleLoggingBtn;
     }
 
-    /*
-     * List of marker
-     */
-    List<Marker> markerList = new List<Marker>();
+    private void createMarker()
+    {
+        _database.InsertValuesInTableMarker("whyred", DateTime.Now, "Marker from pi");
+        // _database.InsertValuesInTableMarker(_markerList.DeviceName(), DateTime.Now, "");
+        _markerList.Update();
+    }
+
 }

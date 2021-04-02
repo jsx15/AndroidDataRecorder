@@ -1,4 +1,5 @@
 ﻿@page "/marker"
+@using AndroidDataRecorder.Misc
 
 <header>
     <h1 class="text-center" style="color: white">Marker</h1>
@@ -9,13 +10,25 @@
 <main class="justify-content-center">
     <section id="marker_list">
         <div class="card">
-            <ul>
-                
-            </ul>
+            <table>
+                <tr>
+                    <th>Time</th>
+                    <th>Message</th>
+                </tr>
+
+                @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                {
+                    <tr>
+                        <td>@marker._markerTimestamp</td>
+                        <td>@marker._markerMessage</td>
+                    </tr>
+                }
+            </table>
+
         </div>
     </section>
 </main>
 
 @code {
-    
+
 }
