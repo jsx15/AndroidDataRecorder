@@ -1,6 +1,7 @@
 ﻿@page "/Config"
 @using System.ComponentModel.DataAnnotations
 @using System.Net
+@using AndroidDataRecorder.Backend
 
 @inject IToastService toastService;
 
@@ -51,8 +52,8 @@
                             DANGER ZONE
                         </div>
                         <div class="card-body">
-                            <button type="submit" class="btn btn-danger btn-block danger-buttons">Restart ADB server</button>
-                            <button type="submit" class="btn btn-danger btn-block danger-buttons">Kill ADB server</button>
+                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="RestartADB">Restart ADB server</button>
+                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="KillADB">Kill ADB server</button>
                         </div>
                     </div>
                 </div>
@@ -191,6 +192,22 @@
             toastService.ShowError("That is not an IP-Address!", "Error");
             toastService.ShowError("Could not add device!", "Error");
         }
+    }
+    
+    /*
+     * Restart ADB server
+     */
+    private void RestartADB()
+    {
+        AdbServer.RestartAdbServer();
+    }
+    
+    /*
+     * Kill ADB Server
+     */
+    private void KillADB()
+    {
+        AdbServer.KillAdbServer();
     }
 
 
