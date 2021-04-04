@@ -14,7 +14,7 @@ namespace AndroidDataRecorder.Misc
         /*
          * Selected device
          */
-        private static SharpAdbClient.DeviceData selectedDeviceData = new DeviceData();
+        public static SharpAdbClient.DeviceData ActiveDeviceData;
 
         /*
          * Database
@@ -26,10 +26,9 @@ namespace AndroidDataRecorder.Misc
          */
         public MarkerList()
         {
-            if (selectedDeviceData != null)
+            if (ActiveDeviceData != null)
             {
-                Markers = data.ListWithMarker("whyred");
-                // Markers = data.ListWithMarker(selectedDeviceData.Name);
+                Markers = data.ListWithMarker(ActiveDeviceData.Name);
             }
         }
 
@@ -38,8 +37,7 @@ namespace AndroidDataRecorder.Misc
          */
         public void Update()
         {
-            Markers = data.ListWithMarker("whyred");
-            // Markers = data.ListWithMarker(selectedDeviceData.Name);
+            Markers = data.ListWithMarker(ActiveDeviceData.Name);
         }
 
         /*
@@ -47,16 +45,17 @@ namespace AndroidDataRecorder.Misc
          */
         public void SetDevice(SharpAdbClient.DeviceData device)
         {
-            selectedDeviceData = device;
+            ActiveDeviceData = device;
             Update();
         }
         
         /*
-         * Get selectedDevice name
+         * Active device name
          */
-        public string DeviceName()
+        public string GetDeviceName()
         {
-            return selectedDeviceData.Name;
+            return ActiveDeviceData.Name;
         }
+    
     }
 }

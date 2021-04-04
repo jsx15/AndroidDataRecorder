@@ -6,12 +6,12 @@
     <div class="row p-3">
         <div class="col-sm-6">
             <div class="card">
-                <button class="btn @BtnColor text-center top-row" @onclick="toggleBtn">@LoggingBtnText</button>
+                <button class="btn @BtnColor text-center top-row" @onclick="ToggleBtn">@LoggingBtnText</button>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="card">
-                <button class="btn btn-primary text-center top-row" @onclick="createMarker">Set Marker</button>
+                <button class="btn btn-primary text-center top-row" @onclick="CreateMarker">Set Marker</button>
             </div>
         </div>
     </div>
@@ -32,8 +32,8 @@
                         @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
-                                <td width="30%">@marker._markerTimestamp</td>
-                                <td>@marker._markerMessage</td>
+                                <td width="30%">@marker.timeStamp</td>
+                                <td>@marker.message</td>
                             </tr>
                         }
                         </tbody>
@@ -100,15 +100,14 @@
     /*
      * Toggle logging button
      */
-    private void toggleBtn()
+    private void ToggleBtn()
     {
         _toggleLoggingBtn = !_toggleLoggingBtn;
     }
 
-    private void createMarker()
+    private void CreateMarker()
     {
-        _database.InsertValuesInTableMarker("whyred", DateTime.Now, "Marker from pi");
-        // _database.InsertValuesInTableMarker(_markerList.DeviceName(), DateTime.Now, "");
+        _database.InsertValuesInTableMarker(_markerList.GetDeviceName(), DateTime.Now, "Marker from pi");
         _markerList.Update();
     }
 

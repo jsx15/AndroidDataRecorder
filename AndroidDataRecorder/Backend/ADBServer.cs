@@ -139,5 +139,19 @@ namespace AndroidDataRecorder.Backend
         {
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
         }
+
+        /// <summary>
+        ///  Get adb version running on host
+        /// </summary>
+        /// <returns>ADB Version running</returns>
+        public static int GetAdbVersion()
+        {
+            return Client.GetAdbVersion();
+        }
+
+        public static bool ServerStatus()
+        {
+             return Server.GetStatus().IsRunning;
+        }
     }
 }

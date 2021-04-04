@@ -19,8 +19,8 @@
                 @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                 {
                     <tr>
-                        <td>@marker._markerTimestamp</td>
-                        <td>@marker._markerMessage</td>
+                        <td>@marker.timeStamp</td>
+                        <td>@marker.message</td>
                     </tr>
                 }
             </table>

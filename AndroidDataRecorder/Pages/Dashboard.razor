@@ -1,5 +1,6 @@
 @page "/Dashboard"
 @using System.Threading;
+@using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Misc
 
 @inject IToastService toastService;
@@ -133,8 +134,8 @@
                         @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
-                                <td>@marker._markerTimestamp</td>
-                                <td>@marker._markerMessage</td>
+                                <td style="width: 30%">@marker.timeStamp</td>
+                                <td>@marker.message</td>
                             </tr>
                         }
                     </table>
@@ -205,7 +206,7 @@
     {
         if (!string.IsNullOrWhiteSpace(_markerSetMessage))
         {
-            data.InsertValuesInTableMarker("whyred", CurrDateTime, _markerSetMessage);
+            data.InsertValuesInTableMarker(_markerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
             toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
             _markerList.Update();

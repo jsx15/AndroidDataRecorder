@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Net
 @using AndroidDataRecorder.Backend
+@using AndroidDataRecorder.Misc
 
 @inject IToastService toastService;
 
@@ -22,21 +23,19 @@
                     <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
                         <table class="table table-bordered mb-0 text-left">
                             <tbody>
-                            @foreach (var item in new string[] {"Device 1", "Device 2", "Device 3"})
+                            @foreach (var item in _tempDeviceList)
                             {
                                 <tr>
                                     <td>
-                                        <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(_selectedDevice.Equals(item, StringComparison.OrdinalIgnoreCase))/>
-                                        <label for="@item">@item</label>
+                                        <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(_markerList.GetDeviceName().Equals(item.Name))/>
+                                        <label for="@item">@item.Name</label>
                                         <!--<button class="btn btn-danger float-right">Remove</button>-->
                                     </td>
                                 </tr>
                             }
-
-                            <label>Selected Value is @_selectedDevice</label>
-
                             </tbody>
                         </table>
+                        <label>Selected device is @_markerList.GetDeviceName()</label>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -118,7 +117,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-right">
-                    @_adbVersion
+                    Version 1.0.@_adbVersion
                 </div>
             </div>
         </div>
@@ -132,28 +131,34 @@
     /*
      * List of attached devices
      */
-    List<string> _tempDeviceList;
+    List<SharpAdbClient.DeviceData> _tempDeviceList;
 
     /*
-     * Selected device
+     * Markerlist
      */
-    string _selectedDevice;
+    MarkerList _markerList = new MarkerList();
 
     /*
      * ADB version used
      */
-    private string _adbVersion;
+    private int _adbVersion;
 
     /*
      * Set device list
      */
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _tempDeviceList = new List<string>() {"Device 1", "Device 2", "Device 3"};
-        _selectedDevice = _tempDeviceList[0];
-        _adbVersion = "version 1.04.23";
+        _tempDeviceList = AdbServer.GetConnectedDevices();
+        try
+        {
+            _markerList.SetDevice(_tempDeviceList[0]);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("No device connected");
+        }
+        _adbVersion = AdbServer.GetAdbVersion();
     }
 
     /*
@@ -162,7 +167,7 @@
 
     void RadioSelection(ChangeEventArgs args)
     {
-        _selectedDevice = args.Value?.ToString();
+        _markerList.SetDevice((SharpAdbClient.DeviceData) args.Value);
     }
 
     /*
