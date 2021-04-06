@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using AndroidDataRecorder.Backend.LogCat;
+using AndroidDataRecorder.Pages;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
@@ -38,6 +39,7 @@ namespace AndroidDataRecorder.Backend
             var result = Server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
             monitor.DeviceConnected += OnDeviceConnected;
+            monitor.DeviceConnected += Configuration.ConnectedDeviceChanged;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
             monitor.Start();
         }
@@ -65,7 +67,19 @@ namespace AndroidDataRecorder.Backend
         /// Get the connected devices
         /// </summary>
         /// <returns> List of the devices </returns>
-        public static List<DeviceData> GetConnectedDevices() => Client.GetDevices();
+        public static List<DeviceData> GetConnectedDevices()
+        {
+            var deviceList = new List<DeviceData>();
+            foreach (var device in Client.GetDevices())
+            {
+                if (device.State != DeviceState.NoPermissions)
+                {
+                    deviceList.Add(device);
+                }
+            }
+
+            return deviceList;
+        }
 
         /// <summary>
         /// Restart the AdbServer
@@ -138,6 +152,20 @@ namespace AndroidDataRecorder.Backend
         private static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
+        }
+
+        /// <summary>
+        ///  Get adb version running on host
+        /// </summary>
+        /// <returns>ADB Version running</returns>
+        public static int GetAdbVersion()
+        {
+            return Client.GetAdbVersion();
+        }
+
+        public static bool ServerStatus()
+        {
+             return Server.GetStatus().IsRunning;
         }
     }
 }

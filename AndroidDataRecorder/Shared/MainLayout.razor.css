@@ -39,7 +39,6 @@
     right:0;
     background-color: #2F4858;
 }
-
     .content-max {
         left: 5em;
     }
@@ -60,7 +59,6 @@
     margin-left: auto;
     margin-right: auto;
 }
-
 
 .nav-link {
     font-size: 2em;
@@ -85,22 +83,20 @@
     .nav-item:first-of-type {
         padding-top: 1rem;
     }
-    
     .nav-item:last-of-type {
         padding-bottom: 1rem;
     }
-
     .nav-item ::deep a.active {
         background-color: rgba(255,255,255,0.25);
         color: white;
         border-radius: 5px;
     }
-    
     .nav-item ::deep a:hover {
         background-color: rgba(255,255,255,0.1);
         color: white;
         border-radius: 5px;
     }
+    
 .appname {
     font-size: 1em;
     font-weight: bold;

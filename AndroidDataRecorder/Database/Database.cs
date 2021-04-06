@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
 using AndroidDataRecorder.Misc;
@@ -165,9 +164,9 @@ namespace AndroidDataRecorder.Database
             {
                 MarkerList.Add(new Marker()
                 {
-                    _deviceName = reader.GetString(1),
-                    _markerTimestamp = reader.GetDateTime(2),
-                    _markerMessage = reader.GetString(3)
+                    devicename = reader.GetString(1),
+                    timeStamp = reader.GetDateTime(2),
+                    message = reader.GetString(3)
 
                 });
             }

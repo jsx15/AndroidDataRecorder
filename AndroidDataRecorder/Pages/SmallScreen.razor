@@ -1,16 +1,17 @@
 @page "/Pi"
 @using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Database
 @layout PiLayout
 <div class="master">
     <div class="row p-3">
         <div class="col-sm-6">
             <div class="card">
-                <button class="btn @BtnColor text-center top-row" @onclick="toggleBtn">@BtnText</button>
+                <button class="btn @BtnColor text-center top-row" @onclick="ToggleBtn">@LoggingBtnText</button>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="card">
-                <button class="btn btn-primary text-center top-row">Set Marker</button>
+                <button class="btn btn-primary text-center top-row" @onclick="CreateMarker">Set Marker</button>
             </div>
         </div>
     </div>
@@ -27,10 +28,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var marker in liste)
+                        @* Reverse list so last entry is at top *@
+                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
-                                <td>@marker._markerMessage</td>
+                                <td width="30%">@marker.timeStamp</td>
+                                <td>@marker.message</td>
                             </tr>
                         }
                         </tbody>
@@ -72,22 +75,40 @@
 
 
 @code {
-    private bool _togglebtn;
-    private string BtnColor => _togglebtn ? "btn-danger" : "btn-success";
-    private string BtnText => _togglebtn ? "Stop Logging" : "Start Logging";
+    /*
+     * Bool for logging button
+     */
+    private bool _toggleLoggingBtn;
+    
+    /*
+     * Database
+     */
+    Database _database = new Database();
+    
+    /*
+     * MarkerList
+     */
+    MarkerList _markerList = new MarkerList();
 
+    /*
+     * Adjusting CSS
+     */
+    private string BtnColor => _toggleLoggingBtn ? "btn-danger" : "btn-success";
 
-    private void toggleBtn()
+    private string LoggingBtnText => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
+
+    /*
+     * Toggle logging button
+     */
+    private void ToggleBtn()
     {
-        _togglebtn = !_togglebtn;
+        _toggleLoggingBtn = !_toggleLoggingBtn;
     }
 
-    List<Marker> liste = new List<Marker>();
-
-    protected override void OnInitialized()
+    private void CreateMarker()
     {
-        base.OnInitialized();
-
+        _database.InsertValuesInTableMarker(_markerList.GetDeviceName(), DateTime.Now, "Marker from pi");
+        _markerList.Update();
     }
 
 }

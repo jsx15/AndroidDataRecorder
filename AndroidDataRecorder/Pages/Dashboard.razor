@@ -1,5 +1,6 @@
 @page "/Dashboard"
 @using System.Threading;
+@using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Misc
 
 @inject IToastService toastService;
@@ -28,7 +29,7 @@
                                 <p class="card-text">IP-Address: </p>
                             </div>
                             <div class="col-md text-left">
-                                <p class="card-text">AndroidPhone123456 </p>
+                                <p class="card-text">@_markerList.GetDeviceName() </p>
                                 <p class="card-text">USB/Ethernet</p>
                                 <p class="card-text">123.123.432.45</p>
                             </div>
@@ -48,7 +49,7 @@
                         <div class="row">
                             <div class="col-md">
                                 <p>
-                                    <btn class="btn @LogBtnColor " @onclick="Logbtnclick"> @LogBtnValue</btn>
+                                    <btn class="btn @LogBtnColor " @onclick="LoggingBtnClick"> @LogBtnValue</btn>
                                 </p>
                             </div>
                             <div class="col-md text-left">
@@ -78,11 +79,11 @@
     <br>
 
     <section id="log_table">
-        <div class="card text-center side-cards">
+        <div class="card text-center">
             <div class="card-header" style="color: white">
                 System Status
             </div>
-            <div class="card-body side-cards">
+            <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 text-left">
                         <p style="font-size: x-large">CPU: </p>
@@ -123,22 +124,22 @@
                 <h3 class="text-center">Marker</h3>
             </div>
             <div class="card-body">
-                <table>
-                    <tr>
-                        <th>Time</th>
-                        <th>Message</th>
-                    </tr>
-
-                    @foreach (var marker in MarkerList)
-                    {
+                <div style="height: 250px" class="table-wrapper-scroll-y scroll-bar">
+                    <table class="table table-bordered table-striped">
                         <tr>
-                            <td>@marker._markerTimestamp</td>
-                            <td>@marker._markerMessage</td>
+                            <th>Time</th>
+                            <th>Message</th>
                         </tr>
-                    }
 
-                </table>
-
+                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                        {
+                            <tr>
+                                <td style="width: 30%">@marker.timeStamp</td>
+                                <td>@marker.message</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
             </div>
         </div>
     </section>
@@ -148,67 +149,67 @@
 
 @code {
 
-    ///
-    ///Time Display
-    ///
-    /// 
+    /*
+     * Timer
+     */
     private Timer _timer;
 
-    public DateTime CurrDateTime { get; set; }
+    /*
+     * Current time and date
+     */
+    private DateTime CurrDateTime { get; set; }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _timer = new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-        }
-    }
+    /*
+     * Database 
+     */
+    AndroidDataRecorder.Database.Database data = new AndroidDataRecorder.Database.Database();
+    
+    /*
+     * Text in marker text box
+     */
+    private string _markerSetMessage;
 
-    private async void DateTimeCallback(object state)
-    {
-    //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("dd.MM.yyyy hh:mm:ss tt");
-        CurrDateTime = DateTime.Now;
-        await InvokeAsync((StateHasChanged));
-    }
+    /*
+     * List of marker
+     */
+    private MarkerList _markerList = new MarkerList();
+    
+    /*
+     * System stats (temporarily) 
+     */
+    string cpuPercentage = "98%";
+    string memoryUsage = "54%";
+    string batterylevel = "86%";
 
-    public void Dispose()
-    {
-        _timer?.Dispose();
-    }
-
+    /*
+     * Set callback for timer and fill marker list on page load
+     */
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        MarkerList = data.ListWithMarker("whyred");
+        _timer = new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
-    AndroidDataRecorder.Database.Database data = new AndroidDataRecorder.Database.Database();
-
-    ///
-    private DateTime _markerSetTime;
-
-    private string _markerSetMessage;
-
-    public List<Marker> MarkerList = new List<Marker>();
-
-    ///<summary>
-    /// Gets the time the marker was set and saves it in a list
-    /// </summary>
-    public void GetMarkerTime()
+    /*
+     * Set CurrDateTime to current time
+     */
+    private async void DateTimeCallback(object state)
     {
-        _markerSetTime = CurrDateTime;
-
-        if (!String.IsNullOrWhiteSpace(_markerSetMessage))
+        CurrDateTime = DateTime.Now;
+        await InvokeAsync((StateHasChanged));
+    }
+    
+    /*
+     * Gets the time the marker was set and saves it in a list
+     */
+    private void GetMarkerTime()
+    {
+        if (!string.IsNullOrWhiteSpace(_markerSetMessage))
         {
-    //MarkerList.Add(new Marker(_markerSetTime, _markerSetMessage));
-
-            data.InsertValuesInTableMarker("whyred", _markerSetTime, _markerSetMessage);
-
+            data.InsertValuesInTableMarker(_markerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
             toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
-
             _markerSetMessage = string.Empty;
-
-            MarkerList = data.ListWithMarker("whyred");
+            _markerList.Update();
         }
         else
         {
@@ -217,28 +218,23 @@
     }
 
 
-    ///
-    ///Log Button Toggle
-    /// 
-    private bool _togglebtn;
+    /*
+     * Logging button
+     */
+    private bool _toggleLoggingBtn;
+    
+    /*
+     * Adjusting CSS for logging
+     */
+    private string LogBtnValue => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
+    private string ProcessTextValue => _toggleLoggingBtn ? "visible" : "hidden";
+    private string LogBtnColor => _toggleLoggingBtn ? "btn-danger" : "btn-success";
 
-    private bool _togglebtncolor;
-
-    private bool _toggleprocesstxt;
-
-    private string LogBtnValue => _togglebtn ? "Stop Logging" : "Start Logging";
-    private string ProcessTextValue => _toggleprocesstxt ? "visible" : "hidden";
-    private string LogBtnColor => _togglebtncolor ? "btn-danger" : "btn-success";
-
-    void Logbtnclick()
+    /*
+     * Toggle logging bool
+     */
+    void LoggingBtnClick()
     {
-        _togglebtn = !_togglebtn;
-        _togglebtncolor = !_togglebtncolor;
-        _toggleprocesstxt = !_toggleprocesstxt;
+        _toggleLoggingBtn = !_toggleLoggingBtn;
     }
-
-    string cpuPercentage = "98%";
-    string memoryUsage = "54%";
-    string batterylevel = "86%";
-
 }
