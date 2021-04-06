@@ -35,7 +35,7 @@ namespace AndroidDataRecorder.Backend.LogCat
         private Grok grok = new Grok(
             "%{USERNAME:device} %{TIMESTAMP_ISO8601:system_timestamp} %{TIMESTAMP_ISO8601:device_timestamp}%{SPACE}%{NUMBER:PID}%{SPACE}%{NUMBER:TID}%{SPACE}%{WORD:loglevel}%{SPACE}%{DATA:App}%{SPACE}:%{SPACE}%{GREEDYDATA:LogMessage}"
         );
-
+    
         /// <summary>
         /// Creates a logcat process and calls saveLogs
         /// Starts a new Thread to log the workload data of the device
@@ -76,6 +76,12 @@ namespace AndroidDataRecorder.Backend.LogCat
                     line = deviceName + " " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + line;
                     
                     var grokResult = grok.Parse(line);
+                    _database.InsertValuesInTableLogs(grokResult[0].Value.ToString(), 
+                        Convert.ToDateTime(grokResult[1].Value), Convert.ToDateTime(grokResult[2].Value), 
+                        Convert.ToInt32(grokResult[3].Value), Convert.ToInt32(grokResult[4].Value), 
+                        grokResult[5].Value.ToString(), grokResult[6].Value.ToString(), grokResult[7].Value.ToString());
+                    
+                    
                     foreach (var item in grokResult)
                     {
                         Console.WriteLine($"{item.Key} : {item.Value}");
@@ -105,6 +111,8 @@ namespace AndroidDataRecorder.Backend.LogCat
             {
                 while (device.State == DeviceState.Online)
                 {
+                    receiver.Flush();
+                    
                     client.ExecuteRemoteCommand("dumpsys cpuinfo", device, receiver);
                     var m = Regex.Match(receiver.ToString(), @"(\S+)\s+TOTAL");
                     if (m.Success) 
