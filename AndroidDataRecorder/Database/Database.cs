@@ -13,9 +13,7 @@ namespace AndroidDataRecorder.Database
     {
         private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
         
-      
-        
-        
+
         /// <summary>
         /// Path for the Database
         /// </summary>
@@ -230,6 +228,42 @@ namespace AndroidDataRecorder.Database
                 
             //Execute Query
             command.ExecuteNonQuery();
+        }
+
+        public List<Logs> ListWithLogs()
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Logs";
+            
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+            
+            List<Logs> LogsList = new List<Logs>();
+            
+            while (reader.Read())
+            {
+                LogsList.Add(new Logs()
+                {
+                    _deviceName = reader.GetString(1),
+                    _systemTimestamp = reader.GetDateTime(2),
+                    _deviceTimestamp = reader.GetDateTime(3),
+                    _pid =  reader.GetInt32(4),
+                    _tid = reader.GetInt32(5),
+                    _loglevel = reader.GetString(6),
+                    _app = reader.GetString(7),
+                    _logMessage = reader.GetString(8)
+
+                });
+            }
+
+            return LogsList;
+
+
         }
 
 

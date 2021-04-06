@@ -19,21 +19,20 @@ namespace AndroidDataRecorder
             ///<summary>
             /// test connection for the database
             /// </summary>
-            // Database.Database database = new Database.Database();
-            // database.ConectionToDatabase();
-            
+            Database.Database database = new Database.Database();
+            database.ConectionToDatabase();
+
             ///<summary>
             /// Methods for the Table Resource
             /// </summary>
             //database.InsertValuesInTableResources("device001", 22, 54, 66,DateTime.Now);
             //database.showAllEntries();
-            
+
             Config.LoadConfig();
 
             //database.InsertValuesInMarker("device000", DateTime.Now);
 
-            CreateHostBuilder(args).Build().Run();
-			
+          
             ///<summary>
             /// Methods for the table Marker
             /// </summary>
@@ -46,11 +45,22 @@ namespace AndroidDataRecorder
                 Console.WriteLine(marker.MarkerId.ToString() + " " + marker.DeviceName + " " + marker.Timestamp.ToString());
             } 
             */
-            //database.InsertValuesInTableLogs("device123", DateTime.Now, DateTime.Now, 12342, 34521, "I", "App","Message" );
+            
+            ///<summary>
+            /// Methods for the table Logs
+            /// </summary>
+            ///database.InsertValuesInTableLogs("device123", DateTime.Now, DateTime.Now, 12342, 34521, "I", "App","Message" );
+            /*foreach (var log in database.ListWithLogs())
+            {
+                Console.WriteLine(log._deviceName.ToString() + " " + log._deviceTimestamp.ToString());
+
+            }*/
+            
+            // CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+        } 
     }
-}
