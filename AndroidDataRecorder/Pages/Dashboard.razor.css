@@ -29,3 +29,11 @@
     left: 0;
     text-align: center;
 }
+
+.scroll-bar {
+    position: relative;
+    overflow: auto;
+}
+.table-wrapper-scroll-y {
+    display: block;
+}
