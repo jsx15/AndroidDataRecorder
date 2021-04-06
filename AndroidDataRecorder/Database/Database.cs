@@ -11,8 +11,8 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
-        private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
-        
+        private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, 
+            ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
 
         /// <summary>
         /// Path for the Database
@@ -39,7 +39,8 @@ namespace AndroidDataRecorder.Database
         /// <param name="cpu"></param>
         /// <param name="memory"></param>
         /// <param name="timestamp"></param>
-        public void InsertValuesInTableResources(string deviceName, int CPU, int Memory, int Battery, DateTime Timestamp)
+        public void InsertValuesInTableResources(string deviceName, int CPU, int Memory, int Battery, 
+            DateTime Timestamp)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -159,13 +160,14 @@ namespace AndroidDataRecorder.Database
 
             // fill the list with the actuall values of database
             List<Marker> MarkerList = new List<Marker>();
+            
             while (reader.Read())
             {
                 MarkerList.Add(new Marker()
                 {
-                    _deviceName = reader.GetString(0),
-                    _markerTimestamp = reader.GetDateTime(1),
-                    _markerMessage = reader.GetString(2)
+                    _deviceName = reader.GetString(1),
+                    _markerTimestamp = reader.GetDateTime(2),
+                    _markerMessage = reader.GetString(3)
 
                 });
             }
@@ -262,11 +264,9 @@ namespace AndroidDataRecorder.Database
             }
 
             return LogsList;
-
-
+            
         }
-
-
+        
         /// <summary>
         /// Shows all Entries of the table Resources
         /// </summary>

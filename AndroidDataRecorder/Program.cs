@@ -19,43 +19,10 @@ namespace AndroidDataRecorder
             ///<summary>
             /// test connection for the database
             /// </summary>
-            Database.Database database = new Database.Database();
-            database.ConectionToDatabase();
-
-            ///<summary>
-            /// Methods for the Table Resource
-            /// </summary>
-            //database.InsertValuesInTableResources("device001", 22, 54, 66,DateTime.Now);
-            //database.showAllEntries();
+            //Database.Database database = new Database.Database();
+            //database.ConectionToDatabase();
 
             Config.LoadConfig();
-
-            //database.InsertValuesInMarker("device000", DateTime.Now);
-
-          
-            ///<summary>
-            /// Methods for the table Marker
-            /// </summary>
-            //database.InsertValuesInTableMarker("device00222", DateTime.Now);
-            //database.SearchMarkerTableByDeviceName("device00222");
-
-            /*
-            foreach (var marker in database.ListWithMarker("device00222"))
-            {
-                Console.WriteLine(marker.MarkerId.ToString() + " " + marker.DeviceName + " " + marker.Timestamp.ToString());
-            } 
-            */
-            
-            ///<summary>
-            /// Methods for the table Logs
-            /// </summary>
-            ///database.InsertValuesInTableLogs("device123", DateTime.Now, DateTime.Now, 12342, 34521, "I", "App","Message" );
-            /*foreach (var log in database.ListWithLogs())
-            {
-                Console.WriteLine(log._deviceName.ToString() + " " + log._deviceTimestamp.ToString());
-
-            }*/
-            
             // CreateHostBuilder(args).Build().Run();
         }
 
