@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-using SharpAdbClient;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -14,7 +12,7 @@ namespace AndroidDataRecorder.Misc
         /*
          * Selected device
          */
-        public static SharpAdbClient.DeviceData ActiveDeviceData;
+        private static SharpAdbClient.DeviceData ActiveDeviceData;
 
         /*
          * Database
@@ -54,7 +52,7 @@ namespace AndroidDataRecorder.Misc
          */
         public string GetDeviceName()
         {
-            return ActiveDeviceData.Name;
+            return ActiveDeviceData is not null ? ActiveDeviceData.Name : "";
         }
     
     }

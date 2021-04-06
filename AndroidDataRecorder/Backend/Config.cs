@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
+using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
 {
@@ -141,6 +142,11 @@ namespace AndroidDataRecorder.Backend
         public static void ClearKnownDevices()
         {
             _source.KnownDevices.Clear();
+        }
+
+        public static List<string> GetKnownDevices()
+        {
+            return _source.KnownDevices;
         }
         
         /// <summary>

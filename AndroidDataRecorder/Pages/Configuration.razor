@@ -1,8 +1,11 @@
 ﻿@page "/Config"
 @using System.ComponentModel.DataAnnotations
 @using System.Net
+@using System.Threading
 @using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Misc
+@using SharpAdbClient
+@using AdbServer = AndroidDataRecorder.Backend.AdbServer
 
 @inject IToastService toastService;
 
@@ -93,19 +96,18 @@
                     <div class="table-wrapper-scroll-y known-devices-table table-hover" style="overflow-x: hidden">
                         <table class="table table-bordered mb-0 text-left">
                             <tbody>
-                            @foreach (var item in new string[] {"Android Device 1", "Android Device 2", "Android Device 3", "Android Device 4", "Android Device 5", "Android Device 1", "Android Device 1"})
+                            @foreach (var item in Config.GetKnownDevices())
                             {
                                 <tr>
                                     <td>
                                         <div class="row">
                                             <div class="col-6">
                                                 <p>
-                                                    @item <br>
-                                                    123.123.123.123
+                                                    @item
                                                 </p>
                                             </div>
                                             <div class="col-6 text-right">
-                                                <button class="btn btn-success">Attach</button> <button class="btn btn-danger">Remove</button>
+                                                <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button> <button class="btn btn-danger">Remove</button>
                                             </div>
                                         </div>
                                     </td>
@@ -131,7 +133,7 @@
     /*
      * List of attached devices
      */
-    List<SharpAdbClient.DeviceData> _tempDeviceList;
+    static List<SharpAdbClient.DeviceData> _tempDeviceList;
 
     /*
      * Markerlist
@@ -150,14 +152,6 @@
     {
         base.OnInitialized();
         _tempDeviceList = AdbServer.GetConnectedDevices();
-        try
-        {
-            _markerList.SetDevice(_tempDeviceList[0]);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("No device connected");
-        }
         _adbVersion = AdbServer.GetAdbVersion();
     }
 
@@ -167,7 +161,8 @@
 
     void RadioSelection(ChangeEventArgs args)
     {
-        _markerList.SetDevice((SharpAdbClient.DeviceData) args.Value);
+        // Find device by name (args only return string)
+        _markerList.SetDevice(_tempDeviceList.Find(x => x.ToString().Equals(args.Value)));
     }
 
     /*
@@ -187,12 +182,17 @@
     {
         IPAddress address;
 
-    // Check for 3 dots and valid range
-        if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out address))
+        // Check for 3 dots and valid range
+        try
         {
-            toastService.ShowSuccess("Device " + deviceName + " with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
+            if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out address))
+            {
+                toastService.ShowSuccess("Device " + deviceName + " with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
+                Config.AddKnownDevice(address.ToString());
+                AdbServer.ConnectWirelessCLient(address.ToString());
+            }
         }
-        else
+        catch (Exception ex)
         {
             toastService.ShowError("That is not an IP-Address!", "Error");
             toastService.ShowError("Could not add device!", "Error");
@@ -213,6 +213,23 @@
     private void KillADB()
     {
         AdbServer.KillAdbServer();
+    }
+
+    /*
+     * Attach device
+     */
+    private void AttachDevice(string address)
+    {
+        AdbServer.ConnectWirelessCLient(address);
+    }
+
+    /*
+     * Refresh device list on new connect
+     */
+    public static void ConnectedDeviceChanged(object sender, DeviceDataEventArgs e)
+    {
+        _tempDeviceList = AdbServer.GetConnectedDevices();
+        Console.WriteLine("Connected Wireless");
     }
 
 
