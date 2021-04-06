@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
+using AndroidDataRecorder.Misc;
 
 namespace AndroidDataRecorder.Database
 {
@@ -12,15 +13,7 @@ namespace AndroidDataRecorder.Database
     {
         private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(Environment.CurrentDirectory, ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
         
-        /// <summary>
-        /// Class for the Marker table to generate a list
-        /// </summary>
-        public class Marker
-        {
-            public int MarkerId { get; set; }
-            public string DeviceName { get; set; }
-            public DateTime Timestamp { get; set; }
-        }
+      
         
         
         /// <summary>
@@ -89,7 +82,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="DeviceName"></param>
         /// <param name="Timestamp"></param>
-        public void InsertValuesInTableMarker(string DeviceName, DateTime Timestamp)
+        public void InsertValuesInTableMarker(string DeviceName, DateTime Timestamp, string markerMessage)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -97,20 +90,23 @@ namespace AndroidDataRecorder.Database
             
             //insert Query
             command.CommandText =
-                @"INSERT INTO Marker(DeviceName, Timestamp)
-                VALUES (@DeviceName, @Timestamp)";
+                @"INSERT INTO Marker(DeviceName, Timestamp, MarkerMessage)
+                VALUES (@DeviceName, @Timestamp, @MarkerMessage)";
             
             // Define paramters to insert new values in the table
             SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p2 = new SQLiteParameter("@Timestamp", DbType.DateTime);
+            SQLiteParameter p3 = new SQLiteParameter("@MarkerMessage", DbType.String);
             
             // Add the paramters to the table
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
+            command.Parameters.Add(p3);
             
             // define the Values which will be insert to the table
             p1.Value = DeviceName;
             p2.Value = Timestamp;
+            p3.Value = markerMessage;
             
             // Execute Query
             command.ExecuteNonQuery();
@@ -169,9 +165,9 @@ namespace AndroidDataRecorder.Database
             {
                 MarkerList.Add(new Marker()
                 {
-                    MarkerId = reader.GetInt32(0),
-                    DeviceName = reader.GetString(1),
-                    Timestamp = reader.GetDateTime(2)
+                    _deviceName = reader.GetString(1),
+                    _markerTimestamp = reader.GetDateTime(2),
+                    _markerMessage = reader.GetString(3)
 
                 });
             }

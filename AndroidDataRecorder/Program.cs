@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using AndroidDataRecorder.Backend;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 
 namespace AndroidDataRecorder
@@ -31,8 +24,9 @@ namespace AndroidDataRecorder
             Config.LoadConfig();
 
             //database.InsertValuesInMarker("device000", DateTime.Now);
-
+            
             CreateHostBuilder(args).Build().Run();
+            
 			
             ///<summary>
             /// Methods for the table Marker
