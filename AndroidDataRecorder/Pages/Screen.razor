@@ -1,0 +1,18 @@
+@page "/Screen"
+@using AndroidDataRecorder.Screenrecord
+
+<button @onclick="StartRecord">start</button>
+<button @onclick="StopRecord">stop</button>
+
+@code {
+
+    public void StartRecord()
+    {
+        Screenrecord.StartScreenrecord();
+    }
+    
+    public void StopRecord()
+    {
+        Screenrecord.StopRecording();
+    }
+}

@@ -26,6 +26,9 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         public static void StartScreenrecord()
         {
+            //set record state to true
+            _record = true;
+            
             //create thread
             var recordProcess = new Thread(PrepareRecord);
 
