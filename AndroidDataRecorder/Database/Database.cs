@@ -164,14 +164,24 @@ namespace AndroidDataRecorder.Database
             {
                 MarkerList.Add(new Marker()
                 {
+                    markerId = reader.GetInt32(0),
                     devicename = reader.GetString(1),
                     timeStamp = reader.GetDateTime(2),
                     message = reader.GetString(3)
-
                 });
             }
 
             return MarkerList;
+        }
+
+        /// <summary>
+        /// Just a dummy siganture for MarkerPage
+        /// Delete as soon as implemented
+        /// </summary>
+        /// <param name="markerid"></param>
+        public void DeleteMarker(int markerid)
+        {
+            
         }
         
         /// <summary>
