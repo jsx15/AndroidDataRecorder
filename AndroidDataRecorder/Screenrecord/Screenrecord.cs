@@ -10,10 +10,10 @@ namespace AndroidDataRecorder.Screenrecord
     public static class Screenrecord
     {
         //length of video snippets
-        private const int VideoLength = 30000;
+        private const int VideoLength = 5000;
 
         //number of videos that will not be deleted
-        private const int NumOfVideos = 4;
+        private const int NumOfVideos = 3;
 
         //bool whether the recording should run or not 
         private static volatile bool _record;
@@ -26,6 +26,9 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         public static void StartScreenrecord()
         {
+            //clear list for before filling
+            FileList.Clear();
+            
             //set record state to true
             _record = true;
             
@@ -84,7 +87,7 @@ namespace AndroidDataRecorder.Screenrecord
                 //check if there are files to delete
                 HandleFiles.CheckVideoNumber(path, NumOfVideos, FileList);
             }
-            
+
             //close standard input of process
             scProc.StandardInput.Close();
 
@@ -155,6 +158,8 @@ namespace AndroidDataRecorder.Screenrecord
 
                 //repeat if video length is not reached or record should be stopped 
             } while (sw.ElapsedMilliseconds < VideoLength && _record); 
+            
+            scProc.Kill();
 
             //close output stream
             output.Close();

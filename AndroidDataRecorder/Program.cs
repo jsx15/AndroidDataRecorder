@@ -25,6 +25,7 @@ namespace AndroidDataRecorder
 
             //database.InsertValuesInMarker("device000", DateTime.Now);
             
+            
             CreateHostBuilder(args).Build().Run();
             
 			

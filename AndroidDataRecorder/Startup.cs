@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using Blazored.Toast;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +22,16 @@ namespace AndroidDataRecorder
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            for (int i = 0; i < 20; i++)
+            {
+                Screenrecord.Screenrecord.StartScreenrecord();
+                Random r = new Random();
+                int rInt = r.Next(20000, 60000);
+                Console.WriteLine("Wait " + rInt +"ms");
+                Thread.Sleep(rInt);
+                Screenrecord.Screenrecord.StopRecording();
+                Thread.Sleep(3000);
+            }
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

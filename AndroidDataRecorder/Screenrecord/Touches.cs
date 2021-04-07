@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using AndroidDataRecorder.Backend;
 
 namespace AndroidDataRecorder.Screenrecord
@@ -48,6 +49,8 @@ namespace AndroidDataRecorder.Screenrecord
 
             //close process
             getStatus.Close();
+            
+            Console.WriteLine("Touch default value is: " + line);
             
             //convert 0/1 in boolean and return it
             return (line != "0");
