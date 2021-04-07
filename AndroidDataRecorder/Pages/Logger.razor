@@ -1,4 +1,6 @@
 @page "/logger"
+@using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Backend
 
 <header>
     <h1 class="text-center" style="color: white">Logger</h1>
@@ -6,24 +8,45 @@
 </header>
 
 <section id="application">
-    <div class="card side-cards">
+    <div class="card">
         <div class="card-header text-center" style="color: white">
-            Overview
+            Filter
         </div>
         <div class="card-body">
-            @{ var list = new List<string>{ "App 1", "App 2","App 3","App 4","App 5","App 6","App 7", }; }
-            <Dropdown TItem="string" OnSelected="@OnSelected" >
-                <InitialTip>Choose Application</InitialTip>
-                <ChildContent>
-                    <DropdownListItem Item="@list[0]">App 1</DropdownListItem>
-                    <DropdownListItem Item="@list[1]">App 2</DropdownListItem>
-                    <DropdownListItem Item="@list[2]">App 3</DropdownListItem>
-                    <DropdownListItem Item="@list[3]">App 4</DropdownListItem>
-                    <DropdownListItem Item="@list[4]">App 5</DropdownListItem>
-                    <DropdownListItem Item="@list[5]">App 6</DropdownListItem>
-                    <DropdownListItem Item="@list[6]">App 7</DropdownListItem>
-                </ChildContent>
-            </Dropdown>
+            <div class="row">
+                <div class="col">
+                    Marker:
+                    <select class="form-control" @bind="_selectedMarker">
+                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                        {
+                            <option>@marker.timeStamp</option>
+
+                        }
+                    </select>
+                </div>
+                <div class="col">
+                    Loglevel:
+                    <select class="form-control" @bind="_selectedLogLevel">
+                        @foreach (var level in loglevel)
+                        {
+                            <option>@level</option>
+                        }
+                    </select>
+                </div>
+                <div class="col">
+                    Application:
+                    <select class="form-control" @bind="_selectedApplication">
+                        @foreach (var item in list)
+                        {
+                            <option>@item</option>
+                        }
+                    </select>
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary" @onclick="FilterBtnPressed">Apply filter</button>
+                </div>
+                
+            </div>
         </div>
     </div>
 </section>
@@ -41,13 +64,14 @@
                       <table class="table table-bordered table-striped mb-0">
                       <thead>
                         <tr>
-                          <th scope="col">Date</th>
-                          <th scope="col">Time</th>
-                          <th scope="col">Host</th>
-                          <th scope="col">Error Type</th>
+                          <th scope="col">Device Name</th>
+                          <th scope="col">System Timestamp</th>
+                          <th scope="col">Device Timestamp</th>
+                          <th scope="col">PID</th>
+                          <th scope="col">TID</th>
+                          <th scope="col">Loglevel</th>
                           <th scope="col">App</th>
                           <th scope="col">Message</th>
-                          
                         </tr>
                       </thead>
                       <tbody>
@@ -59,188 +83,12 @@
                           <td>_appname</td>
                           <td>failed because of reasons</td>
                         </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
-                      <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                      </tr>
                       </tbody>
                     </table>
                   </div>
               </div>
               <div class="card-footer text-muted">
-                  <p style="color: #1e7e34">Fetching Log-Data successful</p>
+                  <p style="color: #1e7e34"></p>
               </div>
           </div>
 </section>
@@ -248,9 +96,43 @@
 
 @code {
 
-    private void OnSelected()
-    {
-        
-    }
+
+    List<string> list = new List<string>{ "App 1", "App 2","App 3","App 4","App 5","App 6","App 7", };
     
+    /*
+     * List with the Loglevels for the dropdown button
+     */
+    List<string> loglevel = new List<string> {"V", "D", "I", "W", "E", "F", "S"};
+
+    private string _selectedMarker;
+    private string _selectedLogLevel;
+    private string _selectedApplication;
+
+
+    
+    
+    void FilterBtnPressed()
+    {
+        Console.WriteLine("Marker: " + _selectedMarker);
+        Console.WriteLine("Marker: " + _selectedLogLevel);
+        Console.WriteLine("Marker: " + _selectedApplication);
+    }
+
+    /*
+     * List of attached devices
+     */
+    static List<SharpAdbClient.DeviceData> _tempDeviceList;
+    
+    /*
+     * Set device list
+     */
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _tempDeviceList = AdbServer.GetConnectedDevices();
+
+    }
+
+
+
 }
