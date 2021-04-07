@@ -10,14 +10,19 @@ namespace AndroidDataRecorder.Backend.LogCat
     public class AccessData
     {
         /// <summary>
-        /// Object to restrain the access on a file to only one Thread at a time
+        /// A delegate to specify the EventHandler type
         /// </summary>
-        private Object _fileInUse = new object();
+        public delegate void DeviceOnlineEvent();
 
+        /// <summary>
+        /// A event to indicate that a connected device is now online
+        /// </summary>
+        public event DeviceOnlineEvent DeviceIsOnline;
+        
         /// <summary>
         /// The needed values to calculate the workload variables
         /// </summary>
-        private String _memTotal, _memAvailiable;
+        private string _memTotal, _memAvailiable;
 
         /// <summary>
         /// The workload variables
@@ -35,7 +40,44 @@ namespace AndroidDataRecorder.Backend.LogCat
         private Grok grok = new Grok(
             "%{USERNAME:device} %{TIMESTAMP_ISO8601:system_timestamp} %{TIMESTAMP_ISO8601:device_timestamp}%{SPACE}%{NUMBER:PID}%{SPACE}%{NUMBER:TID}%{SPACE}%{WORD:loglevel}%{SPACE}%{DATA:App}%{SPACE}:%{SPACE}%{GREEDYDATA:LogMessage}"
         );
-    
+
+        /// <summary>
+        /// Starts a Stopwatch and gives the device 30 seconds to change its state to online
+        /// If the device state changes to online it starts logging
+        /// If the device state doesn't change to online it will just execute
+        /// </summary>
+        /// <param name="device"> The device </param>
+        /// <param name="client"> The AdbCLient </param>
+        /// <param name="receiver"> The ConsoleOutputReceiver </param>
+        public void CheckDeviceState(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
+        {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            do
+            {
+                try
+                {
+                    if (device.State == DeviceState.Online)
+                    {
+                        foreach (var d in AdbServer.GetConnectedDevices())
+                        {
+                            if (d.Serial.Equals(device.Serial))
+                            {
+                                watch.Stop();
+                                DeviceIsOnline?.Invoke();
+                                InitializeProcess(d, client, receiver);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            } 
+            while (watch.Elapsed.Milliseconds < 30000 && watch.IsRunning);
+        }
+        
         /// <summary>
         /// Creates a logcat process and calls saveLogs
         /// Starts a new Thread to log the workload data of the device
@@ -58,6 +100,7 @@ namespace AndroidDataRecorder.Backend.LogCat
             };
             
             new Thread(() => AccessWorkload(device, client, receiver)).Start();
+            client.ExecuteRemoteCommand("logcat -b all -c", device, receiver);
             SaveLogs(proc, device.Name);
         }
 
@@ -82,19 +125,10 @@ namespace AndroidDataRecorder.Backend.LogCat
                         grokResult[5].Value.ToString(), grokResult[6].Value.ToString(), grokResult[7].Value.ToString());
                     
                     
-                    /**foreach (var item in grokResult)
+                    foreach (var item in grokResult)
                     {
                         Console.WriteLine($"{item.Key} : {item.Value}");
                     }
-                    **/
-                    /*lock (fileInUse)
-                    {
-                        using (StreamWriter w = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\LogDaten.log"))
-                        {
-                            w.WriteLine(line);
-                        }
-                        Console.WriteLine(line);
-                    }*/
                 }
             }
         }
