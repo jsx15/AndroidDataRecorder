@@ -20,7 +20,7 @@ namespace AndroidDataRecorder.Database
         //private string datasource = "Data Source = C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
 
         /// <summary>
-        /// Create a variable for the Connection to the Database, the method needs the path to the database
+        /// Create a object for the Connection to the Database, the method needs the path to the database
         /// </summary>
         /// <param name="datasource"></param>
         /// <returns> connection </returns>
@@ -148,6 +148,26 @@ namespace AndroidDataRecorder.Database
             }
 
             return MarkerList;
+        }
+
+        public void DeleteRowInTableMarker(int markerId)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            //insert Query
+            command.CommandText =
+                @"DELETE FROM Marker
+                    WHERE MarkerID = @markerID";
+            
+            // use the Parameter DeviceName to search for it
+            command.Parameters.AddWithValue("@markerId", markerId);
+
+            // Execute Query
+            command.ExecuteNonQuery();
+
+
+
         }
 
         /// <summary>
@@ -279,6 +299,45 @@ namespace AndroidDataRecorder.Database
                 command.Parameters.AddWithValue("@device", device);
             }
 
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actuall values of database
+            List<Logs> LogList = new List<Logs>();
+
+            while (reader.Read())
+            {
+                LogList.Add(new Logs()
+                {
+                    _deviceName = reader.GetString(1),
+                    _systemTimestamp = reader.GetDateTime(2),
+                    _deviceTimestamp = reader.GetDateTime(3),
+                    _pid = reader.GetInt32(4),
+                    _tid = reader.GetInt32(5),
+                    _loglevel = reader.GetString(6),
+                    _app = reader.GetString(7),
+                    _logMessage = reader.GetString(8)
+
+                });
+            }
+
+            return LogList;
+        }
+
+        public List<Logs> LogListFilterByTimestamp(String time)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Logs
+                    WHERE SystemTimestamp LIKE @time";
+            
+            // use the Parameter DeviceName to search for it
+            command.Parameters.AddWithValue("@time", time);
+            
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
