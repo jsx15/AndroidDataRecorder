@@ -82,11 +82,11 @@ namespace AndroidDataRecorder.Backend.LogCat
                         grokResult[5].Value.ToString(), grokResult[6].Value.ToString(), grokResult[7].Value.ToString());
                     
                     
-                    foreach (var item in grokResult)
+                    /**foreach (var item in grokResult)
                     {
                         Console.WriteLine($"{item.Key} : {item.Value}");
                     }
-
+                    **/
                     /*lock (fileInUse)
                     {
                         using (StreamWriter w = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\LogDaten.log"))

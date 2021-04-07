@@ -8,32 +8,33 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Devices Timestamp at Log occurence, since Device and System dont have to share the same system time
         /// </summary>
-        public DateTime DeviceTimestamp;
+        public DateTime DeviceTimestamp { get; set; }
         
         /// <summary>
         /// Process Identifier
         /// </summary>
-        public int Pid;
+        public int Pid{ get; set; }
         
         /// <summary>
         /// Thread Identifier
         /// </summary>
-        public int Tid;
+        public int Tid{ get; set; }
         
         /// <summary>
         /// Log level 
         /// </summary>
-        public string LogLevel;
+        public string LogLevel{ get; set; }
         
         /// <summary>
         /// App that produced the log
         /// </summary>
-        public string App;
+        public string App{ get; set; }
+        
         
         /// <summary>
         /// Constructor of a LogEntry
         /// </summary>
-        /// <param name="deviceName">Nam</param>
+        /// <param name="deviceName">Name</param>
         /// <param name="systemTimestamp">Timestamp of System running AndroidDataRecorder</param>
         /// <param name="deviceTimestamp">Devices Timestamp at Log occurence, since Device and System dont have to share the same system time</param>
         /// <param name="pid">Process identifier</param>

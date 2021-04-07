@@ -13,17 +13,11 @@ namespace AndroidDataRecorder
            
             
             Config.LoadConfig();
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 
             Database.Database db = new Database.Database();
             db.ConectionToDatabase();
-
-            foreach (var logs in db.LogListFilterByTimestamp("2021-04-06 15:54:24.873"))
-            {
-                Console.WriteLine(logs._deviceName + " " + logs._systemTimestamp);
-            }
             
-            db.DeleteRowInTableMarker(3816);
             
         }
 

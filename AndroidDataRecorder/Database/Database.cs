@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using AndroidDataRecorder.Misc;
+using SharpAdbClient.Logs;
 
 namespace AndroidDataRecorder.Database
 {
@@ -235,7 +236,7 @@ namespace AndroidDataRecorder.Database
         /// Returns a List with every Log in the table log
         /// </summary>
         /// <returns>LogList</returns>
-        public List<Logs> ListWithLogs()
+        public List<Backend.LogEntry> ListWithLogs()
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -248,22 +249,13 @@ namespace AndroidDataRecorder.Database
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            List<Logs> LogsList = new List<Logs>();
+            List<Backend.LogEntry> LogsList = new List<Backend.LogEntry>();
 
             while (reader.Read())
             {
-                LogsList.Add(new Logs()
-                {
-                    _deviceName = reader.GetString(1),
-                    _systemTimestamp = reader.GetDateTime(2),
-                    _deviceTimestamp = reader.GetDateTime(3),
-                    _pid = reader.GetInt32(4),
-                    _tid = reader.GetInt32(5),
-                    _loglevel = reader.GetString(6),
-                    _app = reader.GetString(7),
-                    _logMessage = reader.GetString(8)
-
-                });
+                LogsList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
+                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
+                    reader.GetString(8)));
             }
 
             return LogsList;
@@ -275,7 +267,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="device"></param>
         /// <returns>LogList</returns>
-        public List<Logs> LogListFilterByDevice(String device)
+        public List<Backend.LogEntry> LogListFilterByDevice(String device)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -303,28 +295,19 @@ namespace AndroidDataRecorder.Database
             SQLiteDataReader reader = command.ExecuteReader();
 
             // fill the list with the actuall values of database
-            List<Logs> LogList = new List<Logs>();
+            List<Backend.LogEntry> LogList = new List<Backend.LogEntry>();
 
             while (reader.Read())
             {
-                LogList.Add(new Logs()
-                {
-                    _deviceName = reader.GetString(1),
-                    _systemTimestamp = reader.GetDateTime(2),
-                    _deviceTimestamp = reader.GetDateTime(3),
-                    _pid = reader.GetInt32(4),
-                    _tid = reader.GetInt32(5),
-                    _loglevel = reader.GetString(6),
-                    _app = reader.GetString(7),
-                    _logMessage = reader.GetString(8)
-
-                });
+                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
+                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
+                    reader.GetString(8)));
             }
 
             return LogList;
         }
 
-        public List<Logs> LogListFilterByTimestamp(String time)
+        public List<Backend.LogEntry> LogListFilterByTimestamp(String time)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -342,22 +325,13 @@ namespace AndroidDataRecorder.Database
             SQLiteDataReader reader = command.ExecuteReader();
 
             // fill the list with the actuall values of database
-            List<Logs> LogList = new List<Logs>();
+            List<Backend.LogEntry> LogList = new List<Backend.LogEntry>();
 
             while (reader.Read())
             {
-                LogList.Add(new Logs()
-                {
-                    _deviceName = reader.GetString(1),
-                    _systemTimestamp = reader.GetDateTime(2),
-                    _deviceTimestamp = reader.GetDateTime(3),
-                    _pid = reader.GetInt32(4),
-                    _tid = reader.GetInt32(5),
-                    _loglevel = reader.GetString(6),
-                    _app = reader.GetString(7),
-                    _logMessage = reader.GetString(8)
-
-                });
+                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
+                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
+                    reader.GetString(8)));
             }
 
             return LogList;
