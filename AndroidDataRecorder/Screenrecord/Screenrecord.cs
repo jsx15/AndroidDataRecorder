@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using AndroidDataRecorder.Backend;
+using AndroidDataRecorder.Misc;
+using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -26,17 +28,37 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         public static void StartScreenrecord()
         {
-            //clear list for before filling
-            FileList.Clear();
+            DeviceData device;
+            try
+            {
+                //get connected device
+                device = MarkerList.ActiveDeviceData;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No device set for screen record!");
+                return;
+            }
             
-            //set record state to true
-            _record = true;
+            if (device.ToString() != "")
+            {
+                //clear list for before filling
+                FileList.Clear();
             
-            //create thread
-            var recordProcess = new Thread(PrepareRecord);
+                //set record state to true
+                _record = true;
+            
+                //create thread
+                var recordProcess = new Thread(() => PrepareRecord(device));
 
-            //start thread
-            recordProcess.Start();
+                //start thread
+                recordProcess.Start();
+            }
+            else
+            {
+                Console.WriteLine("Can´t find device to screen record");
+            }
+            
         }
 
         /// <summary>
@@ -46,8 +68,17 @@ namespace AndroidDataRecorder.Screenrecord
         /// start merging files
         /// delete all files to get one video
         /// </summary>
-        private static void PrepareRecord()
+        private static void PrepareRecord(DeviceData deviceObj)
         {
+            var device = deviceObj.ToString();
+            if (deviceObj.Name == null)
+            {
+                Console.WriteLine("No device name set for screen record!");
+                return;
+            }
+
+            var deviceName = deviceObj.Name;
+
             //prepare adb process
             var scProc = new Process
             {
@@ -56,7 +87,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
                     //add arguments for screenrecord
-                    Arguments = "exec-out screenrecord --output-format=h264 - ",
+                    Arguments = "-s "+device+" exec-out screenrecord --output-format=h264 - ",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //redirect standard output
@@ -67,16 +98,16 @@ namespace AndroidDataRecorder.Screenrecord
             };
 
             //create path for files and set local path variable
-            var path = CreatePath.HandlePath();
+            var path = CreatePath.HandlePath(deviceName);
 
             //safe touch settings for restore
-            var touchState = Touches.GetStatus();
+            var touchState = Touches.GetStatus(device);
 
             //check if touch already active
             if (!touchState)
             {
                 //show screen touch
-                Touches.ShowTouches();
+                Touches.ShowTouches(device);
             }
             
             //record while bool is true
@@ -98,14 +129,14 @@ namespace AndroidDataRecorder.Screenrecord
             if (!touchState)
             {
                 //hide screen touch
-                Touches.HideTouches();
+                Touches.HideTouches(device);
             }
             
             //merge video files to one video
-            HandleFiles.ConcVideoFiles(FileList, path);
+            HandleFiles.ConcVideoFiles(FileList, path, deviceName);
 
             //delete old files to have only one video
-            HandleFiles.DeleteOldFiles(path);
+            HandleFiles.DeleteOldFiles(path,deviceName);
         }
 
         /// <summary>

@@ -12,7 +12,7 @@ namespace AndroidDataRecorder.Misc
         /*
          * Selected device
          */
-        private static SharpAdbClient.DeviceData ActiveDeviceData;
+        public static SharpAdbClient.DeviceData ActiveDeviceData;
 
         /*
          * Database

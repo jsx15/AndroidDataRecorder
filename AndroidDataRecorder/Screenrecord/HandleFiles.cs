@@ -12,7 +12,8 @@ namespace AndroidDataRecorder.Screenrecord
         /// delete all files that are not named "video.mp4"
         /// </summary>
         /// <param name="path">directory in which the files are to be searched for and deleted</param>
-        public static void DeleteOldFiles(string path)
+        /// <param name="deviceName">connected device name</param>
+        public static void DeleteOldFiles(string path, string deviceName)
         {
             //get an array of files of path
             var filePaths = Directory.GetFiles(path);
@@ -27,7 +28,7 @@ namespace AndroidDataRecorder.Screenrecord
                 name = name.ToLower();
                 
                 //check if the files name is "video.mp4"
-                if (name != "video.mp4")
+                if (name != "video_"+deviceName+".mp4")
                 {
                     //if name is not "video.mp4" -> delete it
                     File.Delete(filePath);
@@ -62,13 +63,14 @@ namespace AndroidDataRecorder.Screenrecord
                 fileList.Remove(file.FullName);
             }
         }
-        
+
         /// <summary>
         /// concatenate all existing videos to one playable video file
         /// </summary>
         /// <param name="list">list of existing video files</param>
         /// <param name="path">directory in which the files are to be searched for</param>
-        public static void ConcVideoFiles(List<string> list, string path)
+        /// <param name="deviceName">connected device name</param>
+        public static void ConcVideoFiles(List<string> list, string path, string deviceName)
         {
             //create process for ffmpeg
             var ffmpeg = new Process
@@ -78,7 +80,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to ffmpeg.exe
                     FileName = Config.GetFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
-                    Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+"video.mp4",
+                    Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+"video_"+deviceName+".mp4",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //use not shell execute

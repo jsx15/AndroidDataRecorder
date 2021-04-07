@@ -10,10 +10,10 @@ namespace AndroidDataRecorder.Screenrecord
         /// create directory to store videos in it
         /// </summary>
         /// <returns>path of created directory</returns>
-        public static string HandlePath()
+        public static string HandlePath(string deviceName)
         {
             // directory to create
-            var path = Config.GetVideoDirPath+"Screenrecord_"+Timestamp.GetTimestamp()+Path.DirectorySeparatorChar;
+            var path = Config.GetVideoDirPath+"Screenrecord_"+deviceName+"_"+Timestamp.GetTimestamp()+Path.DirectorySeparatorChar;
 
             try
             {

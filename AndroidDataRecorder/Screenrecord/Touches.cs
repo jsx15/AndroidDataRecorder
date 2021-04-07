@@ -11,7 +11,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// Method to get the current settings for show or hide screen touches
         /// </summary>
         /// <returns>returns true if setting is activated, false if deactivated </returns>
-        public static bool GetStatus()
+        public static bool GetStatus(string device)
         {
             //create process to get touch settings
             var getStatus = new Process
@@ -21,7 +21,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
                     //add arguments for getting touch setting
-                    Arguments = "exec-out settings get system show_touches",
+                    Arguments = "-s "+device+" exec-out settings get system show_touches",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //redirect standard output
@@ -59,7 +59,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// <summary>
         /// create and start process with arguments to activate "show_touches" setting
         /// </summary>
-        public static void ShowTouches()
+        public static void ShowTouches(string device)
         {
             //new process with settings to activate "show_touches" setting
             var showTouches = new Process
@@ -69,7 +69,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
                     //add arguments for showing touches
-                    Arguments = "exec-out settings put system show_touches 1",
+                    Arguments = "-s "+device+" exec-out settings put system show_touches 1",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //redirect standard output
@@ -92,7 +92,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// <summary>
         /// create and start process with arguments to deactivate "show_touches" setting
         /// </summary>
-        public static void HideTouches()
+        public static void HideTouches(string device)
         {
             //new process with settings to deactivate "show_touches" setting
             var hideTouches = new Process
@@ -102,7 +102,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
                     //add arguments for showing touches
-                    Arguments = "exec-out settings put system show_touches 0",
+                    Arguments = "-s "+device+" exec-out settings put system show_touches 0",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //redirect standard output
