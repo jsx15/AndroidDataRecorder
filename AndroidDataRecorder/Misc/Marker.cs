@@ -7,8 +7,6 @@ namespace AndroidDataRecorder.Misc
     {
 
         public Marker(){}
-        
-        
 
         public Marker(string deviceName, DateTime time, string message)
         {

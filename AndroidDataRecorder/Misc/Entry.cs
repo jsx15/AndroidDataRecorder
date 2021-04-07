@@ -5,10 +5,10 @@ namespace AndroidDataRecorder.Misc
 {
     public class Entry
     {
-        public string devicename;
+        public string devicename { get; set; }
 
-        public string message;
+        public string message { get; set; }
 
-        public DateTime timeStamp;
+        public DateTime timeStamp { get; set; }
     }
 }
