@@ -19,6 +19,7 @@ namespace AndroidDataRecorder
             db.ConectionToDatabase();
             
             
+            
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

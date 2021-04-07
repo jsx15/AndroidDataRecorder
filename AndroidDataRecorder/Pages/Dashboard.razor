@@ -157,7 +157,8 @@
     /*
      * Current time and date
      */
-    private DateTime CurrDateTime { get; set; }
+    DateTime CurrDateTime { get; set; }
+    
 
     /*
      * Database 
@@ -195,6 +196,7 @@
      */
     private async void DateTimeCallback(object state)
     {
+        //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("yyyy-mm-dd hh:mm:ss.fff");
         CurrDateTime = DateTime.Now;
         await InvokeAsync((StateHasChanged));
     }

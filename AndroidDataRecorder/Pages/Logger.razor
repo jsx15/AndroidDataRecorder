@@ -1,6 +1,7 @@
 @page "/logger"
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Backend
+@using AndroidDataRecorder.Database
 
 <header>
     <h1 class="text-center" style="color: white">Logger</h1>
@@ -13,40 +14,33 @@
             Filter
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col">
-                    Marker:
-                    <select class="form-control" @bind="_selectedMarker">
-                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
-                        {
-                            <option>@marker.timeStamp</option>
+            <EditForm Model="@filtering" OnSubmit="@Submit">
+                <div class="row">
+                    <div class="col">
+                        Marker:
+                        <InputSelect class="form-control" @bind-Value="@filtering.timeStamp">
+                            @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                            {
+                                <option>@marker.timeStamp</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col">
+                        Loglevel:
+                        <InputSelect class="form-control" @bind-Value="@filtering.Level">
+                            @foreach (var loglevel in loglevel)
+                            {
+                                <option>@loglevel</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col text-center justify-content-center">
+                        <button type="submit" class="btn btn-primary">Apply filter</button>
+                    </div>
 
-                        }
-                    </select>
                 </div>
-                <div class="col">
-                    Loglevel:
-                    <select class="form-control" @bind="_selectedLogLevel">
-                        @foreach (var level in loglevel)
-                        {
-                            <option>@level</option>
-                        }
-                    </select>
-                </div>
-                <div class="col">
-                    Application:
-                    <select class="form-control" @bind="_selectedApplication">
-                        @foreach (var item in list)
-                        {
-                            <option>@item</option>
-                        }
-                    </select>
-                </div>
-                <div class="col">
-                    <button class="btn btn-primary" @onclick="FilterBtnPressed">Apply filter</button>
-                </div>
-                
-            </div>
+            </EditForm>
+
         </div>
     </div>
 </section>
@@ -75,14 +69,20 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <th scope="row">2021-03-29</th>
-                          <td>13:49:00</td>
-                          <td>AndroIder</td>
-                          <td>F</td>
-                          <td>_appname</td>
-                          <td>failed because of reasons</td>
-                        </tr>
+                      
+                      @foreach (var log in Enumerable.Reverse(Logs))
+                      {
+                          <tr>
+                              <td>@log.devicename</td>
+                              <td>@log.timeStamp</td>
+                              <td>@log.DeviceTimestamp</td>
+                              <td>@log.Pid</td>
+                              <td>@log.Tid</td>
+                              <td>@log.LogLevel</td>
+                              <td>@log.App</td>
+                              <td>@log.message</td>
+                          </tr>
+                      }
                       </tbody>
                     </table>
                   </div>
@@ -95,28 +95,16 @@
 
 
 @code {
-
-
+    
+    /*
+     * Temp List for listed applications
+     */
     List<string> list = new List<string>{ "App 1", "App 2","App 3","App 4","App 5","App 6","App 7", };
     
     /*
      * List with the Loglevels for the dropdown button
      */
     List<string> loglevel = new List<string> {"V", "D", "I", "W", "E", "F", "S"};
-
-    private string _selectedMarker;
-    private string _selectedLogLevel;
-    private string _selectedApplication;
-
-
-    
-    
-    void FilterBtnPressed()
-    {
-        Console.WriteLine("Marker: " + _selectedMarker);
-        Console.WriteLine("Marker: " + _selectedLogLevel);
-        Console.WriteLine("Marker: " + _selectedApplication);
-    }
 
     /*
      * List of attached devices
@@ -130,9 +118,55 @@
     {
         base.OnInitialized();
         _tempDeviceList = AdbServer.GetConnectedDevices();
+    }
+    
+    /*
+     * List for LogEntries
+     */
+    public static List<LogEntry> Logs = new List<LogEntry>();
+    
+    /*
+     * Database instance
+     */
+    private Database data = new Database();
+
+    
+    /*
+     *instance of Filtering class 
+     */
+    Filtering filtering = new Filtering();
+    
+    
+    
+    
+    
+    /*
+     * OnClick for the filter button
+     */
+    public void Submit()
+    {
+        Console.WriteLine(filtering.timeStamp );
+        Console.WriteLine(filtering.Level);
+        Console.WriteLine(filtering.App);
+        Console.WriteLine(filtering.timeStamp.GetType());
+
+        Logs = data.LogListFilterByTimestamp(filtering.timeStamp.Subtract(new TimeSpan(0,0,30)), filtering.timeStamp);
+        
+        Console.WriteLine("hallo");
+        
+    }
+    
+    /*
+     * Model Class?
+     */
+    public class Filtering
+    {
+        public DateTime timeStamp { get; set; }
+
+        public string App { get; set; }
+        public string Level { get; set; }
+
 
     }
-
-
 
 }

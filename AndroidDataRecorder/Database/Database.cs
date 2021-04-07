@@ -307,19 +307,20 @@ namespace AndroidDataRecorder.Database
             return LogList;
         }
 
-        public List<Backend.LogEntry> LogListFilterByTimestamp(String time)
+        public List<Backend.LogEntry> LogListFilterByTimestamp(DateTime time, DateTime time2)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
-            
+
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Logs
-                    WHERE SystemTimestamp LIKE @time";
+                WHERE SystemTimestamp BETWEEN @time AND @time2";
             
             // use the Parameter DeviceName to search for it
             command.Parameters.AddWithValue("@time", time);
+            command.Parameters.AddWithValue("@time2", time2);
             
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
