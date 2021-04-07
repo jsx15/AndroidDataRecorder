@@ -5,17 +5,16 @@ using System.IO;
 using System.Threading;
 using AndroidDataRecorder.Backend;
 using AndroidDataRecorder.Misc;
-using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
 {
     public static class Screenrecord
     {
         //length of video snippets
-        private const int VideoLength = 5000;
+        private const int VideoLength = 30000;
 
         //number of videos that will not be deleted
-        private const int NumOfVideos = 3;
+        private const int NumOfVideos = 4;
 
         //bool whether the recording should run or not 
         private static volatile bool _record;
@@ -28,37 +27,50 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         public static void StartScreenrecord()
         {
-            DeviceData device;
+            //variable for device ID
+            string deviceId;
+            
+            //variable for device name
+            string deviceName;
+
+            //try to get device info
             try
             {
                 //get connected device
-                device = MarkerList.ActiveDeviceData;
+                var device = MarkerList.ActiveDeviceData;
+                
+                //get id of device
+                deviceId = device.ToString();
+                
+                //get name of device
+                deviceName = device.Name;
+                
+                //if device is not correctly set
+                if (deviceId == "" || deviceName == null)
+                {
+                    //throw exception
+                    throw new Exception();
+                }
             }
+            //catch every exception
             catch (Exception)
             {
                 Console.WriteLine("No device set for screen record!");
+                //stop recording intention
                 return;
             }
-            
-            if (device.ToString() != "")
-            {
-                //clear list for before filling
-                FileList.Clear();
-            
-                //set record state to true
-                _record = true;
-            
-                //create thread
-                var recordProcess = new Thread(() => PrepareRecord(device));
 
-                //start thread
-                recordProcess.Start();
-            }
-            else
-            {
-                Console.WriteLine("Can´t find device to screen record");
-            }
-            
+            //clear list for before filling
+            FileList.Clear();
+
+            //set record state to true
+            _record = true;
+
+            //create thread
+            var recordProcess = new Thread(() => PrepareRecord(deviceId, deviceName));
+
+            //start thread
+            recordProcess.Start();
         }
 
         /// <summary>
@@ -68,17 +80,10 @@ namespace AndroidDataRecorder.Screenrecord
         /// start merging files
         /// delete all files to get one video
         /// </summary>
-        private static void PrepareRecord(DeviceData deviceObj)
+        /// <param name="device">device id</param>
+        /// <param name="deviceName">device name</param>
+        private static void PrepareRecord(string device, string deviceName)
         {
-            var device = deviceObj.ToString();
-            if (deviceObj.Name == null)
-            {
-                Console.WriteLine("No device name set for screen record!");
-                return;
-            }
-
-            var deviceName = deviceObj.Name;
-
             //prepare adb process
             var scProc = new Process
             {
@@ -87,7 +92,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
                     //add arguments for screenrecord
-                    Arguments = "-s "+device+" exec-out screenrecord --output-format=h264 - ",
+                    Arguments = "-s " + device + " exec-out screenrecord --output-format=h264 - ",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //redirect standard output
@@ -109,7 +114,7 @@ namespace AndroidDataRecorder.Screenrecord
                 //show screen touch
                 Touches.ShowTouches(device);
             }
-            
+
             //record while bool is true
             while (_record)
             {
@@ -124,19 +129,19 @@ namespace AndroidDataRecorder.Screenrecord
 
             //close process
             scProc.Close();
-            
+
             //check if touch setting was off
             if (!touchState)
             {
                 //hide screen touch
                 Touches.HideTouches(device);
             }
-            
+
             //merge video files to one video
             HandleFiles.ConcVideoFiles(FileList, path, deviceName);
 
             //delete old files to have only one video
-            HandleFiles.DeleteOldFiles(path,deviceName);
+            HandleFiles.DeleteOldFiles(path, deviceName);
         }
 
         /// <summary>
@@ -174,7 +179,7 @@ namespace AndroidDataRecorder.Screenrecord
 
             //start screenrecord process
             scProc.Start();
-            
+
             //create a buffered stream with the standard output of the screenrecord process
             var input = new BufferedStream(scProc.StandardOutput.BaseStream);
 
@@ -188,8 +193,8 @@ namespace AndroidDataRecorder.Screenrecord
                 output.Write(buffer, 0, len);
 
                 //repeat if video length is not reached or record should be stopped 
-            } while (sw.ElapsedMilliseconds < VideoLength && _record); 
-            
+            } while (sw.ElapsedMilliseconds < VideoLength && _record);
+
             scProc.Kill();
 
             //close output stream
