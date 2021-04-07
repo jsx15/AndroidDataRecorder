@@ -126,22 +126,8 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            try
-            {
-                foreach (var device in GetConnectedDevices())
-                {
-                    if (device.Serial.Equals(e.Device.Serial))
-                    {
-                        Client.ExecuteRemoteCommand("logcat -b all -c", e.Device, Receiver);
-                        new Thread(() => AccessData.InitializeProcess(device, Client, Receiver)).Start();
-                    }
-                }
-                Console.WriteLine($"The device {e.Device} has connected to this PC");
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-            }
+            new Thread(() => AccessData.CheckDeviceState(e.Device, Client, Receiver)).Start();
+            Console.WriteLine($"The device {e.Device} has connected to this PC");
         }
 
         /// <summary>
