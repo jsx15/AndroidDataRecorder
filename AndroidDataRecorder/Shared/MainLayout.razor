@@ -3,35 +3,41 @@
 
 <div class="page">
     <div class="@NavMenuCssClass">
-        <div class="navbar" >
+        <div class="navbar">
             <btn class="icon btn" @onclick="ToggleNavMenu">
                 <span class="oi oi-menu"></span>
             </btn>
             <span class="appname">AndroidDR</span>
         </div>
-        
-        
+
+
         <ul class="nav flex-column">
-            <li class="nav-item px-3" >
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
                     <span class="oi oi-home"></span>
                     <span class="item-text pl-2">Status</span>
-                    
+
                 </NavLink>
             </li>
-            <li class="nav-item px-3" >
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="/Logger" Match="NavLinkMatch.All">
                     <span class="oi oi-book"></span>
                     <span class="item-text pl-2">Logger</span>
                 </NavLink>
             </li>
-            <li class="nav-item px-3" >
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="/Screen" Match="NavLinkMatch.All">
                     <span class="oi oi-monitor"></span>
                     <span class="item-text pl-2">Screen</span>
                 </NavLink>
             </li>
-            <li class="nav-item px-3" >
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/Marker" Match="NavLinkMatch.All">
+                    <span class="oi oi-map-marker"></span>
+                    <span class="item-text pl-2">Marker</span>
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="/Config" Match="NavLinkMatch.All">
                     <span class="oi oi-cog"></span>
                     <span class="item-text pl-2">Config</span>
@@ -39,7 +45,7 @@
             </li>
         </ul>
     </div>
-    
+
 
     <div class="@Content content container-fluid pb-2">
         <BlazoredToasts></BlazoredToasts>
@@ -62,6 +68,7 @@
     /*
      * Toggle navigation menu
      */
+
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
