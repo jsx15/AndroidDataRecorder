@@ -26,13 +26,13 @@
                     <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
                         <table class="table table-bordered mb-0 text-left">
                             <tbody>
-                            @foreach (var item in _tempDeviceList)
+                            @foreach (var item in _attachedDeviceList)
                             {
                                 <tr>
                                     <td>
-                                        <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(_markerList.GetDeviceName().Equals(item.Name))/>
-                                        <label for="@item">@item.Name</label>
-                                        <!--<button class="btn btn-danger float-right">Remove</button>-->
+                                        <input style="vertical-align: middle" type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(_markerList.GetDeviceName().Equals(item.Name))/>
+                                        <label for="@item">@item.Name - Connection: @DeviceStates.ConnectionType(item)</label>
+                                        <button class="btn btn-danger float-right" @onclick="() => DisconnectDevice(item)">Disconnect</button>
                                     </td>
                                 </tr>
                             }
@@ -107,7 +107,7 @@
                                                 </p>
                                             </div>
                                             <div class="col-6 text-right">
-                                                <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button> <button class="btn btn-danger">Remove</button>
+                                                <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button> <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
                                             </div>
                                         </div>
                                     </td>
@@ -133,7 +133,7 @@
     /*
      * List of attached devices
      */
-    static List<SharpAdbClient.DeviceData> _tempDeviceList;
+    static List<SharpAdbClient.DeviceData> _attachedDeviceList;
 
     /*
      * Markerlist
@@ -151,33 +151,28 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _tempDeviceList = AdbServer.GetConnectedDevices();
+        _attachedDeviceList = AdbServer.GetConnectedDevices();
         _adbVersion = AdbServer.GetAdbVersion();
     }
 
     /*
      * Change selected device
      */
-
     void RadioSelection(ChangeEventArgs args)
     {
         // Find device by name (args only return string)
-        _markerList.SetDevice(_tempDeviceList.Find(x => x.ToString().Equals(args.Value)));
+        _markerList.SetDevice(_attachedDeviceList.Find(x => x.ToString().Equals(args.Value)));
     }
 
     /*
      * Binded values
      */
     private string ipAddress;
-    private string deviceName;
     private string portAddress;
-
-    private bool successAdd = true;
 
     /*
      * Add device to known devices
      */
-
     void AddButtonPressed()
     {
         IPAddress address;
@@ -187,12 +182,16 @@
         {
             if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out address))
             {
-                toastService.ShowSuccess("Device " + deviceName + " with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
+                toastService.ShowSuccess("Device with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
+                
+                // Add device to config file
                 Config.AddKnownDevice(address.ToString());
-                AdbServer.ConnectWirelessCLient(address.ToString());
+                
+                // Attach device to ADB
+                AdbServer.ConnectWirelessClient(address.ToString());
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             toastService.ShowError("That is not an IP-Address!", "Error");
             toastService.ShowError("Could not add device!", "Error");
@@ -215,23 +214,51 @@
         AdbServer.KillAdbServer();
     }
 
-    /*
+    /*jx15
      * Attach device
      */
     private void AttachDevice(string address)
     {
-        AdbServer.ConnectWirelessCLient(address);
+        AdbServer.ConnectWirelessClient(address);
+    }
+
+    /*
+     * Disconnect only wireless devices -> remove them from attached devices
+     * USB devices cannot be disconnected
+     */
+    private void DisconnectDevice(DeviceData device)
+    {
+        if (DeviceStates.ConnectionType(device) is DeviceStates.ConnectionTypes.Wifi)
+        {
+            string[] split = device.ToString().Split(':');
+            AdbServer.DisconnectWirelessClient(split[0]);
+            _attachedDeviceList = AdbServer.GetConnectedDevices();
+        }
+        else
+        {
+            toastService.ShowError("Only Wifi devices can be disconnected", "Error");
+        }
+    }
+
+    /*
+     * Delete known device from list
+     */
+    private void RemoveDevice(string address)
+    {
+        Config.DeleteKnownDevice(address);
     }
 
     /*
      * Refresh device list on new connect
      */
-    public static void ConnectedDeviceChanged(object sender, DeviceDataEventArgs e)
+    public void ConnectedDeviceChanged(object sender, DeviceDataEventArgs e)
     {
-        _tempDeviceList = AdbServer.GetConnectedDevices();
+        _attachedDeviceList = AdbServer.GetConnectedDevices();
+        
+        StateHasChanged();
+        
+        
         Console.WriteLine("Connected Wireless");
     }
-
-
 
 }

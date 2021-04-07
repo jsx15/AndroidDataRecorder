@@ -30,13 +30,13 @@
                             </div>
                             <div class="col-md text-left">
                                 <p class="card-text">@_markerList.GetDeviceName() </p>
-                                <p class="card-text">USB/Ethernet</p>
-                                <p class="card-text">123.123.432.45</p>
+                                <p class="card-text">@_markerList.DeviceConnectionType()</p>
+                                <p class="card-text">@_markerList.IpAddress()</p>
                             </div>
                         </div>
                     </div>
                     <div class="card-footer text-muted">
-                        <p style="color: #1e7e34">Connected</p>
+                        <p>@_markerList.DeviceStatus()</p>
                     </div>
                 </div>
             </div>
@@ -121,16 +121,18 @@
     <section id="testsection">
         <div class="card">
             <div class="card-header">
-                <h3 class="text-center">Marker</h3>
+                <h3 class="text-center" style="color: white">Marker</h3>
             </div>
             <div class="card-body">
                 <div style="height: 250px" class="table-wrapper-scroll-y scroll-bar">
                     <table class="table table-bordered table-striped">
+                        <thead>
                         <tr>
                             <th>Time</th>
                             <th>Message</th>
                         </tr>
-
+                        </thead>
+                        <tbody>
                         @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
@@ -138,6 +140,7 @@
                                 <td>@marker.message</td>
                             </tr>
                         }
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -163,7 +166,7 @@
      * Database 
      */
     AndroidDataRecorder.Database.Database data = new AndroidDataRecorder.Database.Database();
-    
+
     /*
      * Text in marker text box
      */
@@ -173,7 +176,7 @@
      * List of marker
      */
     private MarkerList _markerList = new MarkerList();
-    
+
     /*
      * System stats (temporarily) 
      */
@@ -184,6 +187,7 @@
     /*
      * Set callback for timer and fill marker list on page load
      */
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -193,18 +197,20 @@
     /*
      * Set CurrDateTime to current time
      */
+
     private async void DateTimeCallback(object state)
     {
         CurrDateTime = DateTime.Now;
         await InvokeAsync((StateHasChanged));
     }
-    
+
     /*
      * Gets the time the marker was set and saves it in a list
      */
+
     private void GetMarkerTime()
     {
-        if (!string.IsNullOrWhiteSpace(_markerSetMessage))
+        if (ValidateMarker())
         {
             data.InsertValuesInTableMarker(_markerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
             toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
@@ -213,8 +219,17 @@
         }
         else
         {
-            toastService.ShowError("Please put in a message", "Error");
+            toastService.ShowError("Please put in a message and select a device", "Error");
         }
+    }
+
+    private bool ValidateMarker()
+    {
+        if (!string.IsNullOrWhiteSpace(_markerSetMessage) && !string.IsNullOrEmpty(_markerList.GetDeviceName()))
+        {
+            return true;
+        }
+        return false;
     }
 
 
@@ -222,7 +237,7 @@
      * Logging button
      */
     private bool _toggleLoggingBtn;
-    
+
     /*
      * Adjusting CSS for logging
      */
@@ -233,8 +248,10 @@
     /*
      * Toggle logging bool
      */
+
     void LoggingBtnClick()
     {
         _toggleLoggingBtn = !_toggleLoggingBtn;
     }
+
 }

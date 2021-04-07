@@ -91,7 +91,7 @@ namespace AndroidDataRecorder.Backend
             {
                 for (int i = 0; i < _source.KnownDevices.Count - 1; i++)
                 {
-                    AdbServer.ConnectWirelessCLient(_source.KnownDevices[i]);
+                    AdbServer.ConnectWirelessClient(_source.KnownDevices[i]);
                 }
             }
             catch (Exception e)
@@ -125,6 +125,7 @@ namespace AndroidDataRecorder.Backend
         public static void AddKnownDevice(string ipAddress)
         {
             _source.KnownDevices.Add(ipAddress);
+            SaveConfig();
         }
         
         /// <summary>
@@ -134,6 +135,13 @@ namespace AndroidDataRecorder.Backend
         public static void DeleteKnownDevice(int index)
         {
             _source.KnownDevices.RemoveAt(index);
+            SaveConfig();
+        }
+
+        public static void DeleteKnownDevice(string address)
+        {
+            _source.KnownDevices.Remove(address);
+            SaveConfig();
         }
 
         /// <summary>
