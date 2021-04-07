@@ -1,3 +1,4 @@
+using System;
 using AndroidDataRecorder.Backend;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -9,38 +10,21 @@ namespace AndroidDataRecorder
     {
         public static void Main(string[] args)
         {
-            ///<summary>
-            /// test connection for the database
-            /// </summary>
-            // Database.Database database = new Database.Database();
-            // database.ConectionToDatabase();
-            
-            ///<summary>
-            /// Methods for the Table Resource
-            /// </summary>
-            //database.InsertValuesInTableResources("device001", 22, 54, 66,DateTime.Now);
-            //database.showAllEntries();
+           
             
             Config.LoadConfig();
+            //CreateHostBuilder(args).Build().Run();
 
-            //database.InsertValuesInMarker("device000", DateTime.Now);
-            
-            CreateHostBuilder(args).Build().Run();
-            
-			
-            ///<summary>
-            /// Methods for the table Marker
-            /// </summary>
-            //database.InsertValuesInTableMarker("device00222", DateTime.Now);
-            //database.SearchMarkerTableByDeviceName("device00222");
+            Database.Database db = new Database.Database();
+            db.ConectionToDatabase();
 
-            /*
-            foreach (var marker in database.ListWithMarker("device00222"))
+            foreach (var logs in db.LogListFilterByTimestamp("2021-04-06 15:54:24.873"))
             {
-                Console.WriteLine(marker.MarkerId.ToString() + " " + marker.DeviceName + " " + marker.Timestamp.ToString());
-            } 
-            */
-            //database.InsertValuesInTableLogs("device123", DateTime.Now, DateTime.Now, 12342, 34521, "I", "App","Message" );
+                Console.WriteLine(logs._deviceName + " " + logs._systemTimestamp);
+            }
+            
+            db.DeleteRowInTableMarker(3816);
+            
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
