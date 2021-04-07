@@ -76,6 +76,10 @@ namespace AndroidDataRecorder.Database
             //Execute Query
             command.ExecuteNonQuery();
         }
+        
+        ///<summary>
+        /// Methods for the table Log
+        /// </summary>
 
         /// <summary>
         /// Insert the Values devicname and Timestamp into the table Marker
@@ -151,7 +155,7 @@ namespace AndroidDataRecorder.Database
             return MarkerList;
         }
 
-        public void DeleteRowInTableMarker(int markerId)
+        public void DeleteMarker(int markerid)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -159,16 +163,14 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"DELETE FROM Marker
-                    WHERE MarkerID = @markerID";
+                    WHERE MarkerID = @markeriD";
             
             // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@markerId", markerId);
+            command.Parameters.AddWithValue("@markerid", markerid);
 
             // Execute Query
             command.ExecuteNonQuery();
-
-
-
+            
         }
 
         /// <summary>
@@ -299,27 +301,31 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
-                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
-                    reader.GetString(8)));
+                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), 
+                    reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), 
+                    reader.GetString(6), reader.GetString(7), reader.GetString(8)));
             }
 
             return LogList;
         }
 
-        public List<Backend.LogEntry> LogListFilterByTimestamp(String time)
+        public List<Backend.LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
             
+            
+            
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Logs
-                    WHERE SystemTimestamp LIKE @time";
+                    WHERE Loglevel LIKE @loglevel AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
             
             // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@time", time);
+            command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+            command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+            command.Parameters.AddWithValue("@loglevel", loglevel);
             
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
@@ -329,12 +335,13 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
-                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
-                    reader.GetString(8)));
+                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2),
+                    reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), 
+                    reader.GetString(7), reader.GetString(8)));
             }
 
             return LogList;
         }
+
     }
 }
