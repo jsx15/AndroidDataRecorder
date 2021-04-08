@@ -1,11 +1,10 @@
 @page "/Screen"
-@using AndroidDataRecorder.Screenrecord
+@using Screenrecord
 @using AndroidDataRecorder.Misc
+@using Controller = Microsoft.AspNetCore.Mvc.Controller
 
-<button @onclick="StartRecordOne">start device 1</button>
-<button @onclick="StopRecordOne">stop device 1</button>
-<button @onclick="StartRecordTwo">start device 2</button>
-<button @onclick="StopRecordTwo">stop device 2</button>
+<button @onclick="StartRecordOne">start recording</button>
+<button @onclick="StopRecordOne">stop recording</button>
 
 @code {
     /*
@@ -13,20 +12,7 @@
      */
     public void StartRecordOne()
     {
-        Screenrecord.StartScreenrecord(MarkerList.ActiveDeviceData);
-    }
-    
-    /*
-     * Stop recording
-     */
-    public void StopRecordTwo()
-    {
-        Screenrecord.StopRecording();
-    }
-    
-    public void StartRecordTwo()
-    {
-        Screenrecord.StartScreenrecord(MarkerList.ActiveDeviceData);
+        RecController.StartScrRec(MarkerList.ActiveDeviceData);
     }
     
     /*
@@ -34,6 +20,7 @@
      */
     public void StopRecordOne()
     {
-        Screenrecord.StopRecording();
+        RecController.StopScrRec(MarkerList.ActiveDeviceData);
     }
+    
 }

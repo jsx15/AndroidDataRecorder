@@ -29,7 +29,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Object of AccessData
         /// </summary>
-        private static readonly AccessData AccessData = new AccessData();
+        private static AccessData _accessData;
 
         /// <summary>
         /// Initialize Adb Server and Monitor
@@ -126,6 +126,7 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
+            _accessData = new AccessData();
             try
             {
                 foreach (var device in GetConnectedDevices())
@@ -133,7 +134,7 @@ namespace AndroidDataRecorder.Backend
                     if (device.Serial.Equals(e.Device.Serial))
                     {
                         Client.ExecuteRemoteCommand("logcat -b all -c", e.Device, Receiver);
-                        new Thread(() => AccessData.InitializeProcess(device, Client, Receiver)).Start();
+                        new Thread(() => _accessData.InitializeProcess(device, Client, Receiver)).Start();
                     }
                 }
                 Console.WriteLine($"The device {e.Device} has connected to this PC");

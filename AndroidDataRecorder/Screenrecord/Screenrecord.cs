@@ -17,16 +17,22 @@ namespace AndroidDataRecorder.Screenrecord
         private const int NumOfVideos = 4;
 
         //bool whether the recording should run or not 
-        private static volatile bool _record;
+        private volatile bool _record;
 
         //list of video files
         private static readonly List<String> FileList = new List<string>();
 
+        private readonly DeviceData _deviceObj;
+
+        public Screenrecord(DeviceData deviceObj)
+        {
+            this._deviceObj = deviceObj;
+        }
+
         /// <summary>
         /// start thread for screenrecord
         /// </summary>
-        /// <param name="device">device to record</param>
-        public bool StartScreenrecord(DeviceData device)
+        public bool StartScreenrecord()
         {
             //variable for device ID
             string deviceId;
@@ -38,10 +44,10 @@ namespace AndroidDataRecorder.Screenrecord
             try
             {
                 //get id of device
-                deviceId = device.ToString();
+                deviceId = _deviceObj.ToString();
                 
                 //get name of device
-                deviceName = device.Name;
+                deviceName = _deviceObj.Name;
                 
                 //if device is not correctly set
                 if (deviceId == "" || deviceName == null)
@@ -142,6 +148,8 @@ namespace AndroidDataRecorder.Screenrecord
 
             //delete old files to have only one video
             HandleFiles.DeleteOldFiles(path, deviceName);
+            
+            Console.WriteLine("Record process finished " + _deviceObj.Name);
         }
 
         /// <summary>
@@ -163,7 +171,7 @@ namespace AndroidDataRecorder.Screenrecord
             //check if path is null and stop if it is null
             if (path == null) return;
 
-            Console.WriteLine("Start recording");
+            Console.WriteLine("Start recording " + _deviceObj.Name);
 
             //create byte buffer
             var buffer = new byte[1024];
@@ -203,7 +211,7 @@ namespace AndroidDataRecorder.Screenrecord
             //close input stream
             input.Close();
 
-            Console.WriteLine("Stop recording");
+            Console.WriteLine("Recording stopped " + _deviceObj.Name);
 
             //add new file to file list
             FileList.Add(file);
@@ -216,6 +224,8 @@ namespace AndroidDataRecorder.Screenrecord
         {
             //set variable to false
             _record = false;
+            
+            Console.WriteLine("stop recording marked " + _deviceObj.Name);
         }
     }
 }
