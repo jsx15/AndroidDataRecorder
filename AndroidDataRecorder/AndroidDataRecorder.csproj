@@ -12,6 +12,9 @@
       <None Update="Pages\Logger.razor.css">
         <DependentUpon>Logger.razor</DependentUpon>
       </None>
+      <None Update="identifier.sqlite">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>

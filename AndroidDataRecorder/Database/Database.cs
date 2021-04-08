@@ -10,9 +10,8 @@ namespace AndroidDataRecorder.Database
     public class Database
 
     {
-        private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(
-            Environment.CurrentDirectory,
-            ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
+        private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(
+            System.IO.Path.Combine(Environment.CurrentDirectory + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
 
         /// <summary>
         /// Create a object for the Connection to the Database, the method needs the path to the database
