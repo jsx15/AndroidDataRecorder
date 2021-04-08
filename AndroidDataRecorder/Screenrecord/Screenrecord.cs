@@ -22,19 +22,31 @@ namespace AndroidDataRecorder.Screenrecord
         //list of video files
         private readonly List<String> _fileList = new List<string>();
 
+        //connected device
         private readonly DeviceData _deviceObj;
 
+        /// <summary>
+        /// constructor to initialize:
+        /// </summary>
+        /// <param name="deviceObj">connected device</param>
+        /// <param name="videoLength">set video length</param>
+        /// <param name="numOfVideos">set maximum number of videos</param>
         public Screenrecord(DeviceData deviceObj, int videoLength, int numOfVideos)
         {
+            //set video length
             this._videoLength = videoLength;
+            
+            //set maximum number of videos
             this._numOfVideos = numOfVideos;
+            
+            //set device object
             this._deviceObj = deviceObj;
         }
 
         /// <summary>
         /// start thread for screenrecord
         /// </summary>
-        public bool StartScreenrecord()
+        public void StartScreenrecord()
         {
             //variable for device ID
             string deviceId = _deviceObj.ToString();
@@ -53,8 +65,6 @@ namespace AndroidDataRecorder.Screenrecord
 
             //start thread
             recordProcess.Start();
-
-            return true;
         }
 
         /// <summary>
@@ -181,6 +191,7 @@ namespace AndroidDataRecorder.Screenrecord
                 //repeat if video length is not reached or record should be stopped 
             } while (sw.ElapsedMilliseconds < _videoLength && _record);
 
+            //kill process before closing streams
             scProc.Kill();
 
             //close output stream
