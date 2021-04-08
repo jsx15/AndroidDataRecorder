@@ -1,7 +1,7 @@
 @page "/Screen"
 @using Screenrecord
 @using AndroidDataRecorder.Misc
-@using Controller = Microsoft.AspNetCore.Mvc.Controller
+@using AndroidDataRecorder.Backend
 
 <button @onclick="StartRecordOne">start recording</button>
 <button @onclick="StopRecordOne">stop recording</button>
@@ -12,7 +12,16 @@
      */
     public void StartRecordOne()
     {
-        RecController.StartScrRec(MarkerList.ActiveDeviceData);
+        bool isActive = RecController.StartScrRec(MarkerList.ActiveDeviceData,5000,4);
+
+        if (isActive)
+        {
+            Console.WriteLine("Recording started successful");
+        }
+        else
+        {
+            Console.WriteLine("No device selected to start recording");
+        }
     }
     
     /*

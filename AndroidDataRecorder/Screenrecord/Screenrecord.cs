@@ -11,21 +11,23 @@ namespace AndroidDataRecorder.Screenrecord
     public class Screenrecord
     {
         //length of video snippets
-        private const int VideoLength = 30000;
+        private readonly int _videoLength;
 
         //number of videos that will not be deleted
-        private const int NumOfVideos = 4;
+        private readonly int _numOfVideos;
 
         //bool whether the recording should run or not 
         private volatile bool _record;
 
         //list of video files
-        private static readonly List<String> FileList = new List<string>();
+        private readonly List<String> _fileList = new List<string>();
 
         private readonly DeviceData _deviceObj;
 
-        public Screenrecord(DeviceData deviceObj)
+        public Screenrecord(DeviceData deviceObj, int videoLength, int numOfVideos)
         {
+            this._videoLength = videoLength;
+            this._numOfVideos = numOfVideos;
             this._deviceObj = deviceObj;
         }
 
@@ -35,37 +37,13 @@ namespace AndroidDataRecorder.Screenrecord
         public bool StartScreenrecord()
         {
             //variable for device ID
-            string deviceId;
+            string deviceId = _deviceObj.ToString();
             
             //variable for device name
-            string deviceName;
-
-            //try to get device info
-            try
-            {
-                //get id of device
-                deviceId = _deviceObj.ToString();
-                
-                //get name of device
-                deviceName = _deviceObj.Name;
-                
-                //if device is not correctly set
-                if (deviceId == "" || deviceName == null)
-                {
-                    //throw exception
-                    throw new Exception();
-                }
-            }
-            //catch every exception
-            catch (Exception)
-            {
-                Console.WriteLine("No device set for screen record!");
-                //stop recording intention
-                return false;
-            }
+            string deviceName = _deviceObj.Name;
 
             //clear list for before filling
-            FileList.Clear();
+            _fileList.Clear();
 
             //set record state to true
             _record = true;
@@ -127,7 +105,7 @@ namespace AndroidDataRecorder.Screenrecord
                 //start recording
                 HandleScreenrecord(path, scProc);
                 //check if there are files to delete
-                HandleFiles.CheckVideoNumber(path, NumOfVideos, FileList);
+                HandleFiles.CheckVideoNumber(path, _numOfVideos, _fileList);
             }
 
             //close standard input of process
@@ -144,7 +122,7 @@ namespace AndroidDataRecorder.Screenrecord
             }
 
             //merge video files to one video
-            HandleFiles.ConcVideoFiles(FileList, path, deviceName);
+            HandleFiles.ConcVideoFiles(_fileList, path, deviceName);
 
             //delete old files to have only one video
             HandleFiles.DeleteOldFiles(path, deviceName);
@@ -201,7 +179,7 @@ namespace AndroidDataRecorder.Screenrecord
                 output.Write(buffer, 0, len);
 
                 //repeat if video length is not reached or record should be stopped 
-            } while (sw.ElapsedMilliseconds < VideoLength && _record);
+            } while (sw.ElapsedMilliseconds < _videoLength && _record);
 
             scProc.Kill();
 
@@ -214,7 +192,7 @@ namespace AndroidDataRecorder.Screenrecord
             Console.WriteLine("Recording stopped " + _deviceObj.Name);
 
             //add new file to file list
-            FileList.Add(file);
+            _fileList.Add(file);
         }
 
         /// <summary>
