@@ -13,7 +13,7 @@ namespace AndroidDataRecorder
 
 
             Config.LoadConfig();
-            CreateHostBuilder(args).Build().Run();
+            //CreateHostBuilder(args).Build().Run();
 
             Database.Database db = new Database.Database();
             db.ConectionToDatabase();
@@ -22,6 +22,7 @@ namespace AndroidDataRecorder
             {
                 Console.WriteLine(log.devicename + " " + log.timeStamp + log.LogLevel);
             }
+           
         }
 
 

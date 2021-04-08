@@ -343,5 +343,66 @@ namespace AndroidDataRecorder.Database
             return LogList;
         }
 
+        ///<summary>
+        /// Methods for the table ResIntens
+        /// </summary>
+        public void InsertValuesIntoTableResIntens(int cpu, int memory, string app)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"INSERT INTO ResIntens(CPU, Memory, App)
+                VALUES (@CPU, @Memory, @App)";
+
+            // Define paramters to insert new values in the table
+            SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Int32);
+            SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Int32);
+            SQLiteParameter p3 = new SQLiteParameter("@app", DbType.String);
+            
+            // Add the paramters to the table
+            command.Parameters.Add(p1);
+            command.Parameters.Add(p2);
+            command.Parameters.Add(p3);
+            
+            // define the Values which will be insert to the table
+            p1.Value = cpu;
+            p2.Value = memory;
+            p3.Value = app;
+            
+            //Execute Query
+            command.ExecuteNonQuery();
+            
+            
+        }
+        
+        public List<ResIntensList> ResourcesIntensLists()
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            
+                //insert Query
+                command.CommandText =
+                    @"SELECT * FROM ResIntens";
+                
+
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actuall values of database
+            List<ResIntensList> resourcesIntensListsList = new List<ResIntensList>();
+
+            while (reader.Read())
+            {
+                resourcesIntensListsList.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3)));
+            }
+
+            return resourcesIntensListsList;
+        }
+
     }
 }
