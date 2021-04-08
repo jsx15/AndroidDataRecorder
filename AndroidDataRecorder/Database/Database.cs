@@ -364,7 +364,7 @@ namespace AndroidDataRecorder.Database
         ///<summary>
         /// Insert Values Into the table ResIntens
         /// </summary>
-        public void InsertValuesIntoTableResIntens(int cpu, int memory, string app)
+        public void InsertValuesIntoTableResIntens(int cpu, int memory, string app, DateTime timestamp)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -372,24 +372,26 @@ namespace AndroidDataRecorder.Database
 
             //insert Query
             command.CommandText =
-                @"INSERT INTO ResIntens(CPU, Memory, App)
-                VALUES (@CPU, @Memory, @App)";
+                @"INSERT INTO ResIntens(CPU, Memory, Process, Timestamp)
+                VALUES (@CPU, @Memory, @Process, @Timestamp)";
 
             // Define paramters to insert new values in the table
             SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Int32);
             SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Int32);
-            SQLiteParameter p3 = new SQLiteParameter("@app", DbType.String);
+            SQLiteParameter p3 = new SQLiteParameter("@Process", DbType.String);
+            SQLiteParameter p4 = new SQLiteParameter("@Timestamp", DbType.DateTime);
             
             // Add the paramters to the table
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
             command.Parameters.Add(p3);
+            command.Parameters.Add(p4);
             
             // define the Values which will be insert to the table
             p1.Value = cpu;
             p2.Value = memory;
             p3.Value = app;
-            
+            p4.Value = timestamp;
             //Execute Query
             command.ExecuteNonQuery();
         }
@@ -416,7 +418,7 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                resourcesIntensLists.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3)));
+                resourcesIntensLists.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3), reader.GetDateTime(4)));
             }
 
             return resourcesIntensLists;

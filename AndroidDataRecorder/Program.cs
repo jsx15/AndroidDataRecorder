@@ -11,10 +11,17 @@ namespace AndroidDataRecorder
         public static void Main(string[] args)
         {
             Config.LoadConfig();
-            CreateHostBuilder(args).Build().Run();
+            //CreateHostBuilder(args).Build().Run();
 
             Database.Database db = new Database.Database();
             db.ConectionToDatabase();
+            
+            db.InsertValuesIntoTableResIntens(22,22, "hi", DateTime.Now);
+
+            foreach (var v in db.ResourcesIntensLists())
+            {
+                Console.WriteLine(v.app + " " + v.timestamp);
+            }
 
         }
 
