@@ -232,7 +232,7 @@ namespace AndroidDataRecorder.Database
         /// Returns a List with every Log in the table log
         /// </summary>
         /// <returns>LogList</returns>
-        public List<Backend.LogEntry> ListWithLogs()
+        public List<LogEntry> ListWithLogs()
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -245,11 +245,11 @@ namespace AndroidDataRecorder.Database
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            List<Backend.LogEntry> LogsList = new List<Backend.LogEntry>();
+            List<LogEntry> LogsList = new List<LogEntry>();
 
             while (reader.Read())
             {
-                LogsList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
+                LogsList.Add(new LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
                     reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
                     reader.GetString(8)));
             }
@@ -263,7 +263,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="device"></param>
         /// <returns>LogList</returns>
-        public List<Backend.LogEntry> LogListFilterByDevice(String device)
+        public List<LogEntry> LogListFilterByDevice(String device)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -291,11 +291,11 @@ namespace AndroidDataRecorder.Database
             SQLiteDataReader reader = command.ExecuteReader();
 
             // fill the list with the actuall values of database
-            List<Backend.LogEntry> LogList = new List<Backend.LogEntry>();
+            List<LogEntry> LogList = new List<LogEntry>();
 
             while (reader.Read())
             {
-                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), 
+                LogList.Add(new LogEntry(reader.GetString(1), reader.GetDateTime(2), 
                     reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), 
                     reader.GetString(6), reader.GetString(7), reader.GetString(8)));
             }
@@ -310,7 +310,7 @@ namespace AndroidDataRecorder.Database
         /// <param name="timeStamp2"></param>
         /// <param name="loglevel"></param>
         /// <returns>LogList</returns>
-        public List<Backend.LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
+        public List<LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -345,11 +345,11 @@ namespace AndroidDataRecorder.Database
             SQLiteDataReader reader = command.ExecuteReader();
 
             // fill the list with the actuall values of database
-            List<Backend.LogEntry> LogList = new List<Backend.LogEntry>();
+            List<LogEntry> LogList = new List<LogEntry>();
 
             while (reader.Read())
             {
-                LogList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2),
+                LogList.Add(new LogEntry(reader.GetString(1), reader.GetDateTime(2),
                     reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), 
                     reader.GetString(7), reader.GetString(8)));
             }

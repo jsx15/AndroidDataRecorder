@@ -1,7 +1,7 @@
 using System;
 using AndroidDataRecorder.Misc;
 
-namespace AndroidDataRecorder.Backend
+namespace AndroidDataRecorder.Misc
 {
     public class LogEntry : Entry
     {
