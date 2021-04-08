@@ -10,8 +10,8 @@ namespace AndroidDataRecorder
     {
         public static void Main(string[] args)
         {
-           
-            
+
+
             Config.LoadConfig();
             CreateHostBuilder(args).Build().Run();
 

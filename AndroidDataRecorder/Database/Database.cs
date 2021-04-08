@@ -7,18 +7,12 @@ using SharpAdbClient.Logs;
 
 namespace AndroidDataRecorder.Database
 {
-
     public class Database
 
     {
         private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(
             Environment.CurrentDirectory,
             ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
-
-        /// <summary>
-        /// Path for the Database
-        /// </summary>
-        //private string datasource = "Data Source = C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
 
         /// <summary>
         /// Create a object for the Connection to the Database, the method needs the path to the database
@@ -308,7 +302,14 @@ namespace AndroidDataRecorder.Database
 
             return LogList;
         }
-
+        
+        /// <summary>
+        /// Creates a List of Log List, which is filterd by the params timeStamp1, timeStamp2 and Loglevel
+        /// </summary>
+        /// <param name="timeStamp1"></param>
+        /// <param name="timeStamp2"></param>
+        /// <param name="loglevel"></param>
+        /// <returns>LogList</returns>
         public List<Backend.LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
         {
             // create connection to the database
@@ -354,6 +355,73 @@ namespace AndroidDataRecorder.Database
             }
 
             return LogList;
+        }
+
+        ///<summary>
+        /// Methods for the table ResIntens
+        /// </summary>
+        
+        ///<summary>
+        /// Insert Values Into the table ResIntens
+        /// </summary>
+        public void InsertValuesIntoTableResIntens(int cpu, int memory, string app, DateTime timestamp)
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"INSERT INTO ResIntens(CPU, Memory, Process, Timestamp)
+                VALUES (@CPU, @Memory, @Process, @Timestamp)";
+
+            // Define paramters to insert new values in the table
+            SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Int32);
+            SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Int32);
+            SQLiteParameter p3 = new SQLiteParameter("@Process", DbType.String);
+            SQLiteParameter p4 = new SQLiteParameter("@Timestamp", DbType.DateTime);
+            
+            // Add the paramters to the table
+            command.Parameters.Add(p1);
+            command.Parameters.Add(p2);
+            command.Parameters.Add(p3);
+            command.Parameters.Add(p4);
+            
+            // define the Values which will be insert to the table
+            p1.Value = cpu;
+            p2.Value = memory;
+            p3.Value = app;
+            p4.Value = timestamp;
+            //Execute Query
+            command.ExecuteNonQuery();
+        }
+        
+        /// <summary>
+        /// Returns a list of the table ResIntens
+        /// </summary>
+        /// <returns>resourcesIntensLists</returns>
+        public List<ResIntensList> ResourcesIntensLists()
+        {
+            // create connection to the database
+            var connection = ConectionToDatabase();
+            var command = connection.CreateCommand();
+            
+                //insert Query
+                command.CommandText =
+                    @"SELECT * FROM ResIntens";
+
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actuall values of database
+            List<ResIntensList> resourcesIntensLists = new List<ResIntensList>();
+
+            while (reader.Read())
+            {
+                resourcesIntensLists.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3), reader.GetDateTime(4)));
+            }
+
+            return resourcesIntensLists;
         }
 
     }
