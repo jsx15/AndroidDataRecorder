@@ -1,22 +1,38 @@
 @page "/Screen"
 @using AndroidDataRecorder.Screenrecord
+@using AndroidDataRecorder.Misc
 
-<button @onclick="StartRecord">start</button>
-<button @onclick="StopRecord">stop</button>
+<button @onclick="StartRecordOne">start device 1</button>
+<button @onclick="StopRecordOne">stop device 1</button>
+<button @onclick="StartRecordTwo">start device 2</button>
+<button @onclick="StopRecordTwo">stop device 2</button>
 
 @code {
     /*
      * Start recording
      */
-    public void StartRecord()
+    public void StartRecordOne()
     {
-        Screenrecord.StartScreenrecord();
+        Screenrecord.StartScreenrecord(MarkerList.ActiveDeviceData);
     }
     
     /*
      * Stop recording
      */
-    public void StopRecord()
+    public void StopRecordTwo()
+    {
+        Screenrecord.StopRecording();
+    }
+    
+    public void StartRecordTwo()
+    {
+        Screenrecord.StartScreenrecord(MarkerList.ActiveDeviceData);
+    }
+    
+    /*
+     * Stop recording
+     */
+    public void StopRecordOne()
     {
         Screenrecord.StopRecording();
     }

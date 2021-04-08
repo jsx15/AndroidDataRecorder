@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using AndroidDataRecorder.Backend;
-using AndroidDataRecorder.Misc;
+using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
 {
-    public static class Screenrecord
+    public class Screenrecord
     {
         //length of video snippets
         private const int VideoLength = 30000;
@@ -25,7 +25,8 @@ namespace AndroidDataRecorder.Screenrecord
         /// <summary>
         /// start thread for screenrecord
         /// </summary>
-        public static void StartScreenrecord()
+        /// <param name="device">device to record</param>
+        public bool StartScreenrecord(DeviceData device)
         {
             //variable for device ID
             string deviceId;
@@ -36,9 +37,6 @@ namespace AndroidDataRecorder.Screenrecord
             //try to get device info
             try
             {
-                //get connected device
-                var device = MarkerList.ActiveDeviceData;
-                
                 //get id of device
                 deviceId = device.ToString();
                 
@@ -57,7 +55,7 @@ namespace AndroidDataRecorder.Screenrecord
             {
                 Console.WriteLine("No device set for screen record!");
                 //stop recording intention
-                return;
+                return false;
             }
 
             //clear list for before filling
@@ -71,6 +69,8 @@ namespace AndroidDataRecorder.Screenrecord
 
             //start thread
             recordProcess.Start();
+
+            return true;
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         /// <param name="device">device id</param>
         /// <param name="deviceName">device name</param>
-        private static void PrepareRecord(string device, string deviceName)
+        private void PrepareRecord(string device, string deviceName)
         {
             //prepare adb process
             var scProc = new Process
@@ -152,7 +152,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         /// <param name="path">path to store the video files</param>
         /// <param name="scProc">adb screenrecord process</param>
-        private static void HandleScreenrecord(string path, Process scProc)
+        private void HandleScreenrecord(string path, Process scProc)
         {
             //get timestamp 
             var time = Timestamp.GetTimestamp();
@@ -212,7 +212,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// <summary>
         /// method to set record variable to false
         /// </summary>
-        public static void StopRecording()
+        public void StopRecording()
         {
             //set variable to false
             _record = false;
