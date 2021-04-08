@@ -8,16 +8,16 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// Name of source
         /// </summary>
-        public string devicename;
+        public string devicename { get; set; }
 
         /// <summary>
         /// Message inside the entry
         /// </summary>
-        public string message;
+        public string message { get; set; }
 
         /// <summary>
         /// Timestamp of the entry
         /// </summary>
-        public DateTime timeStamp;
+        public DateTime timeStamp { get; set; }
     }
 }

@@ -12,6 +12,9 @@
       <None Update="Pages\Logger.razor.css">
         <DependentUpon>Logger.razor</DependentUpon>
       </None>
+      <None Update="identifier.sqlite">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,6 +30,12 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="SharpAdbClient" Version="2.3.23" />
       <PackageReference Include="System.Data.SQLite" Version="1.0.113.7" />
+      <Content Update="Pages\SmallScreen.razor.css">
+        <DependentUpon>SmallScreen.razor</DependentUpon>
+      </Content>
+      <Content Update="Pages\MarkerPage.razor.css">
+        <DependentUpon>MarkerPage.razor</DependentUpon>
+      </Content>
 
     </ItemGroup>
 

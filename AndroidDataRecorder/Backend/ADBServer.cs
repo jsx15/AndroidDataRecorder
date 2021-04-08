@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using AndroidDataRecorder.Backend.LogCat;
@@ -17,21 +15,16 @@ namespace AndroidDataRecorder.Backend
         /// The AdbServer
         /// </summary>
         private static readonly SharpAdbClient.AdbServer Server = new SharpAdbClient.AdbServer();
-
+        
         /// <summary>
         /// The AdbClient
         /// </summary>
         private static readonly AdbClient Client = new AdbClient();
 
         /// <summary>
-        /// The Receiver
-        /// </summary>
-        private static readonly ConsoleOutputReceiver Receiver = new ConsoleOutputReceiver();
-
-        /// <summary>
         /// Object of AccessData
         /// </summary>
-        private static readonly AccessData AccessData = new AccessData();
+        private static AccessData _accessData;
 
         /// <summary>
         /// Initialize Adb Server and Monitor
@@ -42,7 +35,6 @@ namespace AndroidDataRecorder.Backend
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
             monitor.DeviceConnected += OnDeviceConnected;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
-            // monitor.DeviceConnected += Configuration.ConnectedDeviceChanged;
             monitor.Start();
         }
 
@@ -141,31 +133,9 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            try
-            {
-                foreach (var device in GetConnectedDevices())
-                {
-                    Thread.Sleep(250);
-                    if (device.State != DeviceState.Online)
-                    {
-                        break;
-                    }
-
-
-                    if (device.Serial.Equals(e.Device.Serial))
-                    {
-                        Client.ExecuteRemoteCommand("logcat -b all -c", e.Device, Receiver);
-                        new Thread(() => AccessData.InitializeProcess(device, Client, Receiver)).Start();
-                    }
-                }
-
-                Console.WriteLine($"The device {e.Device} has connected to this PC");
-                
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-            }
+            _accessData = new AccessData();
+            new Thread(() => _accessData.CheckDeviceState(e.Device, Client)).Start();
+            Console.WriteLine($"The device {e.Device} has connected to this PC");
         }
 
         /// <summary>
