@@ -364,7 +364,7 @@ namespace AndroidDataRecorder.Database
         ///<summary>
         /// Insert Values Into the table ResIntens
         /// </summary>
-        public void InsertValuesIntoTableResIntens(int cpu, int memory, string app, DateTime timestamp)
+        public void InsertValuesIntoTableResIntens(double cpu, double memory, string process, DateTime timestamp)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
@@ -376,8 +376,8 @@ namespace AndroidDataRecorder.Database
                 VALUES (@CPU, @Memory, @Process, @Timestamp)";
 
             // Define paramters to insert new values in the table
-            SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Int32);
-            SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Int32);
+            SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Double);
+            SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Double);
             SQLiteParameter p3 = new SQLiteParameter("@Process", DbType.String);
             SQLiteParameter p4 = new SQLiteParameter("@Timestamp", DbType.DateTime);
             
@@ -390,7 +390,7 @@ namespace AndroidDataRecorder.Database
             // define the Values which will be insert to the table
             p1.Value = cpu;
             p2.Value = memory;
-            p3.Value = app;
+            p3.Value = process;
             p4.Value = timestamp;
             //Execute Query
             command.ExecuteNonQuery();
@@ -418,7 +418,7 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                resourcesIntensLists.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3), reader.GetDateTime(4)));
+                resourcesIntensLists.Add(new ResIntensList(reader.GetDouble(1), reader.GetDouble(2), reader.GetString(3), reader.GetDateTime(4)));
             }
 
             return resourcesIntensLists;

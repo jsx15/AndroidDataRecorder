@@ -4,19 +4,19 @@ namespace AndroidDataRecorder.Misc
 {
     public class ResIntensList
     {
-        public int cpu { get; set; }
-        public int memory { get; set; }
-        public string app { get; set; }
+        public double cpu { get; set; }
+        public double memory { get; set; }
+        public string process { get; set; }
 
         public DateTime timestamp { get; set; }
         
         public ResIntensList(){}
 
-        public ResIntensList(int _cpu, int _memory, string _app, DateTime _timestamp)
+        public ResIntensList(double _cpu, double _memory, string _process, DateTime _timestamp)
         {
             cpu = _cpu;
             memory = _memory;
-            app = _app;
+            process = _process;
             timestamp = _timestamp;
         }
     }
