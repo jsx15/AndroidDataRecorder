@@ -7,18 +7,12 @@ using SharpAdbClient.Logs;
 
 namespace AndroidDataRecorder.Database
 {
-
     public class Database
 
     {
         private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(System.IO.Path.Combine(
             Environment.CurrentDirectory,
             ".." + System.IO.Path.DirectorySeparatorChar + "identifier.sqlite"));
-
-        /// <summary>
-        /// Path for the Database
-        /// </summary>
-        //private string datasource = "Data Source = C:/Users/sandra/Desktop/projekt/AndroidDataRecorder/identifier.sqlite";
 
         /// <summary>
         /// Create a object for the Connection to the Database, the method needs the path to the database
@@ -308,25 +302,45 @@ namespace AndroidDataRecorder.Database
 
             return LogList;
         }
-
+        
+        /// <summary>
+        /// Creates a List of Log List, which is filterd by the params timeStamp1, timeStamp2 and Loglevel
+        /// </summary>
+        /// <param name="timeStamp1"></param>
+        /// <param name="timeStamp2"></param>
+        /// <param name="loglevel"></param>
+        /// <returns>LogList</returns>
         public List<Backend.LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
         {
             // create connection to the database
             var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
-            
-            
-            
-            //insert Query
-            command.CommandText =
-                @"SELECT * FROM Logs
+
+            if (loglevel.Length > 0 && !loglevel.Equals("*") && !loglevel.Equals(""))
+            {
+                //insert Query
+                command.CommandText =
+                    @"SELECT * FROM Logs
                     WHERE Loglevel LIKE @loglevel AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+
+                // use the Parameter DeviceName to search for it
+                command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                command.Parameters.AddWithValue("@loglevel", loglevel);
+            }
+
+            else
+            {
+                //insert Query
+                command.CommandText =
+                    @"SELECT * FROM Logs
+                    WHERE SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
             
-            // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-            command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-            command.Parameters.AddWithValue("@loglevel", loglevel);
-            
+                // use the Parameter DeviceName to search for it
+                command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+            }
+
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
@@ -345,6 +359,10 @@ namespace AndroidDataRecorder.Database
 
         ///<summary>
         /// Methods for the table ResIntens
+        /// </summary>
+        
+        ///<summary>
+        /// Insert Values Into the table ResIntens
         /// </summary>
         public void InsertValuesIntoTableResIntens(int cpu, int memory, string app)
         {
@@ -374,34 +392,34 @@ namespace AndroidDataRecorder.Database
             
             //Execute Query
             command.ExecuteNonQuery();
-            
-            
         }
         
+        /// <summary>
+        /// Returns a list of the table ResIntens
+        /// </summary>
+        /// <returns>resourcesIntensLists</returns>
         public List<ResIntensList> ResourcesIntensLists()
         {
             // create connection to the database
             var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
             
-            
                 //insert Query
                 command.CommandText =
                     @"SELECT * FROM ResIntens";
-                
 
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
             // fill the list with the actuall values of database
-            List<ResIntensList> resourcesIntensListsList = new List<ResIntensList>();
+            List<ResIntensList> resourcesIntensLists = new List<ResIntensList>();
 
             while (reader.Read())
             {
-                resourcesIntensListsList.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3)));
+                resourcesIntensLists.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3)));
             }
 
-            return resourcesIntensListsList;
+            return resourcesIntensLists;
         }
 
     }
