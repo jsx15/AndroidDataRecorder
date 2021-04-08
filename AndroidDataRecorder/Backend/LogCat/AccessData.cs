@@ -22,12 +22,12 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// <summary>
         /// The needed values to calculate the workload variables
         /// </summary>
-        private string _memTotal, _memAvailiable;
+        private double _memTotal, _memAvailable, _cpuTotal, _cpuIdle;
 
         /// <summary>
         /// The workload variables
         /// </summary>
-        private int _cpuUsage, _memUsed, _batteryLevel;
+        private int _batteryLevel;
 
         /// <summary>
         /// The database to write into
@@ -47,9 +47,8 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// If the device state doesn't change to online it will just execute
         /// </summary>
         /// <param name="device"> The device </param>
-        /// <param name="client"> The AdbCLient </param>
-        /// <param name="receiver"> The ConsoleOutputReceiver </param>
-        public void CheckDeviceState(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
+        /// <param name="client"> The AdbClient </param>
+        public void CheckDeviceState(DeviceData device, AdbClient client)
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
@@ -65,7 +64,7 @@ namespace AndroidDataRecorder.Backend.LogCat
                             {
                                 watch.Stop();
                                 DeviceIsOnline?.Invoke();
-                                InitializeProcess(d, client, receiver);
+                                InitializeProcess(d, client);
                             }
                         }
                     }
@@ -84,8 +83,7 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// </summary>
         /// <param name="device"> The device </param>
         /// <param name="client"> The AdbClient </param>
-        /// <param name="receiver"> The ConsoleOutputReceiver </param>
-        public void InitializeProcess(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
+        public void InitializeProcess(DeviceData device, AdbClient client)
         {
             Process proc = new Process
             {
@@ -99,7 +97,8 @@ namespace AndroidDataRecorder.Backend.LogCat
                 }
             };
             
-            new Thread(() => AccessWorkload(device, client, receiver)).Start();
+            var receiver = new ConsoleOutputReceiver();
+            new Thread(() => AccessWorkload(device, client)).Start();
             client.ExecuteRemoteCommand("logcat -b all -c", device, receiver);
             SaveLogs(proc, device.Name);
         }
@@ -125,58 +124,43 @@ namespace AndroidDataRecorder.Backend.LogCat
                         grokResult[5].Value.ToString(), grokResult[6].Value.ToString(), grokResult[7].Value.ToString());
                     
                     
-                    foreach (var item in grokResult)
+                    /*foreach (var item in grokResult)
                     {
                         Console.WriteLine($"{item.Key} : {item.Value}");
-                    }
+                    }*/
                 }
             }
         }
 
         /// <summary>
-        /// Access the CpuUsage, MemoryUsage and the BatteryLevel periodically every 30 seconds
+        /// Get the CpuUsage, MemoryUsage and the BatteryLevel periodically every 30 seconds and write them into the database
         /// </summary>
         /// <param name="device"> The device to be checked </param>
-        /// <param name="receiver"> The needed receiver </param>
         /// <param name="client"> The AdbClient </param>
-        private void AccessWorkload(DeviceData device, AdbClient client, ConsoleOutputReceiver receiver)
+        private void AccessWorkload(DeviceData device, AdbClient client)
         {
             try
             {
                 while (device.State == DeviceState.Online)
                 {
-                    receiver.Flush();
+                    var receiver = new ConsoleOutputReceiver();
                     
-                    client.ExecuteRemoteCommand("dumpsys cpuinfo", device, receiver);
-                    var m = Regex.Match(receiver.ToString(), @"(\S+)\s+TOTAL");
-                    if (m.Success) 
-                    {
-                        _cpuUsage = Convert.ToInt32(float.Parse(m.Groups[1].Value.Remove(m.Groups[1].Value.Length - 1, 1)));
-                    }
-            
+                    client.ExecuteRemoteCommand("top -b -m 5 -n 1", device, receiver);
+
+                    var cpu = GetCpuUsage(receiver.ToString());
+                    var fiveProcesses = GetFiveProcesses(receiver.ToString());
+                    var cpuFiveProcesses = GetCpuFiveProcesses(receiver.ToString());
+                    var memFiveProcesses = GetMemFiveProcesses(receiver.ToString());
+                    
                     client.ExecuteRemoteCommand("cat /proc/meminfo", device, receiver);
-                    m = Regex.Match(receiver.ToString(), @"MemTotal: +(\S+)\s");
-                    if (m.Success) 
-                    {
-                        _memTotal = m.Groups[1].Value;
-                    }
-            
-                    m = Regex.Match(receiver.ToString(), @"MemAvailable: +(\S+)\s");
-                    if (m.Success) 
-                    {
-                        _memAvailiable = m.Groups[1].Value;
-                    }
-            
-                    _memUsed = Convert.ToInt32((float.Parse(_memAvailiable)/float.Parse(_memTotal))*100);
+
+                    var mem = GetMemUsage(receiver.ToString());
             
                     client.ExecuteRemoteCommand("dumpsys battery", device, receiver);
-                    m = Regex.Match(receiver.ToString(), @"level: +(\S+)\s");
-                    if (m.Success)
-                    {
-                        _batteryLevel = Int32.Parse(m.Groups[1].Value);
-                    }
-                
-                    _database.InsertValuesInTableResources(device.Name, _cpuUsage, _memUsed, _batteryLevel, DateTime.Now);
+
+                    GetBatteryLevel(receiver.ToString());
+                    
+                    _database.InsertValuesInTableResources(device.Name, cpu, mem, _batteryLevel, DateTime.Now);
             
                     Thread.Sleep(30000);
                 }
@@ -185,6 +169,110 @@ namespace AndroidDataRecorder.Backend.LogCat
             {
                 Console.WriteLine(e);
             }
+        }
+
+        /// <summary>
+        /// Calculate and the cpu usage 
+        /// </summary>
+        /// <param name="queryString"> The receiver output </param>
+        /// <returns> the cpu usage </returns>
+        private int GetCpuUsage(string queryString)
+        {
+            var m = Regex.Match(queryString, @"\w*(?=(\%idle))");
+            if (m.Success) 
+            {
+                _cpuIdle = double.Parse(m.Value);
+            }
+            m = Regex.Match(queryString, @"\w*(?=(\%cpu))");
+            if (m.Success) 
+            {
+                _cpuTotal = double.Parse(m.Value);
+            }
+            
+            return Convert.ToInt32(((_cpuTotal - _cpuIdle)/ _cpuTotal)*100);
+        }
+
+        /// <summary>
+        /// Calculate the memory usage
+        /// </summary>
+        /// <param name="queryString"> The receiver output </param>
+        /// <returns> the memory usage </returns>
+        private int GetMemUsage(string queryString)
+        {
+            var m = Regex.Match(queryString, @"(?<=MemTotal:\s+)([0-9]+)");
+            if (m.Success)
+            {
+                _memTotal = double.Parse(m.Value);
+            }
+            
+            m = Regex.Match(queryString, @"(?<=MemAvailable:\s+)([0-9]+)");
+            if (m.Success)
+            {
+                _memAvailable = double.Parse(m.Value);
+            }
+            
+            return Convert.ToInt32(((_memTotal - _memAvailable)/ _memTotal)*100);
+        }
+
+        /// <summary>
+        /// get the battery level
+        /// </summary>
+        /// <param name="queryString"> The receiver output </param>
+        private void GetBatteryLevel(string queryString)
+        {
+            var m = Regex.Match(queryString, @"(?<=level:\s+)([0-9]+)");
+            if (m.Success)
+            {
+                _batteryLevel = Int32.Parse(m.Groups[1].Value);
+            }
+        }
+
+        /// <summary>
+        /// Get the five most expensive processes
+        /// </summary>
+        /// <param name="queryString"> The receiver output </param>
+        /// <returns> A MatchCollection with those processes </returns>
+        private MatchCollection GetFiveProcesses(string queryString)
+        {
+            var n = Regex.Matches(queryString, @"((?<=[0-9]+\:[0-9]+\.[0-9]+\s)(.*)(?=\s))");
+            if (n.Count != 0)
+            {
+                return n;
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Get the cpu usage of the five most expensive processes
+        /// </summary>
+        /// <param name="queryString"> The receiver output </param>
+        /// <returns> A MatchCollection with those cpu usages </returns>
+        private MatchCollection GetCpuFiveProcesses(string queryString)
+        {
+            var n = Regex.Matches(queryString, @"((?<=[A-Z]\s+)([0-9]+\.[0-9])(?=\s+[0-9]+\.[0-9]\s+))");
+            if (n.Count != 0)
+            {
+                return n;
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Get the mem usage of the five most expensive processes
+        /// </summary>
+        /// <param name="queryString"> The receiver output </param>
+        /// <returns> A MatchCollection with those mem usages </returns>
+        private MatchCollection GetMemFiveProcesses(string queryString)
+        {
+            var n = Regex.Matches(queryString, @"((?<=[0-9]+\.[0-9]\s+)([0-9]+\.[0-9])(?=\s+[0-9]+\:[0-9]+\.[0-9]+))");
+            if (n.Count != 0)
+            {
+                return n;
+            }
+
+            return null;
         }
     }
 }
