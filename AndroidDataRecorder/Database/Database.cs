@@ -314,18 +314,31 @@ namespace AndroidDataRecorder.Database
             // create connection to the database
             var connection = ConectionToDatabase();
             var command = connection.CreateCommand();
-            
-            
-            
-            //insert Query
-            command.CommandText =
-                @"SELECT * FROM Logs
+
+            if (loglevel.Equals("*") || loglevel.Equals("") || loglevel.StartsWith(" "))
+            {
+                //insert Query
+                command.CommandText =
+                    @"SELECT * FROM Logs
+                    WHERE SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                
+                // use the Parameter DeviceName to search for it
+                command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                command.Parameters.AddWithValue("@loglevel", loglevel);
+            }
+            else
+            {
+                //insert Query
+                command.CommandText =
+                    @"SELECT * FROM Logs
                     WHERE Loglevel LIKE @loglevel AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                // use the Parameter DeviceName to search for it
+                command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                command.Parameters.AddWithValue("@loglevel", loglevel);
+            }
             
-            // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-            command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-            command.Parameters.AddWithValue("@loglevel", loglevel);
             
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();

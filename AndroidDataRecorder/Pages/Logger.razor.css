@@ -38,3 +38,11 @@
     left: 0;
     text-align: center;
 }
+
+.logtable {
+    font-size: small;
+}
+
+.filter-card {
+    font-size: medium;
+}
