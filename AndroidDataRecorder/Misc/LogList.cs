@@ -12,7 +12,7 @@ namespace AndroidDataRecorder.Misc
 
         public LogList()
         {
-            data.ConectionToDatabase();
+            data.ConnectionToDatabase();
             
         }
 
