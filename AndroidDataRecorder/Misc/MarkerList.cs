@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using AndroidDataRecorder.Backend;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Misc
@@ -15,12 +14,12 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// Selected device
         /// </summary>
-        public static SharpAdbClient.DeviceData ActiveDeviceData;
+        public static DeviceData ActiveDeviceData;
 
         /// <summary>
         /// Database
         /// </summary>
-        private Database.Database data = new Database.Database();
+        private readonly Database.Database _data = new Database.Database();
 
         /// <summary>
         /// Constructor
@@ -29,7 +28,7 @@ namespace AndroidDataRecorder.Misc
         {
             if (ActiveDeviceData != null)
             {
-                Markers = data.ListWithMarker(ActiveDeviceData.Name);
+                Markers = _data.ListWithMarker(ActiveDeviceData.Name);
             }
         }
 
@@ -38,14 +37,14 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public void Update()
         {
-            Markers = data.ListWithMarker(ActiveDeviceData.Name);
+            Markers = _data.ListWithMarker(ActiveDeviceData.Name);
         }
 
         /// <summary>
         /// Change device
         /// </summary>
         /// <param name="device">new selected device</param>
-        public void SetDevice(SharpAdbClient.DeviceData device)
+        public void SetDevice(DeviceData device)
         {
             ActiveDeviceData = device;
             Update();
@@ -55,7 +54,7 @@ namespace AndroidDataRecorder.Misc
         /// Active device name
         /// </summary>
         /// <returns>device name</returns>
-        public string GetDeviceName()
+        public static string GetDeviceName()
         {
             return ActiveDeviceData is not null ? ActiveDeviceData.Name : "";
         }
@@ -64,7 +63,7 @@ namespace AndroidDataRecorder.Misc
         /// Device connection type
         /// </summary>
         /// <returns>Connection of selected device(Wifi or Usb)</returns>
-        public string DeviceConnectionType()
+        public static string DeviceConnectionType()
         {
             try
             {
@@ -80,7 +79,7 @@ namespace AndroidDataRecorder.Misc
         /// Determine the ip address
         /// </summary>
         /// <returns>IP Address of selected device</returns>
-        public string IpAddress()
+        public static string IpAddress()
         {
             try
             {
@@ -92,14 +91,9 @@ namespace AndroidDataRecorder.Misc
             }
         }
 
-        public string DeviceStatus()
+        public static string DeviceStatus()
         {
-            if (ActiveDeviceData is not null)
-            {
-                return "connected";
-            }
-
-            return "not connected";
+            return ActiveDeviceData is not null ? "connected" : "not connected";
         }
     }
 }

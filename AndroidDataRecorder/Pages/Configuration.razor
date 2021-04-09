@@ -1,14 +1,11 @@
 ﻿@page "/Config"
-@using System.ComponentModel.DataAnnotations
-@using System.IO
 @using System.Net
-@using System.Threading
 @using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Misc
 @using SharpAdbClient
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 
-@inject IToastService toastService;
+@inject IToastService ToastService;
 
 <header>
     <h1 class="text-center" style="color: white">Configuration</h1>
@@ -31,7 +28,7 @@
                             {
                                 <tr>
                                     <td>
-                                        <input style="vertical-align: middle" type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@(_markerList.GetDeviceName().Equals(item.Name))/>
+                                        <input style="vertical-align: middle" type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@MarkerList.GetDeviceName().Equals(item.Name)/>
                                         <label for="@item">@item.Name - Connection: @DeviceStates.ConnectionType(item)</label>
                                         <button class="btn btn-danger float-right" @onclick="() => DisconnectDevice(item)">Disconnect</button>
                                     </td>
@@ -39,7 +36,7 @@
                             }
                             </tbody>
                         </table>
-                        <label>Selected device is @_markerList.GetDeviceName()</label>
+                        <label>Selected device is @MarkerList.GetDeviceName()</label>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -55,8 +52,8 @@
                             DANGER ZONE
                         </div>
                         <div class="card-body">
-                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="RestartADB">Restart ADB server</button>
-                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="KillADB">Kill ADB server</button>
+                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="RestartAdb">Restart ADB server</button>
+                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="KillAdb">Kill ADB server</button>
                         </div>
                     </div>
                 </div>
@@ -135,12 +132,12 @@
     /*
      * List of attached devices
      */
-    static List<SharpAdbClient.DeviceData> _attachedDeviceList;
+    static List<DeviceData> _attachedDeviceList;
 
     /*
-     * Markerlist
+     * Marker list
      */
-    MarkerList _markerList = new MarkerList();
+    readonly MarkerList _markerList = new MarkerList();
 
     /*
      * ADB version used
@@ -150,7 +147,7 @@
     /*
      * Monitor to detect changes on connected devices
      */
-    DeviceMonitor monitor;
+    DeviceMonitor _monitor;
     
     /*
      * Set device list
@@ -161,14 +158,13 @@
         _attachedDeviceList = AdbServer.GetConnectedDevices();
         _adbVersion = AdbServer.GetAdbVersion();
         
-        monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
-        monitor.DeviceChanged += DeviceChanged;
-        monitor.DeviceDisconnected += DeviceChanged;
-        monitor.DeviceConnected += DeviceChanged;
-        monitor.Start();
+        _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
+        _monitor.DeviceChanged += DeviceChanged;
+        _monitor.DeviceDisconnected += DeviceChanged;
+        _monitor.DeviceConnected += DeviceChanged;
+        _monitor.Start();
     }
-
-
+    
     /*
      * Change selected device
      */
@@ -189,14 +185,13 @@
      */
     void AddButtonPressed()
     {
-        IPAddress address;
-
-        // Check for 3 dots and valid range
+        
         try
         {
-            if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out address))
+            // Check for 3 dots and valid range
+            if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out var address))
             {
-                toastService.ShowSuccess("Device with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
+                ToastService.ShowSuccess("Device with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
                 
                 // Add device to config file
                 Config.AddKnownDevice(address.ToString());
@@ -207,15 +202,15 @@
         }
         catch (Exception)
         {
-            toastService.ShowError("That is not an IP-Address!", "Error");
-            toastService.ShowError("Could not add device!", "Error");
+            ToastService.ShowError("That is not an IP-Address!", "Error");
+            ToastService.ShowError("Could not add device!", "Error");
         }
     }
     
     /*
      * Restart ADB server
      */
-    private void RestartADB()
+    private static void RestartAdb()
     {
         AdbServer.RestartAdbServer();
     }
@@ -223,7 +218,7 @@
     /*
      * Kill ADB Server
      */
-    private void KillADB()
+    private static void KillAdb()
     {
         AdbServer.KillAdbServer();
     }
@@ -244,20 +239,20 @@
     {
         if (DeviceStates.ConnectionType(device) is DeviceStates.ConnectionTypes.Wifi)
         {
-            string[] split = device.ToString().Split(':');
+            var split = device.ToString().Split(':');
             AdbServer.DisconnectWirelessClient(split[0]);
             _attachedDeviceList = AdbServer.GetConnectedDevices();
         }
         else
         {
-            toastService.ShowError("Only Wifi devices can be disconnected", "Error");
+            ToastService.ShowError("Only Wifi devices can be disconnected", "Error");
         }
     }
 
     /*
      * Delete known device from list
      */
-    private void RemoveDevice(string address)
+    private static void RemoveDevice(string address)
     {
         Config.DeleteKnownDevice(address);
     }

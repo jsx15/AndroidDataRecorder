@@ -32,7 +32,7 @@
                         @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
-                                <td width="30%">@marker.timeStamp</td>
+                                <td style="width: 30%">@marker.timeStamp</td>
                                 <td>@marker.message</td>
                             </tr>
                         }
@@ -107,7 +107,7 @@
 
     private void CreateMarker()
     {
-        _database.InsertValuesInTableMarker(_markerList.GetDeviceName(), DateTime.Now, "Marker from pi");
+        _database.InsertValuesInTableMarker(MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
         _markerList.Update();
     }
 

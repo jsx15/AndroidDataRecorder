@@ -1,9 +1,8 @@
 @page "/Dashboard"
 @using System.Threading;
-@using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Misc
 
-@inject IToastService toastService;
+@inject IToastService ToastService;
 @page "/"
 
 
@@ -29,14 +28,14 @@
                                 <p class="card-text">IP-Address: </p>
                             </div>
                             <div class="col-md text-left">
-                                <p class="card-text">@_markerList.GetDeviceName() </p>
-                                <p class="card-text">@_markerList.DeviceConnectionType()</p>
-                                <p class="card-text">@_markerList.IpAddress()</p>
+                                <p class="card-text">@MarkerList.GetDeviceName() </p>
+                                <p class="card-text">@MarkerList.DeviceConnectionType()</p>
+                                <p class="card-text">@MarkerList.IpAddress()</p>
                             </div>
                         </div>
                     </div>
                     <div class="card-footer text-muted">
-                        <p>@_markerList.DeviceStatus()</p>
+                        <p>@MarkerList.DeviceStatus()</p>
                     </div>
                 </div>
             </div>
@@ -151,12 +150,6 @@
 
 
 @code {
-
-    /*
-     * Timer
-     */
-    private Timer _timer;
-
     /*
      * Current time and date
      */
@@ -166,7 +159,7 @@
     /*
      * Database 
      */
-    AndroidDataRecorder.Database.Database data = new AndroidDataRecorder.Database.Database();
+    readonly AndroidDataRecorder.Database.Database _data = new AndroidDataRecorder.Database.Database();
 
     /*
      * Text in marker text box
@@ -176,7 +169,7 @@
     /*
      * List of marker
      */
-    private MarkerList _markerList = new MarkerList();
+    private readonly MarkerList _markerList = new MarkerList();
 
     /*
      * System stats (temporarily) 
@@ -192,7 +185,8 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _timer = new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        // ReSharper disable once ObjectCreationAsStatement
+        new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     /*
@@ -214,20 +208,20 @@
     {
         if (ValidateMarker())
         {
-            data.InsertValuesInTableMarker(_markerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
-            toastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
+            _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
+            ToastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
             _markerList.Update();
         }
         else
         {
-            toastService.ShowError("Please put in a message and select a device", "Error");
+            ToastService.ShowError("Please put in a message and select a device", "Error");
         }
     }
 
     private bool ValidateMarker()
     {
-        if (!string.IsNullOrWhiteSpace(_markerSetMessage) && !string.IsNullOrEmpty(_markerList.GetDeviceName()))
+        if (!string.IsNullOrWhiteSpace(_markerSetMessage) && !string.IsNullOrEmpty(MarkerList.GetDeviceName()))
         {
             return true;
         }
