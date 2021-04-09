@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AndroidDataRecorder.Backend;
+using AndroidDataRecorder.Misc;
+using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -11,31 +14,16 @@ namespace AndroidDataRecorder.Screenrecord
         /// <summary>
         /// delete all files that are not named "video.mp4"
         /// </summary>
-        /// <param name="path">directory in which the files are to be searched for and deleted</param>
-        /// <param name="deviceName">connected device name</param>
-        public static void DeleteOldFiles(string path, string deviceName)
+        /// <param name="path">path to file which will be deleted</param>
+        public static void DeleteFile(string path)
         {
-            //get an array of files of path
-            var filePaths = Directory.GetFiles(path);
-            
-            //check every file if name is "video.mp4"
-            foreach (var filePath in filePaths)
+            if (File.Exists(path))
             {
-                //get name of this file
-                var name = new FileInfo(filePath).Name;
-                
-                //convert name to lower case 
-                name = name.ToLower();
-                
-                //check if the files name is "video.mp4"
-                if (name != "video_"+deviceName+".mp4")
-                {
-                    //if name is not "video.mp4" -> delete it
-                    File.Delete(filePath);
-                }
+                // If file found, delete it    
+                File.Delete(path);
             }
         }
-        
+
         /// <summary>
         /// while recording the maximum video number is controlled here
         /// if video number is higher than "numOfVideos" -> delete the oldest video
@@ -53,8 +41,8 @@ namespace AndroidDataRecorder.Screenrecord
                 .Skip(numOfVideos)
                 //add other files to list
                 .ToList();
-            
-            //go through all of the files 
+
+            //go through all of the files
             foreach (var file in files)
             {
                 //delete the file
@@ -70,7 +58,9 @@ namespace AndroidDataRecorder.Screenrecord
         /// <param name="list">list of existing video files</param>
         /// <param name="path">directory in which the files are to be searched for</param>
         /// <param name="videoName">name of the finish video</param>
-        public static void ConcVideoFiles(List<string> list, string path, string videoName)
+        /// <param name="markerId">marker ID</param>
+        public static void ConcVideoFiles(List<string> list, string videoPath, string listFile, string videoName,
+            int markerId)
         {
             //create process for ffmpeg
             var ffmpeg = new Process
@@ -80,7 +70,8 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to ffmpeg.exe
                     FileName = Config.GetFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
-                    Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+videoName+".mp4",
+                    Arguments = @"-f concat -safe 0 -i "+listFile+" -c copy " +
+                                videoPath + videoName + ".mp4",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //use not shell execute
@@ -90,27 +81,25 @@ namespace AndroidDataRecorder.Screenrecord
 
             //store all files from list into an array
             var filesToMerge = list.ToArray();
-            
-            //create path for text file
-            var textPath = path+"list.txt";
-            
+
             //check if text file already exists
-            if (!File.Exists(textPath))
+            if (!File.Exists(listFile))
             {
                 //create a stream writer
-                using (var sw = File.CreateText(textPath))
+                using (var sw = File.CreateText(listFile))
                 {
                     //list all files in the text file
                     foreach (var file in filesToMerge)
                     {
                         //write with syntax for ffmpeg
-                        sw.WriteLine("file '"+file+"'");
+                        sw.WriteLine("file '" + file + "'");
                     }
-                }	
+                }
             }
+
             //start concatenate process
             ffmpeg.Start();
-            
+
             //wait till process is finished
             ffmpeg.WaitForExit();
         }

@@ -24,7 +24,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// <param name="deviceObj">connected device</param>
         /// <param name="videoLength">set video length</param>
         /// <param name="numOfVideos">set maximum number of videos</param>
-        public Screenrecord(DeviceData deviceObj, int videoLength, int numOfVideos)
+        public Screenrecord(DeviceData deviceObj, int videoLength)
         {
             //set video length
             this._videoLength = videoLength;

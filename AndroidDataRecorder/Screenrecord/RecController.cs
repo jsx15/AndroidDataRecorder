@@ -16,9 +16,8 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         /// <param name="device">device to start record with</param>
         /// <param name="videoLength">length of the separate video parts</param>
-        /// <param name="numOfVideos">maximum number of videos to concatenate</param>
         /// <returns>Returns whether the video was started or whether data is missing </returns>
-        public static bool StartScrRec(DeviceData device, int videoLength, int numOfVideos)
+        public static bool StartScrRec(DeviceData device, int videoLength)
         {
             //check if all important data available
             if (device == null || device.Name.Equals("")) return false;
@@ -31,7 +30,7 @@ namespace AndroidDataRecorder.Screenrecord
             else
             {
                 //create new screen record object with specified settings
-                Screenrecord tmpDevice = new Screenrecord(device, videoLength,numOfVideos);
+                Screenrecord tmpDevice = new Screenrecord(device, videoLength);
                 
                 //store screen record object in dictionary
                 RecordList.Add(device.ToString(), tmpDevice);
@@ -73,8 +72,9 @@ namespace AndroidDataRecorder.Screenrecord
 
         public static bool CeateVideo(DateTime markerTime, DeviceData deviceData, int videoLength,int replayLength, int markerId)
         {
-            string path = Config.GetVideoDirPath + deviceData;
-            List<string> fileList = MarkerVideo.GetVideoFiles(markerTime, path, videoLength, replayLength);
+            string videoPath = Config.GetVideoDirPath + deviceData + Path.DirectorySeparatorChar;
+            string textFilePath = videoPath + "list_marker_" + markerId + ".txt";
+            List<string> fileList = MarkerVideo.GetVideoFiles(markerTime, videoPath, videoLength, replayLength);
             if (fileList.Count == 0) return false;
             Console.WriteLine(fileList[^1]);
             FileInfo fileInfo = new FileInfo(fileList[^1]);
@@ -82,7 +82,9 @@ namespace AndroidDataRecorder.Screenrecord
             {
                 Console.WriteLine("wait");
             }
-            HandleFiles.ConcVideoFiles(fileList,Config.GetVideoDirPath,"marker_"+markerId+"_hero2lte");
+            
+            HandleFiles.ConcVideoFiles(fileList,Config.GetVideoDirPath, textFilePath,"marker_"+markerId+"_hero2lte",markerId);
+            HandleFiles.DeleteFile(textFilePath);
             return true;
         }
         
