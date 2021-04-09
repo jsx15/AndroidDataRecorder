@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using AndroidDataRecorder.Backend;
-using AndroidDataRecorder.Misc;
-using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
 {
@@ -19,36 +15,8 @@ namespace AndroidDataRecorder.Screenrecord
         {
             if (File.Exists(path))
             {
-                // If file found, delete it    
+                // If file found, delete it
                 File.Delete(path);
-            }
-        }
-
-        /// <summary>
-        /// while recording the maximum video number is controlled here
-        /// if video number is higher than "numOfVideos" -> delete the oldest video
-        /// </summary>
-        /// <param name="path">directory in which the files are to be searched for and deleted</param>
-        /// <param name="numOfVideos">the maximum number of videos</param>
-        /// <param name="fileList">list of files</param>
-        public static void CheckVideoNumber(string path, int numOfVideos, List<string> fileList)
-        {
-            //order files and get the files to be deleted
-            var files = new DirectoryInfo(path).EnumerateFiles()
-                //order files by descending creation time
-                .OrderByDescending(f => f.CreationTime)
-                //skip the number of file to keep
-                .Skip(numOfVideos)
-                //add other files to list
-                .ToList();
-
-            //go through all of the files
-            foreach (var file in files)
-            {
-                //delete the file
-                file.Delete();
-                //remove this file from fileList
-                fileList.Remove(file.FullName);
             }
         }
 
@@ -56,11 +24,10 @@ namespace AndroidDataRecorder.Screenrecord
         /// concatenate all existing videos to one playable video file
         /// </summary>
         /// <param name="list">list of existing video files</param>
-        /// <param name="path">directory in which the files are to be searched for</param>
+        /// <param name="videoPath">directory in which the files are to be searched for</param>
+        /// <param name="listFile"></param>
         /// <param name="videoName">name of the finish video</param>
-        /// <param name="markerId">marker ID</param>
-        public static void ConcVideoFiles(List<string> list, string videoPath, string listFile, string videoName,
-            int markerId)
+        public static void ConcVideoFiles(List<string> list, string videoPath, string listFile, string videoName)
         {
             //create process for ffmpeg
             var ffmpeg = new Process
@@ -70,7 +37,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to ffmpeg.exe
                     FileName = Config.GetFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
-                    Arguments = @"-f concat -safe 0 -i "+listFile+" -c copy " +
+                    Arguments = @"-f concat -safe 0 -i " + listFile + " -c copy " +
                                 videoPath + videoName + ".mp4",
                     //redirect standard input
                     RedirectStandardInput = true,
@@ -102,6 +69,32 @@ namespace AndroidDataRecorder.Screenrecord
 
             //wait till process is finished
             ffmpeg.WaitForExit();
+        }
+
+        /// <summary>
+        /// check if file is used by a process
+        /// </summary>
+        /// <param name="file">file path</param>
+        /// <returns>true if it is in use -> false if not</returns>
+        public static bool IsFileLocked(FileInfo file)
+        {
+            try
+            {
+                //try to open and read a file
+                using (FileStream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    //close stream if it was possible
+                    stream.Close();
+                }
+            } //if file i in use -> catch exception
+            catch (IOException)
+            {
+                //return true, because file is in use
+                return true;
+            }
+
+            //return false, because file is not in use
+            return false;
         }
     }
 }

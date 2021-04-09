@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using AndroidDataRecorder.Backend;
 using SharpAdbClient;
 
@@ -70,38 +71,53 @@ namespace AndroidDataRecorder.Screenrecord
             return RecordList.ContainsKey(device.ToString());
         }
 
-        public static bool CeateVideo(DateTime markerTime, DeviceData deviceData, int videoLength,int replayLength, int markerId)
+        public static void StartCreatingVideo(DateTime markerTime, DeviceData deviceData, int videoLength,
+            int replayLength, int markerId)
         {
-            string videoPath = Config.GetVideoDirPath + deviceData + Path.DirectorySeparatorChar;
-            string textFilePath = videoPath + "list_marker_" + markerId + ".txt";
-            List<string> fileList = MarkerVideo.GetVideoFiles(markerTime, videoPath, videoLength, replayLength);
-            if (fileList.Count == 0) return false;
-            Console.WriteLine(fileList[^1]);
-            FileInfo fileInfo = new FileInfo(fileList[^1]);
-            while (IsFileLocked(fileInfo))
-            {
-                Console.WriteLine("wait");
-            }
-            
-            HandleFiles.ConcVideoFiles(fileList,Config.GetVideoDirPath, textFilePath,"marker_"+markerId+"_hero2lte",markerId);
-            HandleFiles.DeleteFile(textFilePath);
-            return true;
+            new Thread (()=> CreateVideo(markerTime,deviceData,videoLength,replayLength,markerId)).Start();
         }
-        
-        private static bool IsFileLocked(FileInfo file)
+
+        /// <summary>
+        /// find all necessary files
+        /// concat these video files
+        /// delete text file
+        /// </summary>
+        /// <param name="markerTime">time of set marker</param>
+        /// <param name="deviceData">device from which the video is to be taken </param>
+        /// <param name="videoLength">length of the separate video parts</param>
+        /// <param name="replayLength">length of the resulting video</param>
+        /// <param name="markerId">marker ID</param>
+        /// <returns></returns>
+        private static void CreateVideo(DateTime markerTime, DeviceData deviceData, int videoLength,int replayLength, int markerId)
         {
-            try
-            {
-                using(FileStream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    stream.Close();
-                }
-            }
-            catch (IOException)
-            {
-                return true;
-            }
-            return false;
+            //create path of the video files
+            var videoPath = Config.GetVideoDirPath + deviceData + Path.DirectorySeparatorChar;
+
+            //create resulting video name
+            var videoName = "marker_" + markerId + "_hero2lte";
+            
+            //create path of the text file
+            var textFilePath = videoPath + "list_marker_" + markerId + ".txt";
+            
+            //get all files in the time range
+            var fileList = MarkerVideo.GetVideoFiles(markerTime, videoPath, videoLength, replayLength);
+            
+            //check if there is a file in this range
+            if (fileList.Count == 0) return;
+            
+            Console.WriteLine(fileList[^1]);
+            
+            //get last or newest file of this list
+            var fileInfo = new FileInfo(fileList[^1]);
+            
+            //wait till recording of this file is done
+            while (HandleFiles.IsFileLocked(fileInfo)) { }
+            
+            //concatenate all video parts
+            HandleFiles.ConcVideoFiles(fileList,Config.GetVideoDirPath, textFilePath,videoName);
+            
+            //delete text file
+            HandleFiles.DeleteFile(textFilePath);
         }
     }
 }
