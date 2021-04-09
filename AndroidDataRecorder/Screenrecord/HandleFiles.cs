@@ -69,8 +69,8 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         /// <param name="list">list of existing video files</param>
         /// <param name="path">directory in which the files are to be searched for</param>
-        /// <param name="deviceName">connected device name</param>
-        public static void ConcVideoFiles(List<string> list, string path, string deviceName)
+        /// <param name="videoName">name of the finish video</param>
+        public static void ConcVideoFiles(List<string> list, string path, string videoName)
         {
             //create process for ffmpeg
             var ffmpeg = new Process
@@ -80,7 +80,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to ffmpeg.exe
                     FileName = Config.GetFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
-                    Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+"video_"+deviceName+".mp4",
+                    Arguments = @"-f concat -safe 0 -i "+path+"list.txt -c copy "+path+videoName+".mp4",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //use not shell execute

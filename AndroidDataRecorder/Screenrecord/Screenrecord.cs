@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -13,14 +12,8 @@ namespace AndroidDataRecorder.Screenrecord
         //length of video snippets
         private readonly int _videoLength;
 
-        //number of videos that will not be deleted
-        private readonly int _numOfVideos;
-
         //bool whether the recording should run or not 
         private volatile bool _record;
-
-        //list of video files
-        private readonly List<String> _fileList = new List<string>();
 
         //connected device
         private readonly DeviceData _deviceObj;
@@ -35,10 +28,7 @@ namespace AndroidDataRecorder.Screenrecord
         {
             //set video length
             this._videoLength = videoLength;
-            
-            //set maximum number of videos
-            this._numOfVideos = numOfVideos;
-            
+
             //set device object
             this._deviceObj = deviceObj;
         }
@@ -50,18 +40,12 @@ namespace AndroidDataRecorder.Screenrecord
         {
             //variable for device ID
             string deviceId = _deviceObj.ToString();
-            
-            //variable for device name
-            string deviceName = _deviceObj.Name;
-
-            //clear list for before filling
-            _fileList.Clear();
 
             //set record state to true
             _record = true;
 
             //create thread
-            var recordProcess = new Thread(() => PrepareRecord(deviceId, deviceName));
+            var recordProcess = new Thread(() => PrepareRecord(deviceId));
 
             //start thread
             recordProcess.Start();
@@ -75,8 +59,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// delete all files to get one video
         /// </summary>
         /// <param name="device">device id</param>
-        /// <param name="deviceName">device name</param>
-        private void PrepareRecord(string device, string deviceName)
+        private void PrepareRecord(string device)
         {
             //prepare adb process
             var scProc = new Process
@@ -97,7 +80,7 @@ namespace AndroidDataRecorder.Screenrecord
             };
 
             //create path for files and set local path variable
-            var path = CreatePath.HandlePath(deviceName);
+            var path = VideoPath.Create(device);
 
             //safe touch settings for restore
             var touchState = Touches.GetStatus(device);
@@ -114,8 +97,6 @@ namespace AndroidDataRecorder.Screenrecord
             {
                 //start recording
                 HandleScreenrecord(path, scProc);
-                //check if there are files to delete
-                HandleFiles.CheckVideoNumber(path, _numOfVideos, _fileList);
             }
 
             //close standard input of process
@@ -130,13 +111,6 @@ namespace AndroidDataRecorder.Screenrecord
                 //hide screen touch
                 Touches.HideTouches(device);
             }
-
-            //merge video files to one video
-            HandleFiles.ConcVideoFiles(_fileList, path, deviceName);
-
-            //delete old files to have only one video
-            HandleFiles.DeleteOldFiles(path, deviceName);
-            
             Console.WriteLine("Record process finished " + _deviceObj.Name);
         }
 
@@ -201,9 +175,6 @@ namespace AndroidDataRecorder.Screenrecord
             input.Close();
 
             Console.WriteLine("Recording stopped " + _deviceObj.Name);
-
-            //add new file to file list
-            _fileList.Add(file);
         }
 
         /// <summary>

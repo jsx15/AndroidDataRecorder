@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using AndroidDataRecorder.Backend;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
@@ -67,6 +69,37 @@ namespace AndroidDataRecorder.Screenrecord
         {
             //find device in dictionary
             return RecordList.ContainsKey(device.ToString());
+        }
+
+        public static bool CeateVideo(DateTime markerTime, DeviceData deviceData, int videoLength,int replayLength, int markerId)
+        {
+            string path = Config.GetVideoDirPath + deviceData;
+            List<string> fileList = MarkerVideo.GetVideoFiles(markerTime, path, videoLength, replayLength);
+            if (fileList.Count == 0) return false;
+            Console.WriteLine(fileList[^1]);
+            FileInfo fileInfo = new FileInfo(fileList[^1]);
+            while (IsFileLocked(fileInfo))
+            {
+                Console.WriteLine("wait");
+            }
+            HandleFiles.ConcVideoFiles(fileList,Config.GetVideoDirPath,"marker_"+markerId+"_hero2lte");
+            return true;
+        }
+        
+        private static bool IsFileLocked(FileInfo file)
+        {
+            try
+            {
+                using(FileStream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

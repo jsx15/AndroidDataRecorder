@@ -2,17 +2,24 @@
 @using Screenrecord
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Backend
+@using System.IO
 
-<button @onclick="StartRecordOne">start recording</button>
-<button @onclick="StopRecordOne">stop recording</button>
+<button @onclick="StartRecord">start recording</button>
+<button @onclick="StopRecord">stop recording</button>
+<button @onclick="CreateMarker">create Marker</button>
+<button @onclick="CreateVideo">create Video</button>
+
 
 @code {
+
+    DateTime marker;
     /*
      * Start recording
      */
-    public void StartRecordOne()
+
+    public void StartRecord()
     {
-        bool isActive = RecController.StartScrRec(MarkerList.ActiveDeviceData,5000,4);
+        bool isActive = RecController.StartScrRec(MarkerList.ActiveDeviceData, 5000, 4);
 
         if (isActive)
         {
@@ -23,13 +30,24 @@
             Console.WriteLine("No device selected to start recording");
         }
     }
-    
+
     /*
      * Stop recording
      */
-    public void StopRecordOne()
+
+    public void StopRecord()
     {
         RecController.StopScrRec(MarkerList.ActiveDeviceData);
+    }
+
+    public void CreateMarker()
+    {
+        marker = DateTime.Now;
+    }
+
+    public void CreateVideo()
+    {
+        RecController.CeateVideo(marker, MarkerList.ActiveDeviceData, 5000, 120000, 1);
     }
     
 }
