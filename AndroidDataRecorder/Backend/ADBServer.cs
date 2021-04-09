@@ -25,6 +25,45 @@ namespace AndroidDataRecorder.Backend
         /// Object of AccessData
         /// </summary>
         private static AccessData _accessData;
+        
+        /// <summary>
+        /// A Singleton instance of the CustomMonitor that gets initialized in the constructor of AdbServer
+        /// </summary>
+        public static CustomMonitor Instance;
+        
+        /// <summary>
+        /// A custom monitor for customized Events that are based on DeviceDataEvent
+        /// It's designed as Singleton
+        /// </summary>
+        public sealed class CustomMonitor
+        {  
+            CustomMonitor()  
+            {  
+            }  
+            private static readonly object Padlock = new object();  
+            private static CustomMonitor _instance = null;
+            public event EventHandler<DeviceDataEventArgs> DeviceWorkloadChanged;
+            public static CustomMonitor Instance
+            {
+                get
+                {
+                    lock (Padlock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new CustomMonitor();
+                        }  
+                        return _instance;  
+                    }  
+                }  
+            }
+            public void OnDeviceWorkloadChanged(DeviceDataEventArgs e)
+            {
+                if (this.DeviceWorkloadChanged == null)
+                    return;
+                this.DeviceWorkloadChanged((object) this, e);
+            }
+        }
 
         /// <summary>
         /// Initialize Adb Server and Monitor
@@ -36,6 +75,7 @@ namespace AndroidDataRecorder.Backend
             monitor.DeviceConnected += OnDeviceConnected;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
             monitor.Start();
+            Instance = CustomMonitor.Instance;
         }
 
         /// <summary>
@@ -134,6 +174,7 @@ namespace AndroidDataRecorder.Backend
         private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
             _accessData = new AccessData();
+            //new CheckDevice().CheckDeviceState(e.Device, Client);
             new Thread(() => _accessData.CheckDeviceState(e.Device, Client)).Start();
             Console.WriteLine($"The device {e.Device} has connected to this PC");
         }
@@ -146,6 +187,11 @@ namespace AndroidDataRecorder.Backend
         private static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
+        }
+        
+        private static void OnWorkloadChanged(object sender, DeviceDataEventArgs e)
+        {
+            Console.WriteLine($"Notice me Senpaiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
         }
 
         /// <summary>
