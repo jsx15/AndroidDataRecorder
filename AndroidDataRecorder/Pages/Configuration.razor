@@ -1,5 +1,6 @@
 ﻿@page "/Config"
 @using System.ComponentModel.DataAnnotations
+@using System.IO
 @using System.Net
 @using System.Threading
 @using AndroidDataRecorder.Backend
@@ -147,6 +148,11 @@
     private int _adbVersion;
 
     /*
+     * Monitor to detect changes on connected devices
+     */
+    DeviceMonitor monitor;
+    
+    /*
      * Set device list
      */
     protected override void OnInitialized()
@@ -154,7 +160,14 @@
         base.OnInitialized();
         _attachedDeviceList = AdbServer.GetConnectedDevices();
         _adbVersion = AdbServer.GetAdbVersion();
+        
+        monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
+        monitor.DeviceChanged += DeviceChanged;
+        monitor.DeviceDisconnected += DeviceChanged;
+        monitor.DeviceConnected += DeviceChanged;
+        monitor.Start();
     }
+
 
     /*
      * Change selected device
@@ -250,16 +263,13 @@
     }
 
     /*
-     * Refresh device list on new connect
+     * Refresh device list on device changes
      */
-    public void ConnectedDeviceChanged(object sender, DeviceDataEventArgs e)
+    private void DeviceChanged(object sender, DeviceDataEventArgs e)
     {
         _attachedDeviceList = AdbServer.GetConnectedDevices();
-        
-        StateHasChanged();
-        
-        
-        Console.WriteLine("Connected Wireless");
+        InvokeAsync(StateHasChanged);
     }
+    
 
 }
