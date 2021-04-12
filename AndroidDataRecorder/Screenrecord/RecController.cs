@@ -94,7 +94,7 @@ namespace AndroidDataRecorder.Screenrecord
             var videoPath = Config.GetVideoDirPath + deviceData + Path.DirectorySeparatorChar;
 
             //create resulting video name
-            var videoName = "marker_" + markerId + "_hero2lte";
+            var videoName = "marker_" + markerId + deviceData.Name;
             
             //create path of the text file
             var textFilePath = videoPath + "list_marker_" + markerId + ".txt";
