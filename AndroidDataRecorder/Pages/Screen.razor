@@ -1,23 +1,54 @@
 @page "/Screen"
-@using AndroidDataRecorder.Screenrecord
+@using Screenrecord
+@using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Backend
+@using System.IO
 
-<button @onclick="StartRecord">start</button>
-<button @onclick="StopRecord">stop</button>
+<button @onclick="StartRecord">start recording</button>
+<button @onclick="StopRecord">stop recording</button>
+<button @onclick="CreateMarker">create Marker</button>
+<button @onclick="CreateVideo">create Video</button>
+
 
 @code {
+
+    DateTime marker;
     /*
      * Start recording
      */
+
     public void StartRecord()
     {
-        Screenrecord.StartScreenrecord();
+        bool isActive = RecController.StartScrRec(MarkerList.ActiveDeviceData, 5000);
+
+        if (isActive)
+        {
+            Console.WriteLine("Recording started successful");
+        }
+        else
+        {
+            Console.WriteLine("No device selected to start recording");
+        }
     }
-    
+
     /*
      * Stop recording
      */
+
     public void StopRecord()
     {
-        Screenrecord.StopRecording();
+        RecController.StopScrRec(MarkerList.ActiveDeviceData);
     }
+
+    public void CreateMarker()
+    {
+        marker = DateTime.Now;
+        Console.WriteLine("Marker created: " + marker);
+    }
+
+    public void CreateVideo()
+    {
+        RecController.StartCreatingVideo(marker, MarkerList.ActiveDeviceData, 5000, 120000, 1);
+    }
+    
 }
