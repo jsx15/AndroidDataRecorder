@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using GrokNet;
@@ -9,16 +10,6 @@ namespace AndroidDataRecorder.Backend.LogCat
 {
     public class AccessData
     {
-        /// <summary>
-        /// A delegate to specify the EventHandler type
-        /// </summary>
-        public delegate void DeviceOnlineEvent();
-
-        /// <summary>
-        /// A event to indicate that a connected device is now online
-        /// </summary>
-        public event DeviceOnlineEvent DeviceIsOnline;
-        
         /// <summary>
         /// The needed values to calculate the workload variables
         /// </summary>
@@ -63,7 +54,6 @@ namespace AndroidDataRecorder.Backend.LogCat
                             if (d.Serial.Equals(device.Serial))
                             {
                                 watch.Stop();
-                                DeviceIsOnline?.Invoke();
                                 InitializeProcess(d, client);
                             }
                         }
@@ -159,9 +149,19 @@ namespace AndroidDataRecorder.Backend.LogCat
                     client.ExecuteRemoteCommand("dumpsys battery", device, receiver);
 
                     GetBatteryLevel(receiver.ToString());
+
+                    var time = DateTime.Now;
                     
-                    _database.InsertValuesInTableResources(device.Name, cpu, mem, _batteryLevel, DateTime.Now);
-            
+                    _database.InsertValuesInTableResources(device.Name, cpu, mem, _batteryLevel, time);
+
+                    /*for (int i = 0; i < 5; i++)
+                    {
+                        _database.InsertValuesIntoTableResIntens(double.Parse(cpuFiveProcesses[i], CultureInfo.InvariantCulture), 
+                            double.Parse(memFiveProcesses[i], CultureInfo.InvariantCulture), fiveProcesses[i].ToString(), time);
+                    }*/
+
+                    AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(device));
+                    
                     Thread.Sleep(30000);
                 }
             }
