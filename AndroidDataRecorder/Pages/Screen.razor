@@ -48,6 +48,7 @@
 
     public void CreateVideo()
     {
+        Console.WriteLine("Create Video for marker time: "+marker);
         RecController.StartCreatingVideo(marker, MarkerList.ActiveDeviceData, 5000, 120000, 1);
     }
     
