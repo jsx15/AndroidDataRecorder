@@ -70,6 +70,38 @@ namespace AndroidDataRecorder.Database
             command.ExecuteNonQuery();
         }
         
+        /// <summary>
+        /// Creates a list of Resources Table
+        /// </summary>
+        /// <param name="deviceName"></param>
+        /// <returns> resList </returns>
+        public List<ResourcesList> ResourcesLists(string deviceName)
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Resources
+                    WHERE DeviceName LIKE @deviceName";
+            command.Parameters.AddWithValue("@deviceName", deviceName);
+                
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actual values of database
+            List<ResourcesList> resList = new List<ResourcesList>();
+
+            while (reader.Read())
+            {
+                resList.Add(new ResourcesList(reader.GetString(1), reader.GetInt32(2),
+                    reader.GetInt32(3), reader.GetInt32(4), reader.GetDateTime(5)));
+            }
+
+            return resList;
+        }
+        
         ///<summary>
         /// Methods for the table Log
         /// </summary>
@@ -365,7 +397,7 @@ namespace AndroidDataRecorder.Database
         ///<summary>
         /// Insert Values Into the table ResIntens
         /// </summary>
-        public void InsertValuesIntoTableResIntens(double cpu, double memory, string process, DateTime timestamp)
+        public void InsertValuesIntoTableResIntens(string deviceName, double cpu, double memory, string process, DateTime timestamp)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -373,26 +405,30 @@ namespace AndroidDataRecorder.Database
 
             //insert Query
             command.CommandText =
-                @"INSERT INTO ResIntens(CPU, Memory, Process, Timestamp)
-                VALUES (@CPU, @Memory, @Process, @Timestamp)";
+                @"INSERT INTO ResIntens(DeviceName, CPU, Memory, Process, Timestamp)
+                VALUES (@DeviceName, @CPU, @Memory, @Process, @Timestamp)";
 
             // Define parameters to insert new values in the table
+            SQLiteParameter p0 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Double);
             SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Double);
             SQLiteParameter p3 = new SQLiteParameter("@Process", DbType.String);
             SQLiteParameter p4 = new SQLiteParameter("@Timestamp", DbType.DateTime);
             
             // Add the parameters to the table
+            command.Parameters.Add(p0);
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
             command.Parameters.Add(p3);
             command.Parameters.Add(p4);
             
             // define the Values which will be insert to the table
+            p0.Value = deviceName;
             p1.Value = cpu;
             p2.Value = memory;
             p3.Value = process;
             p4.Value = timestamp;
+           
             //Execute Query
             command.ExecuteNonQuery();
         }
@@ -401,7 +437,7 @@ namespace AndroidDataRecorder.Database
         /// Returns a list of the table ResIntens
         /// </summary>
         /// <returns>resourcesIntensLists</returns>
-        public List<ResIntensList> ResourcesIntensLists()
+        public List<ResIntensList> ResourcesIntensLists(string deviceName)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -409,8 +445,10 @@ namespace AndroidDataRecorder.Database
             
                 //insert Query
                 command.CommandText =
-                    @"SELECT * FROM ResIntens";
-
+                    @"SELECT * FROM ResIntens
+                    WHERE DeviceName LIKE @deviceName";
+                command.Parameters.AddWithValue("@deviceName", deviceName);
+                
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
@@ -419,8 +457,8 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                resourcesIntensLists.Add(new ResIntensList(reader.GetDouble(1), reader.GetDouble(2),
-                    reader.GetString(3), reader.GetDateTime(4)));
+                resourcesIntensLists.Add(new ResIntensList(reader.GetString(1),reader.GetDouble(2), reader.GetDouble(3),
+                    reader.GetString(4), reader.GetDateTime(5)));
             }
 
             return resourcesIntensLists;
