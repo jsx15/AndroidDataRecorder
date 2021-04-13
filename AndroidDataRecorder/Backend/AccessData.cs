@@ -6,7 +6,7 @@ using System.Threading;
 using GrokNet;
 using SharpAdbClient;
 
-namespace AndroidDataRecorder.Backend.LogCat
+namespace AndroidDataRecorder.Backend
 {
     public class AccessData
     {
@@ -23,38 +23,59 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// <summary>
         /// The database to write into
         /// </summary>
-        private Database.Database _database = new Database.Database();
+        private readonly Database.Database _database = new Database.Database();
         
         /// <summary>
         /// The grok to filter the logs
         /// </summary>
-        private Grok grok = new Grok(
+        private readonly Grok _grok = new Grok(
             "%{USERNAME:device} %{TIMESTAMP_ISO8601:system_timestamp} %{TIMESTAMP_ISO8601:device_timestamp}%{SPACE}%{NUMBER:PID}%{SPACE}%{NUMBER:TID}%{SPACE}%{WORD:loglevel}%{SPACE}%{DATA:App}%{SPACE}:%{SPACE}%{GREEDYDATA:LogMessage}"
         );
 
+        /// <summary>
+        /// The device that should be logged
+        /// </summary>
+        private DeviceData _device;
+
+        /// <summary>
+        /// The CancellationToken for the Thread
+        /// </summary>
+        private CancellationToken _token; 
+        
+        /// <summary>
+        /// Initialize by setting the device
+        /// </summary>
+        /// <param name="device"> The device that should be logged </param>
+        public AccessData(DeviceData device)
+        {
+            _device = device;
+        }
+        
         /// <summary>
         /// Starts a Stopwatch and gives the device 30 seconds to change its state to online
         /// If the device state changes to online it starts logging
         /// If the device state doesn't change to online it will just execute
         /// </summary>
-        /// <param name="device"> The device </param>
-        /// <param name="client"> The AdbClient </param>
-        public void CheckDeviceState(DeviceData device, AdbClient client)
+        /// <param name="object"> the CancellationToken </param>
+        public void CheckDeviceState(object obj)
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
+            _token = (CancellationToken) obj;
+
             do
             {
                 try
                 {
-                    if (device.State == DeviceState.Online)
+                    if (_device.State == DeviceState.Online)
                     {
                         foreach (var d in AdbServer.GetConnectedDevices())
                         {
-                            if (d.Serial.Equals(device.Serial))
+                            if (d.Serial.Equals(_device.Serial))
                             {
                                 watch.Stop();
-                                InitializeProcess(d, client);
+                                _device = d;
+                                InitializeProcess();
                             }
                         }
                     }
@@ -71,26 +92,29 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// Creates a logcat process and calls saveLogs
         /// Starts a new Thread to log the workload data of the device
         /// </summary>
-        /// <param name="device"> The device </param>
-        /// <param name="client"> The AdbClient </param>
-        public void InitializeProcess(DeviceData device, AdbClient client)
+        private void InitializeProcess()
         {
             Process proc = new Process
             {
                 StartInfo = new ProcessStartInfo 
                 {
                     FileName = Config.GetAdbPath(), 
-                    Arguments = "-s " + device.Serial + " logcat -v year", 
+                    Arguments = "-s " + _device.Serial + " logcat -v year", 
                     UseShellExecute = false, 
                     RedirectStandardOutput = true, 
                     CreateNoWindow = true
                 }
             };
+            //ThreadPool.QueueUserWorkItem(new WaitCallback(AccessWorkload), _device);
+            //var t = new Thread(() => AccessWorkload(device, AdbServer.getClient()));
+            /*threads.Workload = t;
+            t.Start();
+            LoggingManager.AddEntry(device.Serial, threads);*/
             
             var receiver = new ConsoleOutputReceiver();
-            new Thread(() => AccessWorkload(device, client)).Start();
-            client.ExecuteRemoteCommand("logcat -b all -c", device, receiver);
-            SaveLogs(proc, device.Name);
+            AdbServer.getClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
+            new Thread(() => SaveLogs(proc, _device.Name)).Start();
+            AccessWorkload();
         }
 
         /// <summary>
@@ -101,23 +125,17 @@ namespace AndroidDataRecorder.Backend.LogCat
         private void SaveLogs(Process proc, String deviceName)
         {
             proc.Start();
-            while (!proc.StandardOutput.EndOfStream) {
+            while (!proc.StandardOutput.EndOfStream && !_token.IsCancellationRequested) {
                 string line = proc.StandardOutput.ReadLine();
                 if (!string.IsNullOrEmpty(line) && !line.StartsWith("---------"))
                 {
                     line = deviceName + " " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + line;
                     
-                    var grokResult = grok.Parse(line);
+                    var grokResult = _grok.Parse(line);
                     _database.InsertValuesInTableLogs(grokResult[0].Value.ToString(), 
                         Convert.ToDateTime(grokResult[1].Value), Convert.ToDateTime(grokResult[2].Value), 
                         Convert.ToInt32(grokResult[3].Value), Convert.ToInt32(grokResult[4].Value), 
                         grokResult[5].Value.ToString(), grokResult[6].Value.ToString(), grokResult[7].Value.ToString());
-                    
-                    
-                    /*foreach (var item in grokResult)
-                    {
-                        Console.WriteLine($"{item.Key} : {item.Value}");
-                    }*/
                 }
             }
         }
@@ -125,43 +143,42 @@ namespace AndroidDataRecorder.Backend.LogCat
         /// <summary>
         /// Get the CpuUsage, MemoryUsage and the BatteryLevel periodically every 30 seconds and write them into the database
         /// </summary>
-        /// <param name="device"> The device to be checked </param>
-        /// <param name="client"> The AdbClient </param>
-        private void AccessWorkload(DeviceData device, AdbClient client)
+        private void AccessWorkload()
         {
             try
             {
-                while (device.State == DeviceState.Online)
+                while(!_token.IsCancellationRequested)
                 {
                     var receiver = new ConsoleOutputReceiver();
                     
-                    client.ExecuteRemoteCommand("top -b -m 5 -n 1", device, receiver);
+                    AdbServer.getClient().ExecuteRemoteCommand("top -b -m 5 -n 1", _device, receiver);
 
                     var cpu = GetCpuUsage(receiver.ToString());
                     var fiveProcesses = GetFiveProcesses(receiver.ToString());
                     var cpuFiveProcesses = GetCpuFiveProcesses(receiver.ToString());
                     var memFiveProcesses = GetMemFiveProcesses(receiver.ToString());
                     
-                    client.ExecuteRemoteCommand("cat /proc/meminfo", device, receiver);
+                    AdbServer.getClient().ExecuteRemoteCommand("cat /proc/meminfo", _device, receiver);
 
                     var mem = GetMemUsage(receiver.ToString());
             
-                    client.ExecuteRemoteCommand("dumpsys battery", device, receiver);
+                    AdbServer.getClient().ExecuteRemoteCommand("dumpsys battery", _device, receiver);
 
                     GetBatteryLevel(receiver.ToString());
 
                     var time = DateTime.Now;
                     
-                    _database.InsertValuesInTableResources(device.Name, cpu, mem, _batteryLevel, time);
+                    _database.InsertValuesInTableResources(_device.Name, cpu, mem, _batteryLevel, time);
 
-                    /*for (int i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
-                        _database.InsertValuesIntoTableResIntens(double.Parse(cpuFiveProcesses[i], CultureInfo.InvariantCulture), 
-                            double.Parse(memFiveProcesses[i], CultureInfo.InvariantCulture), fiveProcesses[i].ToString(), time);
-                    }*/
+                        _database.InsertValuesIntoTableResIntens(_device.Name,
+                            double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
+                            double.Parse(memFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
+                            fiveProcesses[i].ToString(), time);
+                    }
 
-                    AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(device));
-                    
+                    AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(_device));
                     Thread.Sleep(30000);
                 }
             }

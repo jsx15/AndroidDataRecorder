@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
-using AndroidDataRecorder.Backend.LogCat;
-using AndroidDataRecorder.Pages;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
@@ -22,15 +20,10 @@ namespace AndroidDataRecorder.Backend
         private static readonly AdbClient Client = new AdbClient();
 
         /// <summary>
-        /// Object of AccessData
-        /// </summary>
-        private static AccessData _accessData;
-        
-        /// <summary>
         /// A Singleton instance of the CustomMonitor that gets initialized in the constructor of AdbServer
         /// </summary>
         public static CustomMonitor Instance;
-        
+
         /// <summary>
         /// A custom monitor for customized Events that are based on DeviceDataEvent
         /// It's designed as Singleton
@@ -78,6 +71,12 @@ namespace AndroidDataRecorder.Backend
             Instance = CustomMonitor.Instance;
         }
 
+        /// <summary>
+        /// Get the AdbClient
+        /// </summary>
+        /// <returns> the AdbClient </returns>
+        public static AdbClient getClient() => Client;
+        
         /// <summary>
         /// Connect to a Android device over a Network
         /// </summary>
@@ -167,15 +166,45 @@ namespace AndroidDataRecorder.Backend
         }
 
         /// <summary>
+        /// Initialize the logging process for a device
+        /// </summary>
+        /// <param name="device"> The device to be logged </param>
+        public static void InitializeLogging(DeviceData device)
+        {
+            var accessData = new AccessData(device);
+            var cts = new CancellationTokenSource();
+            LoggingManager.AddEntry(device.Serial, cts);
+            ThreadPool.QueueUserWorkItem(new WaitCallback(accessData.CheckDeviceState), cts.Token);
+        }
+
+        /// <summary>
+        /// Stop the logging process for a specified device
+        /// </summary>
+        /// <param name="device"> The specified device </param>
+        /// <returns> true for success and false for failure </returns>
+        public static bool StopLogging(DeviceData device)
+        {
+            if(LoggingManager.DeleteEntry(device.Serial))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
+        /// <summary>
         /// Start logging when a new device connects and display a toast
         /// </summary>
         /// <param name="sender"> The sender </param>
         /// <param name="e"> Event to recognize devices </param>
         private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            _accessData = new AccessData();
-            //new CheckDevice().CheckDeviceState(e.Device, Client);
-            new Thread(() => _accessData.CheckDeviceState(e.Device, Client)).Start();
+            //var threads = new Threads();
+            //var t = new Thread(() => accessData.CheckDeviceState(e.Device, Client, threads));
+            //t.Start();
+            
+            ThreadPool.SetMaxThreads(GetConnectedDevices().Count, GetConnectedDevices().Count);
+            InitializeLogging(e.Device);
             Console.WriteLine($"The device {e.Device} has connected to this PC");
         }
 
@@ -186,12 +215,9 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         private static void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
         {
+            ThreadPool.SetMaxThreads(GetConnectedDevices().Count, GetConnectedDevices().Count);
+            LoggingManager.DeleteEntry(e.Device.Serial);
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
-        }
-        
-        private static void OnWorkloadChanged(object sender, DeviceDataEventArgs e)
-        {
-            Console.WriteLine($"Notice me Senpaiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
         }
 
         /// <summary>
