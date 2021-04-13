@@ -1,6 +1,8 @@
 ﻿@page "/marker"
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Database
+@using AndroidDataRecorder.Services
+@inject MarkerBridge MarkerBridge
 
 <header>
     <h1 class="text-center" style="color: white">Marker</h1>
@@ -21,15 +23,14 @@
                 </thead>
                 <tbody>
 
-                @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                @foreach (var element in _elements)
                 {
-                    <tr @onclick="@(() => Console.WriteLine("clicked"))">
-                        
-                            <td>@marker.markerId</td>
-                            <td>@marker.timeStamp</td>
-                            <td class="w-75">@marker.message</td>
+                    <tr style="background: @element.Color" @onclick="() => RowSelected(element)">
+                        <td>@element.Marker.markerId</td>
+                            <td>@element.Marker.timeStamp</td>
+                            <td class="w-75">@element.Marker.message</td>
                         <td class="text-center">
-                            <button @onclick="() => DeleteButton(marker.markerId)" @onclick:stopPropagation="true" class="btn btn-danger">
+                            <button @onclick="() => DeleteButton(element.Marker.markerId)" @onclick:stopPropagation="true" class="btn btn-danger">
                                 <span style="vertical-align: middle" class="oi oi-circle-x"></span>
                             </button>
                         </td>
@@ -53,13 +54,74 @@
     MarkerList _markerList = new MarkerList();
 
     /*
+     * Table class
+     */
+    private class TableElement
+    {
+        public Marker Marker { get; }
+        public string Color => Selected?  "#CBFFF8" : "white";
+        public bool Selected;
+
+        public TableElement(Marker newMarker)
+        {
+            Marker = newMarker;
+            Selected = false;
+
+        }
+    }
+    
+    /*
+     * List of table elements
+     */
+    private readonly List<TableElement> _elements = new List<TableElement>();
+    
+    /*
+     * Init elements list
+     */
+    private void InitElement()
+    {
+        _elements.Clear();
+        foreach (var marker in MarkerList.Markers)
+        {
+            _elements.Add(new TableElement(marker));
+        }
+    }
+
+    /*
+     * Fill element list
+     */
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        InitElement();
+        MarkerBridge.selectedMarkers.Clear();
+    }
+
+    /*
+     * Row selected
+     */
+    private void RowSelected(TableElement element)
+    {
+        if (element.Selected)
+        {
+            MarkerBridge.selectedMarkers.Remove(element.Marker);
+        }
+        else
+        {
+            MarkerBridge.selectedMarkers.Add(element.Marker);
+        }
+        element.Selected = !element.Selected;
+       
+    }
+    
+    /*
      * Delete button for marker
      */
-
     private void DeleteButton(int markerid)
     {
         _data.DeleteMarker(markerid);
         _markerList.Update();
+        InitElement();
     }
 
 }
