@@ -56,7 +56,7 @@ namespace AndroidDataRecorder.Backend
         /// If the device state changes to online it starts logging
         /// If the device state doesn't change to online it will just execute
         /// </summary>
-        /// <param name="object"> the CancellationToken </param>
+        /// <param name="obj"> the CancellationToken </param>
         public void CheckDeviceState(object obj)
         {
             Stopwatch watch = new Stopwatch();
@@ -84,7 +84,7 @@ namespace AndroidDataRecorder.Backend
                 {
                     Console.WriteLine(e);
                 }
-            } 
+            }
             while (watch.Elapsed.Milliseconds < 30000 && watch.IsRunning);
         }
         
@@ -105,14 +105,9 @@ namespace AndroidDataRecorder.Backend
                     CreateNoWindow = true
                 }
             };
-            //ThreadPool.QueueUserWorkItem(new WaitCallback(AccessWorkload), _device);
-            //var t = new Thread(() => AccessWorkload(device, AdbServer.getClient()));
-            /*threads.Workload = t;
-            t.Start();
-            LoggingManager.AddEntry(device.Serial, threads);*/
             
             var receiver = new ConsoleOutputReceiver();
-            AdbServer.getClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
+            AdbServer.GetClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
             new Thread(() => SaveLogs(proc, _device.Name)).Start();
             AccessWorkload();
         }
@@ -147,22 +142,22 @@ namespace AndroidDataRecorder.Backend
         {
             try
             {
-                while(!_token.IsCancellationRequested)
+                while(!_token.IsCancellationRequested && AdbServer.GetConnectedDevices().Exists(x => x.Serial.Equals(_device.Serial)))
                 {
                     var receiver = new ConsoleOutputReceiver();
                     
-                    AdbServer.getClient().ExecuteRemoteCommand("top -b -m 5 -n 1", _device, receiver);
+                    AdbServer.GetClient().ExecuteRemoteCommand("top -b -m 5 -n 1", _device, receiver);
 
                     var cpu = GetCpuUsage(receiver.ToString());
                     var fiveProcesses = GetFiveProcesses(receiver.ToString());
                     var cpuFiveProcesses = GetCpuFiveProcesses(receiver.ToString());
                     var memFiveProcesses = GetMemFiveProcesses(receiver.ToString());
                     
-                    AdbServer.getClient().ExecuteRemoteCommand("cat /proc/meminfo", _device, receiver);
+                    AdbServer.GetClient().ExecuteRemoteCommand("cat /proc/meminfo", _device, receiver);
 
                     var mem = GetMemUsage(receiver.ToString());
             
-                    AdbServer.getClient().ExecuteRemoteCommand("dumpsys battery", _device, receiver);
+                    AdbServer.GetClient().ExecuteRemoteCommand("dumpsys battery", _device, receiver);
 
                     GetBatteryLevel(receiver.ToString());
 
@@ -196,12 +191,12 @@ namespace AndroidDataRecorder.Backend
         private int GetCpuUsage(string queryString)
         {
             var m = Regex.Match(queryString, @"\w*(?=(\%idle))");
-            if (m.Success) 
+            if (m.Success)
             {
                 _cpuIdle = double.Parse(m.Value);
             }
             m = Regex.Match(queryString, @"\w*(?=(\%cpu))");
-            if (m.Success) 
+            if (m.Success)
             {
                 _cpuTotal = double.Parse(m.Value);
             }

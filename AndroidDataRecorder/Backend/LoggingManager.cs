@@ -27,17 +27,19 @@ namespace AndroidDataRecorder.Backend
         /// <returns> true for success and false for failure </returns>
         public static bool DeleteEntry(string serialNumber)
         {
-            if(ThreadDictionary.TryGetValue(serialNumber, out var cts))
-            {
-                cts.Cancel();
-                Thread.Sleep(1000);
-                cts.Dispose();
-                ThreadDictionary.Remove(serialNumber);
+            if (!ThreadDictionary.TryGetValue(serialNumber, out var cts)) return false;
+            cts.Cancel();
+            Thread.Sleep(1000);
+            cts.Dispose();
+            ThreadDictionary.Remove(serialNumber);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
+
+        /// <summary>
+        /// Get the Dictionary with logging devices
+        /// </summary>
+        /// <returns> The Dictionary with logging devices </returns>
+        public static Dictionary<string, CancellationTokenSource> GetLoggingDevices() => ThreadDictionary;
     }
 }

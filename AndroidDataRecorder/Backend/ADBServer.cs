@@ -75,7 +75,7 @@ namespace AndroidDataRecorder.Backend
         /// Get the AdbClient
         /// </summary>
         /// <returns> the AdbClient </returns>
-        public static AdbClient getClient() => Client;
+        public static AdbClient GetClient() => Client;
         
         /// <summary>
         /// Connect to a Android device over a Network
@@ -184,12 +184,17 @@ namespace AndroidDataRecorder.Backend
         /// <returns> true for success and false for failure </returns>
         public static bool StopLogging(DeviceData device)
         {
-            if(LoggingManager.DeleteEntry(device.Serial))
-            {
-                return true;
-            }
+            return LoggingManager.DeleteEntry(device.Serial);
+        }
 
-            return false;
+        /// <summary>
+        /// Determines if a device is logging
+        /// </summary>
+        /// <param name="device"></param>
+        /// <returns> true if the device is logging </returns>
+        public static bool DeviceIsLogging(DeviceData device)
+        {
+            return LoggingManager.GetLoggingDevices().ContainsKey(device.Serial);
         }
         
         /// <summary>
@@ -199,10 +204,6 @@ namespace AndroidDataRecorder.Backend
         /// <param name="e"> Event to recognize devices </param>
         private static void OnDeviceConnected(object sender, DeviceDataEventArgs e)
         {
-            //var threads = new Threads();
-            //var t = new Thread(() => accessData.CheckDeviceState(e.Device, Client, threads));
-            //t.Start();
-            
             ThreadPool.SetMaxThreads(GetConnectedDevices().Count, GetConnectedDevices().Count);
             InitializeLogging(e.Device);
             Console.WriteLine($"The device {e.Device} has connected to this PC");
