@@ -46,3 +46,8 @@
 .filter-card {
     font-size: medium;
 }
+
+.logger-card-header {
+    font-size: small;
+    height: auto;
+}
