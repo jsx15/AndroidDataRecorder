@@ -14,21 +14,22 @@
 
 <section id="application">
     <div class="card filter-card">
-        <div class="card-header text-center" style="color: white; font-size: Large">
+        <div class="card-header text-center logger" style="color: white; font-size: Large">
             Filter
         </div>
-        @for (var i = 0; i<_filterList.Count; i++)
-        {
-            var filterModel = _filterList[i];
-            
-            Marker marker = null;
-            @if (i < _localSelectedMarkers.Count)
+        <div class="card-body">
+            @for (var i = 0; i<_filterList.Count; i++)
             {
-                marker = _localSelectedMarkers[i];
-                filterModel.TimeStamp = marker.timeStamp;
-            }
+                var filterModel = _filterList[i];
             
-            <div class="card-body">
+                Marker marker = null;
+                @if (i < _localSelectedMarkers.Count)
+                {
+                    marker = _localSelectedMarkers[i];
+                    filterModel.TimeStamp = marker.timeStamp;
+                }
+            
+            
                 <EditForm Model="filterModel" OnSubmit="() => Submit(filterModel)">
                     <div class="row">
                         <div class="col">
@@ -81,12 +82,12 @@
                         </div>
                     </div>
                 </EditForm>
-
-            </div>
-        }
-        
-        <button class="btn btn-primary" @onclick="AddFilter">Add</button>
-        
+                
+                <br>
+           
+            }
+            <button class="btn btn-primary text-center" @onclick="AddFilter">Add Marker</button>
+        </div>
     </div>
 </section>
 
@@ -96,7 +97,7 @@
     @foreach (var filter in _filterList)
     {
         <div class="card text-center">
-            <div class="card-header" style="color: white">
+            <div class="card-header logger-card-header" style="color: white">
                 Log Table of @filter.TimeStamp 
             </div>
 
@@ -137,6 +138,8 @@
                 <p style="color: #1e7e34"></p>
             </div>
         </div>
+        
+        <br>
     }
 </section>
 
