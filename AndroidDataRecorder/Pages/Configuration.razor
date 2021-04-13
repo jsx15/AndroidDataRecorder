@@ -2,6 +2,7 @@
 @using System.Net
 @using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Screenrecord
 @using SharpAdbClient
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 
@@ -27,10 +28,14 @@
                             @foreach (var item in _attachedDeviceList)
                             {
                                 <tr>
-                                    <td>
-                                        <input style="vertical-align: middle" type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@MarkerList.GetDeviceName().Equals(item.Name)/>
+                                    <td class="text-left" style="vertical-align: middle">
+                                        <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@MarkerList.GetDeviceName().Equals(item.Name)/>
                                         <label for="@item">@item.Name - Connection: @DeviceStates.ConnectionType(item)</label>
-                                        <button class="btn btn-danger float-right" @onclick="() => DisconnectDevice(item)">Disconnect</button>
+                                    </td>
+                                    <td class="text-right">
+                                        <button class="btn p-2 @LoggingButtonColor(item)" @onclick="() => OnLoggingButtonClick(item)">@LoggingText(item) Logging</button>
+                                        <button class="btn p-2 @RecordingButtonColor(item)" @onclick="() => OnRecordingButtonClick(item)">@RecordText(item) Recording</button>
+                                        <button class="btn btn-danger p-2" style="text-align: right" @onclick="() => DisconnectDevice(item)">Disconnect</button>
                                     </td>
                                 </tr>
                             }
@@ -128,7 +133,7 @@
 
 
 @code {
-    
+
     /*
      * List of attached devices
      */
@@ -148,29 +153,75 @@
      * Monitor to detect changes on connected devices
      */
     DeviceMonitor _monitor;
-    
+
     /*
      * Set device list
      */
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
         _attachedDeviceList = AdbServer.GetConnectedDevices();
         _adbVersion = AdbServer.GetAdbVersion();
-        
+
         _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
         _monitor.DeviceChanged += DeviceChanged;
         _monitor.DeviceDisconnected += DeviceChanged;
         _monitor.DeviceConnected += DeviceChanged;
         _monitor.Start();
     }
-    
+
+    private string LoggingText(DeviceData device)
+    {
+        return AdbServer.DeviceIsLogging(device) ? "Stop" : "Start";
+    }
+
+    private void OnLoggingButtonClick(DeviceData device)
+    {
+        if (AdbServer.DeviceIsLogging(device))
+        {
+            AdbServer.StopLogging(device);
+        }
+        else
+        {
+            AdbServer.InitializeLogging(device);
+        }
+    }
+
+    private string LoggingButtonColor(DeviceData device)
+    {
+        return AdbServer.DeviceIsLogging(device) ? "btn-danger" : "btn-success";
+    }
+
+    private void OnRecordingButtonClick(DeviceData device)
+    {
+        if (RecController.IsRecording(device))
+        {
+            RecController.StopScrRec(device);
+        }
+        else
+        {
+            RecController.StartScrRec(device, 30000);
+        }
+    }
+
+    private string RecordText(DeviceData device)
+    {
+        return RecController.IsRecording(device) ? "Stop" : "Start";
+    }
+
+    private string RecordingButtonColor(DeviceData device)
+    {
+        return RecController.IsRecording(device) ? "btn-danger" : "btn-success";
+    }
+
     /*
      * Change selected device
      */
+
     void RadioSelection(ChangeEventArgs args)
     {
-        // Find device by name (args only return string)
+    // Find device by name (args only return string)
         _markerList.SetDevice(_attachedDeviceList.Find(x => x.ToString().Equals(args.Value)));
     }
 
@@ -183,20 +234,20 @@
     /*
      * Add device to known devices
      */
+
     void AddButtonPressed()
     {
-        
         try
         {
-            // Check for 3 dots and valid range
+    // Check for 3 dots and valid range
             if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out var address))
             {
                 ToastService.ShowSuccess("Device with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
-                
-                // Add device to config file
+
+    // Add device to config file
                 Config.AddKnownDevice(address.ToString());
-                
-                // Attach device to ADB
+
+    // Attach device to ADB
                 AdbServer.ConnectWirelessClient(address.ToString());
             }
         }
@@ -206,18 +257,20 @@
             ToastService.ShowError("Could not add device!", "Error");
         }
     }
-    
+
     /*
      * Restart ADB server
      */
+
     private static void RestartAdb()
     {
         AdbServer.RestartAdbServer();
     }
-    
+
     /*
      * Kill ADB Server
      */
+
     private static void KillAdb()
     {
         AdbServer.KillAdbServer();
@@ -226,6 +279,7 @@
     /*jx15
      * Attach device
      */
+
     private void AttachDevice(string address)
     {
         AdbServer.ConnectWirelessClient(address);
@@ -235,6 +289,7 @@
      * Disconnect only wireless devices -> remove them from attached devices
      * USB devices cannot be disconnected
      */
+
     private void DisconnectDevice(DeviceData device)
     {
         if (DeviceStates.ConnectionType(device) is DeviceStates.ConnectionTypes.Wifi)
@@ -252,6 +307,7 @@
     /*
      * Delete known device from list
      */
+
     private static void RemoveDevice(string address)
     {
         Config.DeleteKnownDevice(address);
@@ -260,11 +316,12 @@
     /*
      * Refresh device list on device changes
      */
+
     private void DeviceChanged(object sender, DeviceDataEventArgs e)
     {
         _attachedDeviceList = AdbServer.GetConnectedDevices();
         InvokeAsync(StateHasChanged);
     }
-    
+
 
 }

@@ -161,5 +161,33 @@ namespace AndroidDataRecorder.Backend
         {
             return Server.GetStatus().IsRunning;
         }
+
+        /*
+         * DELETE ON MERGE!
+         */
+        public static void InitializeLogging(DeviceData device)
+        {
+            
+        }
+
+        /*
+         * DELETE ON MERGE!
+         */
+        public static bool StopLogging(DeviceData device)
+        {
+            return true;
+        }
+        
+        /*
+         * DELETE ON MERGE!
+         */
+        public static bool DeviceIsLogging(DeviceData device)
+        {
+            return true;
+        }
+
+
+
+        
     }
 }
