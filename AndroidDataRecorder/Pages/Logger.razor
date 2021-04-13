@@ -1,9 +1,8 @@
 @page "/logger"
 @using AndroidDataRecorder.Misc
-@using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Database
 @using AndroidDataRecorder.Services
-@using Microsoft.AspNetCore.Mvc.ApplicationModels
+
 
 @inject IToastService ToastService;
 @inject MarkerBridge MarkerBridge;
@@ -18,18 +17,35 @@
         <div class="card-header text-center" style="color: white; font-size: Large">
             Filter
         </div>
-        @for (var i = 0; i<MarkerBridge.selectedMarkers.Count; i++)
+        @for (var i = 0; i<_filterList.Count; i++)
         {
-            var marker = MarkerBridge.selectedMarkers[i];
             var filterModel = _filterList[i];
-            filterModel.TimeStamp = marker.timeStamp;
+            
+            Marker marker = null;
+            @if (i < _localSelectedMarkers.Count)
+            {
+                marker = _localSelectedMarkers[i];
+                filterModel.TimeStamp = marker.timeStamp;
+            }
+            
             <div class="card-body">
                 <EditForm Model="filterModel" OnSubmit="() => Submit(filterModel)">
                     <div class="row">
                         <div class="col">
                             Marker:
                             <InputSelect class="form-control" @bind-Value="filterModel.TimeStamp">
-                                <option>@marker.timeStamp</option>
+                                @if (marker is not null)
+                                {
+                                    <option>@marker.timeStamp</option>
+                                }
+                                else
+                                {
+                                    foreach (var allMarker in MarkerList.Markers)
+                                    {
+                                        <option>@allMarker.timeStamp</option>
+                                    }
+                                }
+                                
                             </InputSelect>
                         </div>
                         <div class="col">
@@ -68,6 +84,9 @@
 
             </div>
         }
+        
+        <button class="btn btn-primary" @onclick="AddFilter">Add</button>
+        
     </div>
 </section>
 
@@ -142,12 +161,17 @@
     /*
      *instance of Filtering class 
      */
-    List<Filtering> _filterList = new List<Filtering>();
+    readonly List<Filtering> _filterList = new List<Filtering>();
+    
+    /*
+     * Markers that were selected on the marker page
+     */
+    List<Marker> _localSelectedMarkers = new List<Marker>();
     
     /*
      * OnClick for the filter button
      */
-    public void Submit(Filtering filtering)
+    private void Submit(Filtering filtering)
     {
         try
         {    
@@ -170,21 +194,32 @@
             ToastService.ShowError("Unable to search","Error");
         }
     }
-
+    
+    /*
+     * Copy selected markers 
+     */
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        foreach (var unused in MarkerBridge.selectedMarkers)
+        
+        _localSelectedMarkers = MarkerBridge.selectedMarkers;
+        
+        foreach (var unused in _localSelectedMarkers)
         {
             _filterList.Add(new Filtering());
         }
-        
+    }
+
+    public void AddFilter()
+    {
+        _filterList.Add(new Filtering());
+        StateHasChanged();
     }
 
     /*
      * Model Class for the dropdowns in filtering
      */
-    public class Filtering
+    private class Filtering
     {
         /*
          * TimeStamp in DateTime format
