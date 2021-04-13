@@ -20,14 +20,16 @@
                 </tr>
                 </thead>
                 <tbody>
+
                 @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                 {
-                    <tr>
-                        <td>@marker.markerId</td>
-                        <td>@marker.timeStamp</td>
-                        <td class="w-75">@marker.message</td>
+                    <tr @onclick="@(() => Console.WriteLine("clicked"))">
+                        
+                            <td>@marker.markerId</td>
+                            <td>@marker.timeStamp</td>
+                            <td class="w-75">@marker.message</td>
                         <td class="text-center">
-                            <button @onclick="() => DeleteButton(marker.markerId)" class="btn btn-danger">
+                            <button @onclick="() => DeleteButton(marker.markerId)" @onclick:stopPropagation="true" class="btn btn-danger">
                                 <span style="vertical-align: middle" class="oi oi-circle-x"></span>
                             </button>
                         </td>
@@ -35,7 +37,6 @@
                 }
                 </tbody>
             </table>
-
         </div>
     </section>
 </main>
