@@ -15,6 +15,9 @@
       <None Update="identifier.sqlite">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Pages\Ticket.razor.css">
+        <DependentUpon>Ticket.razor</DependentUpon>
+      </None>
     </ItemGroup>
 
     <ItemGroup>

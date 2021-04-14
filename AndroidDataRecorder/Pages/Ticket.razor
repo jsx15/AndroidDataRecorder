@@ -1,0 +1,168 @@
+﻿@page "/ticket"
+@using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Services
+@inject MarkerBridge MarkerBridge;
+
+<header>
+    <h1 class="text-center" style="color: white">Ticket</h1>
+    <br>
+</header>
+
+<section id="ticket_card">
+    <div class="card text-center">
+        <div class="card-header" style="color: white">
+            JIRA Issue
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive-md ">
+                        <table class="table table-bordered table-striped mb-0">
+                            <tbody class="text-left logtable">
+                            @foreach (var marker in _tmpList)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col">
+                                                Marker here
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                Log Entries:
+                                            </div>
+                                            <div class="col">
+                                                Timespan:
+                                            </div>
+                                            <div class="col">
+                                                <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+                                                    <InputCheckbox class="form-check" @bind-Value="_ticketModel.checkBoxTMP"></InputCheckbox>
+                                                </EditForm>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+
+
+            <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+            <div class="row">
+                <div class="col-md-6 text-left">
+                    <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputText>
+                </div>
+                <div class="col-md-6 text-left">
+                    <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
+                        @foreach (var type in _types)
+                        {
+                            <option>@type</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+                
+            <br>
+                
+            <div class="row text-left">
+                <div class="col-md-6">
+                    <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Message" placeholder="Enter message..."></InputTextArea>
+                </div>
+                <div class="col-md-6">
+                    <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
+                        @foreach (var prio in _prioLevel)
+                        {
+                            <option>@prio</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            
+            <br>
+            
+            <div class="row">
+                <div class="col-6 text-center">
+                    
+                </div>
+                <div class="col-6 text-left">
+                    <button class="btn btn-primary" type="submit">Create Ticket</button>
+                </div>
+            </div>
+        </EditForm>
+        </div>
+    </div>
+</section>
+
+@code {
+    /*
+     * List with the priority levels
+     */
+    private readonly List<string> _prioLevel = new List<string>(){"High", "Major", "Low"};
+    
+    /*
+     * List with the task types
+     */
+    private readonly List<string> _types = new List<string>(){"Task", "Bug", "Entry"};
+    
+    /*
+     * Instance of the ticket model class
+     */
+    private readonly TicketModel _ticketModel = new TicketModel();
+    
+    /*
+     * This is just for testing, okay?
+     */
+    private List<Marker> _tmpList = new List<Marker>();
+
+
+    private void HandleSubmit()
+    {
+        
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _tmpList = MarkerBridge.selectedMarkers;
+    }
+
+    /*
+     * Model class
+     */
+    public class TicketModel
+    
+    {
+        /*
+         * Description of the jira ticket
+         */
+        public string Description { get; set; }
+
+        /*
+         * Message of the jira ticket
+         */
+        public string Message { get; set; }
+
+        /*
+         * Priority of the jira ticket
+         */
+        public string Priority { get; set; }
+
+        /*
+         * Type of the jira ticket
+         */
+        public string Type { get; set; }
+        
+        /*
+         * This is just for testing, okay?
+         */
+        public bool checkBoxTMP;
+    }
+    
+}
