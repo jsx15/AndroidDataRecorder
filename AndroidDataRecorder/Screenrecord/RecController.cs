@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
-using AndroidDataRecorder.Backend;
+using AndroidDataRecorder.Misc;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Screenrecord
@@ -34,7 +33,7 @@ namespace AndroidDataRecorder.Screenrecord
                 Screenrecord tmpDevice = new Screenrecord(device, videoLength);
                 
                 //store screen record object in dictionary
-                RecordList.Add(device.ToString(), tmpDevice);
+                RecordList.Add(device.Serial, tmpDevice);
                 
                 //start screen recording for this device
                 tmpDevice.StartScreenrecord();
@@ -50,13 +49,13 @@ namespace AndroidDataRecorder.Screenrecord
         public static void StopScrRec(DeviceData device)
         {
             //find device in dictionary
-            if (RecordList.TryGetValue(device.ToString(), out var obj))
+            if (RecordList.TryGetValue(device.Serial, out var obj))
             {
                 //stop recording of this device
                 obj.StopRecording();
                 
                 //remove device from list
-                RecordList.Remove(device.ToString());
+                RecordList.Remove(device.Serial);
             }
         }
 
@@ -68,56 +67,23 @@ namespace AndroidDataRecorder.Screenrecord
         private static bool IsRecording(DeviceData device)
         {
             //find device in dictionary
-            return RecordList.ContainsKey(device.ToString());
-        }
-
-        public static void StartCreatingVideo(DateTime markerTime, DeviceData deviceData, int videoLength,
-            int replayLength, int markerId)
-        {
-            new Thread (()=> CreateVideo(markerTime,deviceData,videoLength,replayLength,markerId)).Start();
+            return RecordList.ContainsKey(device.Serial);
         }
 
         /// <summary>
-        /// find all necessary files
-        /// concat these video files
-        /// delete text file
+        /// method to create a playable video files of separate unplayable files in timespan
         /// </summary>
-        /// <param name="markerTime">time of set marker</param>
-        /// <param name="deviceData">device from which the video is to be taken </param>
-        /// <param name="videoLength">length of the separate video parts</param>
-        /// <param name="replayLength">length of the resulting video</param>
-        /// <param name="markerId">marker ID</param>
-        /// <returns></returns>
-        private static void CreateVideo(DateTime markerTime, DeviceData deviceData, int videoLength,int replayLength, int markerId)
+        /// <param name="marker">marker with range around it</param>
+        /// <param name="startTime">start of the time range</param>
+        /// <param name="endTime">end of the time range</param>
+        /// <param name="videoLength">video length of the separate video parts</param>
+        public static void StartCreatingVideo(Marker marker, DateTime startTime, DateTime endTime, int videoLength)
         {
-            //create path of the video files
-            var videoPath = Config.GetVideoDirPath + deviceData + Path.DirectorySeparatorChar;
-
-            //create resulting video name
-            var videoName = "marker_" + markerId + deviceData.Name;
+            //Thread to start video creation
+            new Thread (()=> MarkerVideo.CreateVideo(marker.devicename,marker.deviceSerial,startTime,endTime,marker.markerId,videoLength)).Start();
             
-            //create path of the text file
-            var textFilePath = videoPath + "list_marker_" + markerId + ".txt";
-            
-            //get all files in the time range
-            var fileList = MarkerVideo.GetVideoFiles(markerTime, videoPath, videoLength, replayLength);
-            
-            //check if there is a file in this range
-            if (fileList.Count == 0) return;
-            
-            Console.WriteLine(fileList[^1]);
-            
-            //get last or newest file of this list
-            var fileInfo = new FileInfo(fileList[^1]);
-            
-            //wait till recording of this file is done
-            while (HandleFiles.IsFileLocked(fileInfo)) { }
-            
-            //concatenate all video parts
-            HandleFiles.ConcVideoFiles(fileList,Config.GetVideoDirPath, textFilePath,videoName);
-            
-            //delete text file
-            HandleFiles.DeleteFile(textFilePath);
+            Console.WriteLine("Thread started to create concatenate video");
         }
+        
     }
 }

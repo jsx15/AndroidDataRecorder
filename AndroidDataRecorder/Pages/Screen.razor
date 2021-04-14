@@ -12,7 +12,9 @@
 
 @code {
 
-    DateTime marker;
+    private Marker _marker;
+    DateTime startTime;
+    DateTime endTime;
     /*
      * Start recording
      */
@@ -42,14 +44,19 @@
 
     public void CreateMarker()
     {
-        marker = DateTime.Now;
-        Console.WriteLine("Marker created: " + marker);
+        _marker = new Marker();
+        _marker.markerId = 1;
+        _marker.devicename = "hero2lte";
+        _marker.timeStamp = DateTime.Now;
+        _marker.deviceSerial = "9885b64548364a5158";
+        startTime = DateTime.Now.AddMinutes(-2);
+        endTime = DateTime.Now.AddMinutes(2);
+        Console.WriteLine("Marker created:\n" + "Marker time: " + _marker.timeStamp + "\nstartTime: "+startTime+"\nendtime: "+endTime);
     }
 
     public void CreateVideo()
     {
-        Console.WriteLine("Create Video for marker time: "+marker);
-        RecController.StartCreatingVideo(marker, MarkerList.ActiveDeviceData, 5000, 120000, 1);
+        Console.WriteLine("Create Video for marker time: "+_marker.timeStamp);
+        RecController.StartCreatingVideo(_marker, startTime, endTime, 5000);
     }
-    
 }

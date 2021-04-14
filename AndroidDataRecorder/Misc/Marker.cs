@@ -5,7 +5,7 @@ namespace AndroidDataRecorder.Misc
 {
     public class Marker : Entry
     {
-
+        public string deviceSerial;
         public int markerId { set; get; }
         public Marker(){}
 
