@@ -75,6 +75,7 @@ namespace AndroidDataRecorder.Backend
                             {
                                 watch.Stop();
                                 _device = d;
+                                if(!_database.DeviceList().Exists(x => x.serial.Equals(_device.Serial))) _database.InsertValuesIntoDeviceTable(_device.Serial, _device.Name);
                                 InitializeProcess();
                             }
                         }

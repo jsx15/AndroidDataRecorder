@@ -17,12 +17,10 @@ namespace AndroidDataRecorder
 
 
             Config.LoadConfig();
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 
             Database.Database db = new Database.Database();
             db.ConnectionToDatabase();
-            
-            db.InsertValuesIntoDeviceTable("$€r!@l33", "name");
 
             foreach (var dev in db.DeviceList())
             {
