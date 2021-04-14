@@ -38,13 +38,13 @@ namespace AndroidDataRecorder.Screenrecord
         public void StartScreenrecord()
         {
             //variable for device ID
-            string deviceId = _deviceObj.ToString();
+            string deviceSerial = _deviceObj.Serial;
 
             //set record state to true
             _record = true;
 
             //create thread
-            var recordProcess = new Thread(() => PrepareRecord(deviceId));
+            var recordProcess = new Thread(() => PrepareRecord(deviceSerial));
 
             //start thread
             recordProcess.Start();
@@ -57,8 +57,8 @@ namespace AndroidDataRecorder.Screenrecord
         /// start merging files
         /// delete all files to get one video
         /// </summary>
-        /// <param name="device">device id</param>
-        private void PrepareRecord(string device)
+        /// <param name="deviceSerial">device id</param>
+        private void PrepareRecord(string deviceSerial)
         {
             //prepare adb process
             var scProc = new Process
@@ -68,7 +68,7 @@ namespace AndroidDataRecorder.Screenrecord
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
                     //add arguments for screenrecord
-                    Arguments = "-s " + device + " exec-out screenrecord --output-format=h264 - ",
+                    Arguments = "-s " + deviceSerial + " exec-out screenrecord --output-format=h264 - ",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //redirect standard output
@@ -79,16 +79,16 @@ namespace AndroidDataRecorder.Screenrecord
             };
 
             //create path for files and set local path variable
-            var path = VideoPath.Create(device);
+            var path = VideoPath.Create(deviceSerial);
 
             //safe touch settings for restore
-            var touchState = Touches.GetStatus(device);
+            var touchState = Touches.GetStatus(deviceSerial);
 
             //check if touch already active
             if (!touchState)
             {
                 //show screen touch
-                Touches.ShowTouches(device);
+                Touches.ShowTouches(deviceSerial);
             }
 
             //record while bool is true
@@ -108,11 +108,12 @@ namespace AndroidDataRecorder.Screenrecord
             if (!touchState)
             {
                 //hide screen touch
-                Touches.HideTouches(device);
+                Touches.HideTouches(deviceSerial);
             }
             Console.WriteLine("Record process finished " + _deviceObj.Name);
         }
 
+        
         /// <summary>
         /// start and stop the screenrecord process
         /// create video file

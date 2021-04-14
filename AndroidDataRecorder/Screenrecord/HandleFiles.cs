@@ -38,7 +38,7 @@ namespace AndroidDataRecorder.Screenrecord
                     FileName = Config.GetFfmpegPath(),
                     //set arguments for concatenating all files in list.txt
                     Arguments = @"-f concat -safe 0 -i " + listFile + " -c copy " +
-                                videoPath + videoName + ".mp4",
+                                videoPath + videoName + ".mp4 -y",
                     //redirect standard input
                     RedirectStandardInput = true,
                     //use not shell execute
@@ -53,14 +53,12 @@ namespace AndroidDataRecorder.Screenrecord
             if (!File.Exists(listFile))
             {
                 //create a stream writer
-                using (var sw = File.CreateText(listFile))
+                using var sw = File.CreateText(listFile);
+                //list all files in the text file
+                foreach (var file in filesToMerge)
                 {
-                    //list all files in the text file
-                    foreach (var file in filesToMerge)
-                    {
-                        //write with syntax for ffmpeg
-                        sw.WriteLine("file '" + file + "'");
-                    }
+                    //write with syntax for ffmpeg
+                    sw.WriteLine("file '" + file + "'");
                 }
             }
 
@@ -81,11 +79,11 @@ namespace AndroidDataRecorder.Screenrecord
             try
             {
                 //try to open and read a file
-                using (FileStream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    //close stream if it was possible
-                    stream.Close();
-                }
+                using FileStream stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+                
+                //close stream if it was possible
+                stream.Close();
+                
             } //if file i in use -> catch exception
             catch (IOException)
             {
