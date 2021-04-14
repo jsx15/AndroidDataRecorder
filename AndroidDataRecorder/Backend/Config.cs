@@ -152,10 +152,11 @@ namespace AndroidDataRecorder.Backend
             _source.KnownDevices.Clear();
         }
 
-        public static List<string> GetKnownDevices()
-        {
-            return _source.KnownDevices;
-        }
+        /// <summary>
+        /// Get the list of known devices
+        /// </summary>
+        /// <returns> The list of known devices </returns>
+        public static List<string> GetKnownDevices() => _source.KnownDevices;
         
         /// <summary>
         /// Add a recording device
