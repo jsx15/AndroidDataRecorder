@@ -233,6 +233,6 @@ namespace AndroidDataRecorder.Backend
         public static bool ServerStatus()
         {
             return Server.GetStatus().IsRunning;
-        }
+        }        
     }
 }

@@ -107,7 +107,10 @@
 
     private void CreateMarker()
     {
-        _database.InsertValuesInTableMarker(MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
+        
+        // New Databasemethod
+        _database.InsertValuesInTableMarker(MarkerList.GetDeviceName(), MarkerList.GetDeviceSerial(), DateTime.Now, "Marker from pi");
+
         _markerList.Update();
     }
 

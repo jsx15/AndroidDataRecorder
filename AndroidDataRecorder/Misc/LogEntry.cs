@@ -48,6 +48,7 @@ namespace AndroidDataRecorder.Misc
         {
             deviceSerial = deviceserial;
             devicename = deviceName;
+            deviceSerial = deviceserial;
             timeStamp = systemTimestamp;
             DeviceTimestamp = deviceTimestamp;
             Pid = pid;

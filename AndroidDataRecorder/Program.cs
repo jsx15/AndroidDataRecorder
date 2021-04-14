@@ -21,16 +21,7 @@ namespace AndroidDataRecorder
 
             Database.Database db = new Database.Database();
             db.ConnectionToDatabase();
-            
-            db.InsertValuesInTableResources("12345", "name", 1, 2, 3, DateTime.Now);
-            
-            
-            var log = db.ResourcesIntensLists("name2").ElementAt(db.ResourcesIntensLists("name2").Count - 1);
-            Console.WriteLine(log.cpu + " " + log.timestamp);
 
-            var resourcesList = db.ResourcesLists("device001").ElementAt(db.ResourcesLists("device001").Count - 1);
-            Console.WriteLine(resourcesList.deviceName + " " + resourcesList.timestamp);
-            
 
 
         }

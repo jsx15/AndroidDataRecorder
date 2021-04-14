@@ -65,7 +65,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// </summary>
         /// <param name="device">device to get status whether screen recording is running</param>
         /// <returns></returns>
-        private static bool IsRecording(DeviceData device)
+        public static bool IsRecording(DeviceData device)
         {
             //find device in dictionary
             return RecordList.ContainsKey(device.ToString());
