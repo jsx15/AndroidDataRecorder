@@ -42,10 +42,11 @@ namespace AndroidDataRecorder.Misc
         /// <param name="logLevel">Log priority</param>
         /// <param name="app">App that produced the log</param>
         /// <param name="logMessage">Message from the log</param>
-        public LogEntry(string deviceName, DateTime systemTimestamp, DateTime deviceTimestamp, 
+        public LogEntry(string deviceserial, string deviceName, DateTime systemTimestamp, DateTime deviceTimestamp, 
             int pid, int tid, string logLevel, string app, string logMessage)
         {
             devicename = deviceName;
+            deviceSerial = deviceserial;
             timeStamp = systemTimestamp;
             DeviceTimestamp = deviceTimestamp;
             Pid = pid;

@@ -208,7 +208,12 @@
     {
         if (ValidateMarker())
         {
+            // New Databasemethod
+            // _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), Markerlist.GetDeviceSerial(), CurrDateTime, _markerSetMessage);
+            
+            // TODO remove old database method
             _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
+            
             ToastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
             _markerList.Update();
@@ -221,7 +226,7 @@
 
     private bool ValidateMarker()
     {
-        if (!string.IsNullOrWhiteSpace(_markerSetMessage) && !string.IsNullOrEmpty(MarkerList.GetDeviceName()))
+        if (!string.IsNullOrWhiteSpace(_markerSetMessage) && MarkerList.ActiveDeviceData is not null)
         {
             return true;
         }

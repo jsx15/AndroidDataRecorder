@@ -28,7 +28,7 @@ namespace AndroidDataRecorder.Misc
         {
             if (ActiveDeviceData != null)
             {
-                Markers = _data.ListWithMarker(ActiveDeviceData.Name);
+                Markers = _data.ListWithMarker(ActiveDeviceData.Serial);
             }
         }
 
@@ -37,7 +37,7 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public void Update()
         {
-            Markers = _data.ListWithMarker(ActiveDeviceData.Name);
+            Markers = _data.ListWithMarker(ActiveDeviceData.Serial);
         }
 
         /// <summary>
@@ -57,6 +57,11 @@ namespace AndroidDataRecorder.Misc
         public static string GetDeviceName()
         {
             return ActiveDeviceData is not null ? ActiveDeviceData.Name : "";
+        }
+
+        public static string GetDeviceSerial()
+        {
+            return ActiveDeviceData is not null ? ActiveDeviceData.Serial : "";
         }
 
         /// <summary>
