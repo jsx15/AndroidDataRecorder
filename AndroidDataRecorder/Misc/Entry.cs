@@ -11,6 +11,11 @@ namespace AndroidDataRecorder.Misc
         public string devicename { get; set; }
 
         /// <summary>
+        /// Serial of source
+        /// </summary>
+        public string deviceSerial { get; set; }
+        
+        /// <summary>
         /// Message inside the entry
         /// </summary>
         public string message { get; set; }

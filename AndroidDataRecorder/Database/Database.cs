@@ -16,43 +16,50 @@ namespace AndroidDataRecorder.Database
         /// <summary>
         /// Create a object for the Connection to the Database, the method needs the path to the database
         /// </summary>
-        /// <param name="datasource"></param>
         /// <returns> connection </returns>
-        public SQLiteConnection ConectionToDatabase()
+        public SQLiteConnection ConnectionToDatabase()
         {
             var connection = new SQLiteConnection(_datasource);
             connection.Open();
             return connection;
         }
+        
+        ///<summary>
+        /// Methods for the table Resources
+        /// </summary>
 
         /// <summary>
-        /// Insert the Values devicename, cpu, memory, timestamp to the table Resource.
+        /// Insert the Values deviceName, cpu, memory, timestamp to the table Resource.
         /// Just for testing
         /// </summary>
+        /// <param name="deviceSerial"></param>
         /// <param name="deviceName"></param>
         /// <param name="cpu"></param>
         /// <param name="memory"></param>
+        /// <param name="battery"></param>
         /// <param name="timestamp"></param>
-        public void InsertValuesInTableResources(string deviceName, int CPU, int Memory, int Battery,
-            DateTime Timestamp)
+        public void InsertValuesInTableResources(string deviceSerial, string deviceName, int cpu, int memory, int battery,
+            DateTime timestamp)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             //insert Query
             command.CommandText =
-                @"INSERT INTO Resources(DeviceName, CPU, Memory, Battery, Timestamp)
-                VALUES (@DeviceName, @CPU, @Memory,@Battery, @Timestamp)";
+                @"INSERT INTO Resources(Serial, DeviceName, CPU, Memory, Battery, Timestamp)
+                VALUES (@Serial, @DeviceName, @CPU, @Memory,@Battery, @Timestamp)";
 
-            // Define paramters to insert new values in the table
+            // Define parameters to insert new values in the table
+            SQLiteParameter p0 = new SQLiteParameter("@Serial", DbType.String);
             SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p2 = new SQLiteParameter("@CPU", DbType.Int32);
             SQLiteParameter p3 = new SQLiteParameter("@Memory", DbType.Int32);
-            SQLiteParameter p4 = new SQLiteParameter("Battery", DbType.Int32);
+            SQLiteParameter p4 = new SQLiteParameter("@Battery", DbType.Int32);
             SQLiteParameter p5 = new SQLiteParameter("@Timestamp", DbType.DateTime);
 
-            // Add the paramters to the table
+            // Add the parameters to the table
+            command.Parameters.Add(p0);
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
             command.Parameters.Add(p3);
@@ -60,65 +67,107 @@ namespace AndroidDataRecorder.Database
             command.Parameters.Add(p5);
 
             // define the Values which will be insert to the table
+            p0.Value = deviceSerial;
             p1.Value = deviceName;
-            p2.Value = CPU;
-            p3.Value = Memory;
-            p4.Value = Battery;
-            p5.Value = Timestamp;
+            p2.Value = cpu;
+            p3.Value = memory;
+            p4.Value = battery;
+            p5.Value = timestamp;
 
             //Execute Query
             command.ExecuteNonQuery();
         }
         
+        /// <summary>
+        /// Creates a list of Resources Table
+        /// </summary>
+        /// <param name="deviceName"></param>
+        /// <returns> resList </returns>
+        public List<ResourcesList> ResourcesLists(string deviceName)
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+            
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Resources
+                    WHERE DeviceName LIKE @deviceName";
+            command.Parameters.AddWithValue("@deviceName", deviceName);
+                
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actual values of database
+            List<ResourcesList> resList = new List<ResourcesList>();
+
+            while (reader.Read())
+            {
+                resList.Add(new ResourcesList(
+                    reader.GetString(1), 
+                    reader.GetString(2), 
+                    reader.GetInt32(3),
+                    reader.GetInt32(4),
+                    reader.GetInt32(5), 
+                    reader.GetDateTime(6)));
+            }
+
+            return resList;
+        }
+        
         ///<summary>
-        /// Methods for the table Log
+        /// Methods for the table Marker
         /// </summary>
 
         /// <summary>
-        /// Insert the Values devicname and Timestamp into the table Marker
+        /// Insert the Values deviceName and Timestamp into the table Marker
         /// </summary>
-        /// <param name="DeviceName"></param>
-        /// <param name="Timestamp"></param>
-        public void InsertValuesInTableMarker(string DeviceName, DateTime Timestamp, string markerMessage)
+        /// <param name="deviceSerial"></param>
+        /// <param name="deviceName"></param>
+        /// <param name="markerMessage"></param>
+        /// <param name="timestamp"></param>
+        public void InsertValuesInTableMarker(string deviceSerial, string deviceName, DateTime timestamp, string markerMessage)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             //insert Query
             command.CommandText =
-                @"INSERT INTO Marker(DeviceName, Timestamp, MarkerMessage)
-                VALUES (@DeviceName, @Timestamp, @MarkerMessage)";
+                @"INSERT INTO Marker(Serial, DeviceName, Timestamp, MarkerMessage)
+                VALUES (@Serial, @DeviceName, @Timestamp, @MarkerMessage)";
 
-            // Define paramters to insert new values in the table
+            // Define parameters to insert new values in the table
+            SQLiteParameter p0 = new SQLiteParameter("@Serial", DbType.String);
             SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p2 = new SQLiteParameter("@Timestamp", DbType.DateTime);
             SQLiteParameter p3 = new SQLiteParameter("@MarkerMessage", DbType.String);
 
-            // Add the paramters to the table
+            // Add the parameters to the table
+            command.Parameters.Add(p0);
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
             command.Parameters.Add(p3);
 
             // define the Values which will be insert to the table
-            p1.Value = DeviceName;
-            p2.Value = Timestamp;
+            p0.Value = deviceSerial;
+            p1.Value = deviceName;
+            p2.Value = timestamp;
             p3.Value = markerMessage;
             
             // Execute Query
             command.ExecuteNonQuery();
         }
-        
 
         /// <summary>
         /// Method which generate a List of Marker by searching specific Marker and return it
         /// </summary>
-        /// <param name="DeviceName"></param>
+        /// <param name="deviceName"></param>
         /// <returns> ListOfMarker </returns>
-        public List<Marker> ListWithMarker(string DeviceName)
+        public List<Marker> ListWithMarker(string deviceName)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             //insert Query
@@ -127,40 +176,45 @@ namespace AndroidDataRecorder.Database
                WHERE DeviceName LIKE @DeviceName";
 
             // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@DeviceName", DeviceName);
+            command.Parameters.AddWithValue("@DeviceName", deviceName);
 
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            // fill the list with the actuall values of database
-            List<Marker> MarkerList = new List<Marker>();
+            // fill the list with the actual values of database
+            List<Marker> markerList = new List<Marker>();
 
             while (reader.Read())
             {
-                MarkerList.Add(new Marker()
+                markerList.Add(new Marker()
                 {
                     markerId = reader.GetInt32(0),
-                    devicename = reader.GetString(1),
-                    timeStamp = reader.GetDateTime(2),
-                    message = reader.GetString(3)
+                    serial = reader.GetString(1),
+                    devicename = reader.GetString(2),
+                    timeStamp = reader.GetDateTime(3),
+                    message = reader.GetString(4)
                 });
             }
 
-            return MarkerList;
+            return markerList;
         }
 
-        public void DeleteMarker(int markerid)
+        /// <summary>
+        /// Delte the Marker which is equal with the param markeId
+        /// </summary>
+        /// <param name="markerId"></param>
+        public void DeleteMarker(int markerId)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
             //insert Query
             command.CommandText =
                 @"DELETE FROM Marker
-                    WHERE MarkerID = @markeriD";
+                    WHERE MarkerID = @markerID";
             
             // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@markerid", markerid);
+            command.Parameters.AddWithValue("@markerID", markerId);
 
             // Execute Query
             command.ExecuteNonQuery();
@@ -174,37 +228,40 @@ namespace AndroidDataRecorder.Database
         /// <summary>
         /// Insert Values Into the Table Logs
         /// </summary>
-        /// <param name="DeviceName"></param>
-        /// <param name="SystemTimestamp"></param>
-        /// <param name="DeviceTimestamp"></param>
-        /// <param name="PID"></param>
-        /// <param name="TID"></param>
-        /// <param name="Loglevel"></param>
-        /// <param name="APP"></param>
-        /// <param name="LogMessage"></param>
-        public void InsertValuesInTableLogs(string DeviceName, DateTime SystemTimestamp, DateTime DeviceTimestamp,
-            int PID, int TID, string Loglevel, string APP, string LogMessage)
+        /// <param name="deviceSerial"></param>
+        /// <param name="deviceName"></param>
+        /// <param name="systemTimestamp"></param>
+        /// <param name="deviceTimestamp"></param>
+        /// <param name="pid"></param>
+        /// <param name="tid"></param>
+        /// <param name="loglevel"></param>
+        /// <param name="app"></param>
+        /// <param name="logMessage"></param>
+        public void InsertValuesInTableLogs(string deviceSerial, string deviceName, DateTime systemTimestamp, DateTime deviceTimestamp,
+            int pid, int tid, string loglevel, string app, string logMessage)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             //insert Query
             command.CommandText =
-                @"INSERT INTO Logs(DeviceName, SystemTimestamp, DeviceTimestamp, PID, TID, Loglevel, APP, LogMessage)
-                VALUES (@DeviceName, @SystemTimestamp, @DeviceTimestamp,@PID, @TID, @Loglevel, @APP, @LogMessage)";
+                @"INSERT INTO Logs(Serial, DeviceName, SystemTimestamp, DeviceTimestamp, PID, TID, Loglevel, APP, LogMessage)
+                VALUES (@Serial, @DeviceName, @SystemTimestamp, @DeviceTimestamp,@PID, @TID, @Loglevel, @APP, @LogMessage)";
 
-            // Define paramters to insert new values in the table
+            // Define parameters to insert new values in the table
+            SQLiteParameter p0 = new SQLiteParameter("@Serial", DbType.String);
             SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
             SQLiteParameter p2 = new SQLiteParameter("@SystemTimestamp", DbType.DateTime);
             SQLiteParameter p3 = new SQLiteParameter("@DeviceTimestamp", DbType.DateTime);
-            SQLiteParameter p4 = new SQLiteParameter("PID", DbType.Int32);
+            SQLiteParameter p4 = new SQLiteParameter("@PID", DbType.Int32);
             SQLiteParameter p5 = new SQLiteParameter("@TID", DbType.Int32);
             SQLiteParameter p6 = new SQLiteParameter("@Loglevel", DbType.String);
             SQLiteParameter p7 = new SQLiteParameter("@APP", DbType.String);
             SQLiteParameter p8 = new SQLiteParameter("@LogMessage", DbType.String);
 
-            // Add the paramters to the table
+            // Add the parameters to the table
+            command.Parameters.Add(p0);
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
             command.Parameters.Add(p3);
@@ -215,14 +272,15 @@ namespace AndroidDataRecorder.Database
             command.Parameters.Add(p8);
 
             // define the Values which will be insert to the table
-            p1.Value = DeviceName;
-            p2.Value = SystemTimestamp;
-            p3.Value = DeviceTimestamp;
-            p4.Value = PID;
-            p5.Value = TID;
-            p6.Value = Loglevel;
-            p7.Value = APP;
-            p8.Value = LogMessage;
+            p0.Value = deviceSerial;
+            p1.Value = deviceName;
+            p2.Value = systemTimestamp;
+            p3.Value = deviceTimestamp;
+            p4.Value = pid;
+            p5.Value = tid;
+            p6.Value = loglevel;
+            p7.Value = app;
+            p8.Value = logMessage;
 
             //Execute Query
             command.ExecuteNonQuery();
@@ -235,7 +293,7 @@ namespace AndroidDataRecorder.Database
         public List<LogEntry> ListWithLogs()
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             //insert Query
@@ -245,16 +303,23 @@ namespace AndroidDataRecorder.Database
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            List<LogEntry> LogsList = new List<LogEntry>();
+            List<LogEntry> logsList = new List<LogEntry>();
 
             while (reader.Read())
             {
-                LogsList.Add(new LogEntry(reader.GetString(1), reader.GetDateTime(2), reader.GetDateTime(3),
-                    reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), reader.GetString(7),
-                    reader.GetString(8)));
+                logsList.Add(new LogEntry(
+                    reader.GetString(1), 
+                    reader.GetString(2),
+                    reader.GetDateTime(3), 
+                    reader.GetDateTime(4),
+                    reader.GetInt32(5), 
+                    reader.GetInt32(6), 
+                    reader.GetString(7), 
+                    reader.GetString(8),
+                    reader.GetString(9)));
             }
 
-            return LogsList;
+            return logsList;
 
         }
         
@@ -266,7 +331,7 @@ namespace AndroidDataRecorder.Database
         public List<LogEntry> LogListFilterByDevice(String device)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
             
             // Query for the Parameter device, with if else condition
@@ -290,21 +355,21 @@ namespace AndroidDataRecorder.Database
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            // fill the list with the actuall values of database
-            List<LogEntry> LogList = new List<LogEntry>();
+            // fill the list with the actual values of database
+            List<LogEntry> logList = new List<LogEntry>();
 
             while (reader.Read())
             {
-                LogList.Add(new LogEntry(reader.GetString(1), reader.GetDateTime(2), 
-                    reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), 
-                    reader.GetString(6), reader.GetString(7), reader.GetString(8)));
+                logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
+                    reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6), 
+                    reader.GetString(7), reader.GetString(8), reader.GetString(9)));
             }
 
-            return LogList;
+            return logList;
         }
         
         /// <summary>
-        /// Creates a List of Log List, which is filterd by the params timeStamp1, timeStamp2 and Loglevel
+        /// Creates a List of Log List, which is filtered by the params timeStamp1, timeStamp2 and Loglevel
         /// </summary>
         /// <param name="timeStamp1"></param>
         /// <param name="timeStamp2"></param>
@@ -313,7 +378,7 @@ namespace AndroidDataRecorder.Database
         public List<LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             if (loglevel.Equals("*") || loglevel.Equals("") || loglevel.StartsWith(" "))
@@ -344,17 +409,17 @@ namespace AndroidDataRecorder.Database
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            // fill the list with the actuall values of database
-            List<LogEntry> LogList = new List<LogEntry>();
+            // fill the list with the actual values of database
+            List<LogEntry> logList = new List<LogEntry>();
 
             while (reader.Read())
             {
-                LogList.Add(new LogEntry(reader.GetString(1), reader.GetDateTime(2),
-                    reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), 
-                    reader.GetString(7), reader.GetString(8)));
+                logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
+                    reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6), 
+                    reader.GetString(7), reader.GetString(8), reader.GetString(9)));
             }
 
-            return LogList;
+            return logList;
         }
 
         ///<summary>
@@ -364,34 +429,41 @@ namespace AndroidDataRecorder.Database
         ///<summary>
         /// Insert Values Into the table ResIntens
         /// </summary>
-        public void InsertValuesIntoTableResIntens(int cpu, int memory, string app, DateTime timestamp)
+        public void InsertValuesIntoTableResIntens(string serial, string deviceName, double cpu, double memory, string process, DateTime timestamp)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             //insert Query
             command.CommandText =
-                @"INSERT INTO ResIntens(CPU, Memory, Process, Timestamp)
-                VALUES (@CPU, @Memory, @Process, @Timestamp)";
+                @"INSERT INTO ResIntens(Serial, DeviceName, CPU, Memory, Process, Timestamp)
+                VALUES (@Serial, @DeviceName, @CPU, @Memory, @Process, @Timestamp)";
 
-            // Define paramters to insert new values in the table
-            SQLiteParameter p1 = new SQLiteParameter("@CPU", DbType.Int32);
-            SQLiteParameter p2 = new SQLiteParameter("@Memory", DbType.Int32);
-            SQLiteParameter p3 = new SQLiteParameter("@Process", DbType.String);
-            SQLiteParameter p4 = new SQLiteParameter("@Timestamp", DbType.DateTime);
+            // Define parameters to insert new values in the table
+            SQLiteParameter p0 = new SQLiteParameter("@Serial", DbType.String);
+            SQLiteParameter p1 = new SQLiteParameter("@DeviceName", DbType.String);
+            SQLiteParameter p2 = new SQLiteParameter("@CPU", DbType.Double);
+            SQLiteParameter p3 = new SQLiteParameter("@Memory", DbType.Double);
+            SQLiteParameter p4 = new SQLiteParameter("@Process", DbType.String);
+            SQLiteParameter p5 = new SQLiteParameter("@Timestamp", DbType.DateTime);
             
-            // Add the paramters to the table
+            // Add the parameters to the table
+            command.Parameters.Add(p0);
             command.Parameters.Add(p1);
             command.Parameters.Add(p2);
             command.Parameters.Add(p3);
             command.Parameters.Add(p4);
+            command.Parameters.Add(p5);
             
             // define the Values which will be insert to the table
-            p1.Value = cpu;
-            p2.Value = memory;
-            p3.Value = app;
-            p4.Value = timestamp;
+            p0.Value = serial;
+            p1.Value = deviceName;
+            p2.Value = cpu;
+            p3.Value = memory;
+            p4.Value = process;
+            p5.Value = timestamp;
+           
             //Execute Query
             command.ExecuteNonQuery();
         }
@@ -400,25 +472,33 @@ namespace AndroidDataRecorder.Database
         /// Returns a list of the table ResIntens
         /// </summary>
         /// <returns>resourcesIntensLists</returns>
-        public List<ResIntensList> ResourcesIntensLists()
+        public List<ResIntensList> ResourcesIntensLists(string deviceName)
         {
             // create connection to the database
-            var connection = ConectionToDatabase();
+            var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
             
                 //insert Query
                 command.CommandText =
-                    @"SELECT * FROM ResIntens";
-
+                    @"SELECT * FROM ResIntens
+                    WHERE DeviceName LIKE @deviceName";
+                command.Parameters.AddWithValue("@deviceName", deviceName);
+                
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
 
-            // fill the list with the actuall values of database
+            // fill the list with the actual values of database
             List<ResIntensList> resourcesIntensLists = new List<ResIntensList>();
 
             while (reader.Read())
             {
-                resourcesIntensLists.Add(new ResIntensList(reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3), reader.GetDateTime(4)));
+                resourcesIntensLists.Add(new ResIntensList(
+                    reader.GetName(1),
+                    reader.GetString(2),
+                    reader.GetDouble(3), 
+                    reader.GetDouble(4),
+                    reader.GetString(5),
+                    reader.GetDateTime(6)));
             }
 
             return resourcesIntensLists;
