@@ -58,6 +58,10 @@ namespace AndroidDataRecorder.Backend
         public TicketCreator()
         {
             _jira = Jira.CreateRestClient(_jiraServerUrl, _jiraUsername, _apiToken);
+            if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Tickets")))
+            {
+                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Tickets"));
+            }
         }
 
         /// <summary>
