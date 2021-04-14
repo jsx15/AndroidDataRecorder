@@ -29,7 +29,7 @@ namespace AndroidDataRecorder.Backend
         /// The grok to filter the logs
         /// </summary>
         private readonly Grok _grok = new Grok(
-            "%{USERNAME:device} %{TIMESTAMP_ISO8601:system_timestamp} %{TIMESTAMP_ISO8601:device_timestamp}%{SPACE}%{NUMBER:PID}%{SPACE}%{NUMBER:TID}%{SPACE}%{WORD:loglevel}%{SPACE}%{DATA:App}%{SPACE}:%{SPACE}%{GREEDYDATA:LogMessage}"
+            "%{DATA:serial} %{USERNAME:device} %{TIMESTAMP_ISO8601:system_timestamp} %{TIMESTAMP_ISO8601:device_timestamp}%{SPACE}%{NUMBER:PID}%{SPACE}%{NUMBER:TID}%{SPACE}%{WORD:loglevel}%{SPACE}%{DATA:App}%{SPACE}:%{SPACE}%{GREEDYDATA:LogMessage}"
         );
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// The CancellationToken for the Thread
         /// </summary>
-        private CancellationToken _token; 
+        private CancellationToken _token;
         
         /// <summary>
         /// Initialize by setting the device
@@ -108,7 +108,7 @@ namespace AndroidDataRecorder.Backend
             
             var receiver = new ConsoleOutputReceiver();
             AdbServer.GetClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
-            new Thread(() => SaveLogs(proc, _device.Name)).Start();
+            new Thread(() => SaveLogs(proc)).Start();
             AccessWorkload();
         }
 
@@ -117,20 +117,20 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <param name="proc"> The process to be executed </param>
         /// <param name="deviceName"> The name of the device </param>
-        private void SaveLogs(Process proc, String deviceName)
+        private void SaveLogs(Process proc)
         {
             proc.Start();
             while (!proc.StandardOutput.EndOfStream && !_token.IsCancellationRequested) {
                 string line = proc.StandardOutput.ReadLine();
                 if (!string.IsNullOrEmpty(line) && !line.StartsWith("---------"))
                 {
-                    line = deviceName + " " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + line;
+                    line = _device.Serial + " " + _device.Name + " " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + line;
                     
                     var grokResult = _grok.Parse(line);
-                    _database.InsertValuesInTableLogs(grokResult[0].Value.ToString(), 
-                        Convert.ToDateTime(grokResult[1].Value), Convert.ToDateTime(grokResult[2].Value), 
-                        Convert.ToInt32(grokResult[3].Value), Convert.ToInt32(grokResult[4].Value), 
-                        grokResult[5].Value.ToString(), grokResult[6].Value.ToString(), grokResult[7].Value.ToString());
+                    _database.InsertValuesInTableLogs(grokResult[0].Value.ToString(), grokResult[1].Value.ToString(), 
+                        Convert.ToDateTime(grokResult[2].Value), Convert.ToDateTime(grokResult[3].Value), 
+                        Convert.ToInt32(grokResult[4].Value), Convert.ToInt32(grokResult[5].Value), 
+                        grokResult[6].Value.ToString(), grokResult[7].Value.ToString(), grokResult[8].Value.ToString());
                 }
             }
         }
