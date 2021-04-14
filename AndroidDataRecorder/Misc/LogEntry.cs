@@ -1,5 +1,4 @@
 using System;
-using AndroidDataRecorder.Misc;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -55,5 +54,11 @@ namespace AndroidDataRecorder.Misc
             message = logMessage;
         }
         
+        public override string ToString()
+        {
+            return "" + devicename + " " + timeStamp + " " + DeviceTimestamp + " " + Pid + " " + Tid + " " + LogLevel +
+                   " " + App + ": " + message;
+        }
+
     }
 }
