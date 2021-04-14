@@ -18,17 +18,17 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Url of the jira server
         /// </summary>
-        private String _jiraServerUrl;
+        private readonly String _jiraServerUrl = Config.GetJiraServerUrl();
 
         /// <summary>
         /// Username who connects to the jira server
         /// </summary>
-        private String _jiraUsername;
+        private readonly String _jiraUsername = Config.GetJiraUsername();
         
         /// <summary>
         /// API token for logging in
         /// </summary>
-        private String _apiToken;
+        private readonly String _apiToken = Config.GetApiToken();
         
         /// <summary>
         /// Supported issue/ticket types
@@ -57,9 +57,6 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         public TicketCreator()
         {
-            _jiraServerUrl = "https://androiddebugger.atlassian.net/";
-            _jiraUsername = "e.kenner@gmx.net";
-            _apiToken = "XfgTiD10CbH1g0EvZkaw4974";
             _jira = Jira.CreateRestClient(_jiraServerUrl, _jiraUsername, _apiToken);
         }
 

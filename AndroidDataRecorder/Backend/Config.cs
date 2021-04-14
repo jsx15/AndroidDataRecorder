@@ -81,7 +81,25 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <returns> The path to the video directory </returns>
         public static string GetVideoDirPath => _source.VideoDirPath;
-        
+
+        /// <summary>
+        /// Get jira server url
+        /// </summary>
+        /// <returns>url of jira server</returns>
+        public static string GetJiraServerUrl() => _source.JiraServerUrl;
+
+        /// <summary>
+        /// Get jira username
+        /// </summary>
+        /// <returns>username for jira</returns>
+        public static string GetJiraUsername() => _source.JiraUsername;
+
+        /// <summary>
+        /// Get api token
+        /// </summary>
+        /// <returns>api token for jira</returns>
+        public static string GetApiToken() => _source.ApiToken;
+
         /// <summary>
         /// Connect to already known devices
         /// </summary>
@@ -191,6 +209,9 @@ namespace AndroidDataRecorder.Backend
             public string AdbPath { get; set; }
             public string FfmpegPath { get; set; }
             public string VideoDirPath { get; set; }
+            public string JiraServerUrl { get; set; }
+            public string JiraUsername { get; set; }
+            public string ApiToken { get; set; }
             public List<string> KnownDevices { get; set; }
             public Dictionary<string, bool> RecordingDevices { get; set; }
         }
