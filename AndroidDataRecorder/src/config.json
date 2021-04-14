@@ -1,1 +1,1 @@
-{"adbPath":"","ffmpegPath":"", "videoDirPath":"","knownDevices":[],"recordingDevices": {}}
+{"adbPath":"/usr/bin/adb","ffmpegPath":"", "videoDirPath":"","knownDevices":[],"recordingDevices": {}}

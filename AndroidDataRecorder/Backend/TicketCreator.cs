@@ -10,14 +10,29 @@ namespace AndroidDataRecorder.Backend
 {
     public class TicketCreator
     {
+        /// <summary>
+        /// Jira RestClient
+        /// </summary>
         private readonly Jira _jira;
 
+        /// <summary>
+        /// Url of the jira server
+        /// </summary>
         private String _jiraServerUrl;
 
+        /// <summary>
+        /// Username who connects to the jira server
+        /// </summary>
         private String _jiraUsername;
-
+        
+        /// <summary>
+        /// API token for logging in
+        /// </summary>
         private String _apiToken;
         
+        /// <summary>
+        /// Supported issue/ticket types
+        /// </summary>
         public enum TicketType
         {
             Bug,
@@ -25,6 +40,9 @@ namespace AndroidDataRecorder.Backend
             Task,
         }
         
+        /// <summary>
+        /// Supported issue/ticket types
+        /// </summary>
         public enum TicketPriority
         {
             Highest,
@@ -34,6 +52,9 @@ namespace AndroidDataRecorder.Backend
             Lowest,
         }
 
+        /// <summary>
+        /// Constructor which should only be initialized once 
+        /// </summary>
         public TicketCreator()
         {
             _jiraServerUrl = "https://androiddebugger.atlassian.net/";
@@ -42,6 +63,16 @@ namespace AndroidDataRecorder.Backend
             _jira = Jira.CreateRestClient(_jiraServerUrl, _jiraUsername, _apiToken);
         }
 
+        /// <summary>
+        /// Creates a ticket with .txt files attached
+        /// </summary>
+        /// <param name="combinedInfos">List of all selected markers</param>
+        /// <param name="projectKey">Jira project key needed for jira</param>
+        /// <param name="type">Ticket type</param>
+        /// <param name="priority">Ticket priority</param>
+        /// <param name="summary">Summary of the created issue/ticket</param>
+        /// <param name="assignee">Person who created the issue/ticket</param>
+        /// <param name="description">Issue/ticket description</param>
         public void CreateTicketTxt(List<Demo.combinedInfo> combinedInfos, String projectKey, TicketType type,
             TicketPriority priority, String summary, String assignee, [Optional] String description)
         {
@@ -68,6 +99,16 @@ namespace AndroidDataRecorder.Backend
             
         }
         
+        /// <summary>
+        /// Creates a ticket with .json files attached
+        /// </summary>
+        /// <param name="combinedInfos">List of all selected markers</param>
+        /// <param name="projectKey">Jira project key needed for jira</param>
+        /// <param name="type">Ticket type</param>
+        /// <param name="priority">Ticket priority</param>
+        /// <param name="summary">Summary of the created issue/ticket</param>
+        /// <param name="assignee">Person who created the issue/ticket</param>
+        /// <param name="description">Issue/ticket description</param>
         public void CreateTicketJson(List<Demo.combinedInfo> combinedInfos, String projectKey, TicketType type,
             TicketPriority priority, String summary, String assignee, [Optional] String description)
         {
@@ -94,6 +135,11 @@ namespace AndroidDataRecorder.Backend
             
         }
 
+        /// <summary>
+        /// private methode used in CreateTicketTxt, which creates files that will be attached
+        /// </summary>
+        /// <param name="info">combinedInfo object</param>
+        /// <param name="file">File path</param>
         private void CreateMarkerFile(Demo.combinedInfo info, String file)
         {
             FileInfo fi = new FileInfo(file);
@@ -133,6 +179,11 @@ namespace AndroidDataRecorder.Backend
             }
         }
 
+        /// <summary>
+        /// private methode used in CreateTicketJson, which creates files that will be attached
+        /// </summary>
+        /// <param name="info">combinedInfo object</param>
+        /// <param name="file">File path</param>
         private void CreateMarkerJson(Demo.combinedInfo info, String file)
         {
             FileInfo fi = new FileInfo(file);
@@ -159,11 +210,14 @@ namespace AndroidDataRecorder.Backend
             }
         }
 
+        /// <summary>
+        /// Used to replace spaces and slashes from DateTime.Now.ToString() with underscores
+        /// </summary>
+        /// <returns>alternative string value for DateTime.Now.ToString()</returns>
         private string GetDate()
         {
             String temp = DateTime.Now.ToString().Replace("/","_");
             
-
             return temp.Replace(" ","_");
         }
 
