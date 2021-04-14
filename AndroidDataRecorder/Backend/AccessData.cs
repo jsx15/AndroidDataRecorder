@@ -163,11 +163,11 @@ namespace AndroidDataRecorder.Backend
 
                     var time = DateTime.Now;
                     
-                    _database.InsertValuesInTableResources(_device.Name, cpu, mem, _batteryLevel, time);
+                    _database.InsertValuesInTableResources(_device.Serial, _device.Name, cpu, mem, _batteryLevel, time);
 
                     for (int i = 0; i < 5; i++)
                     {
-                        _database.InsertValuesIntoTableResIntens(_device.Name,
+                        _database.InsertValuesIntoTableResIntens(_device.Serial, _device.Name,
                             double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             double.Parse(memFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             fiveProcesses[i].ToString(), time);

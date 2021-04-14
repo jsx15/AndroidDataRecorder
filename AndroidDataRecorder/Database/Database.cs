@@ -309,7 +309,7 @@ namespace AndroidDataRecorder.Database
             {
                 logsList.Add(new Backend.LogEntry(
                     reader.GetString(1), 
-                    reader.GetString(2)
+                    reader.GetString(2),
                     reader.GetDateTime(3), 
                     reader.GetDateTime(4),
                     reader.GetInt32(5), 
@@ -360,9 +360,9 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                logList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2), 
-                    reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), 
-                    reader.GetString(6), reader.GetString(7), reader.GetString(8)));
+                logList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
+                    reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6), 
+                    reader.GetString(7), reader.GetString(8), reader.GetString(9)));
             }
 
             return logList;
@@ -414,9 +414,9 @@ namespace AndroidDataRecorder.Database
 
             while (reader.Read())
             {
-                logList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetDateTime(2),
-                    reader.GetDateTime(3), reader.GetInt32(4), reader.GetInt32(5), reader.GetString(6), 
-                    reader.GetString(7), reader.GetString(8)));
+                logList.Add(new Backend.LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
+                    reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6), 
+                    reader.GetString(7), reader.GetString(8), reader.GetString(9)));
             }
 
             return logList;
