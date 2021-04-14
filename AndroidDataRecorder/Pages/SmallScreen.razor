@@ -109,11 +109,8 @@
     {
         
         // New Databasemethod
-        // _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), Markerlist.GetDeviceSerial(), DateTime.Now, "Marker from pi");
-                
-        // TODO remove old database method
-        _database.InsertValuesInTableMarker(MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
-        
+        _database.InsertValuesInTableMarker(MarkerList.GetDeviceName(), MarkerList.GetDeviceSerial(), DateTime.Now, "Marker from pi");
+
         _markerList.Update();
     }
 

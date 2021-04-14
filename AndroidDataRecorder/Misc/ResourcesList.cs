@@ -2,25 +2,24 @@
 
 namespace AndroidDataRecorder.Misc
 {
-    public class ResIntensList
+    public class ResourcesList
     {
         public string serial { get; set; }
         public string deviceName { get; set; }
-        public double cpu { get; set; }
-        public double memory { get; set; }
-        public string process { get; set; }
-
+        public int cpu { get; set; }
+        public int memory { get; set; }
+        public int battery { get; set; }
         public DateTime timestamp { get; set; }
         
-        public ResIntensList(){}
+        public ResourcesList(){}
 
-        public ResIntensList(string _serial, string _deviceName, double _cpu, double _memory, string _process, DateTime _timestamp)
+        public ResourcesList(string _serial, string _deviceName, int _cpu, int _memory, int _battery, DateTime _timestamp)
         {
             serial = _serial;
             deviceName = _deviceName;
             cpu = _cpu;
             memory = _memory;
-            process = _process;
+            battery = _battery;
             timestamp = _timestamp;
         }
     }

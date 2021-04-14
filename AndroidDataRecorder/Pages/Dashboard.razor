@@ -209,11 +209,8 @@
         if (ValidateMarker())
         {
             // New Databasemethod
-            // _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), Markerlist.GetDeviceSerial(), CurrDateTime, _markerSetMessage);
-            
-            // TODO remove old database method
-            _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
-            
+            _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), MarkerList.GetDeviceSerial(), CurrDateTime, _markerSetMessage);
+
             ToastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
             _markerList.Update();
