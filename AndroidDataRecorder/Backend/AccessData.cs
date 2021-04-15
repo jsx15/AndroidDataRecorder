@@ -20,6 +20,8 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private int _batteryLevel;
 
+        private string cpuUsageCommand;
+
         /// <summary>
         /// The database to write into
         /// </summary>
@@ -95,7 +97,7 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private void InitializeProcess()
         {
-            Process proc = new Process
+            var proc = new Process
             {
                 StartInfo = new ProcessStartInfo 
                 {
@@ -108,16 +110,23 @@ namespace AndroidDataRecorder.Backend
             };
             
             var receiver = new ConsoleOutputReceiver();
+            
+            //Empty the logs before starting to log
             AdbServer.GetClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
+            
+            //Decide which command to use for accessing the cpu usage by checking the devices build version
+            AdbServer.GetClient().ExecuteRemoteCommand("getprop ro.build.version.release", _device, receiver);
+            cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top -b -n 1" : "top -b -m 5 -n 1";
+            
+            //Start the logging and accessing of the workload
             new Thread(() => SaveLogs(proc)).Start();
             AccessWorkload();
         }
 
         /// <summary>
-        /// Save the logs to LogDaten.log located in home/user
+        /// Write all the logs consistently into the database table Logs
         /// </summary>
         /// <param name="proc"> The process to be executed </param>
-        /// <param name="deviceName"> The name of the device </param>
         private void SaveLogs(Process proc)
         {
             proc.Start();
@@ -137,7 +146,8 @@ namespace AndroidDataRecorder.Backend
         }
 
         /// <summary>
-        /// Get the CpuUsage, MemoryUsage and the BatteryLevel periodically every 30 seconds and write them into the database
+        /// Get the CpuUsage, MemoryUsage and the BatteryLevel periodically every 30 seconds and write them into the database --> Resources
+        /// Also gets the five most expensive processes and their CPU/mem usage and writes them into the database --> ResIntens
         /// </summary>
         private void AccessWorkload()
         {
@@ -147,25 +157,27 @@ namespace AndroidDataRecorder.Backend
                 {
                     var receiver = new ConsoleOutputReceiver();
                     
-                    AdbServer.GetClient().ExecuteRemoteCommand("top -b -m 5 -n 1", _device, receiver);
-
+                    //Get the cpu usage and the five most expensive processes
+                    AdbServer.GetClient().ExecuteRemoteCommand(cpuUsageCommand, _device, receiver);
                     var cpu = GetCpuUsage(receiver.ToString());
                     var fiveProcesses = GetFiveProcesses(receiver.ToString());
                     var cpuFiveProcesses = GetCpuFiveProcesses(receiver.ToString());
                     var memFiveProcesses = GetMemFiveProcesses(receiver.ToString());
                     
+                    //Get the memusage
                     AdbServer.GetClient().ExecuteRemoteCommand("cat /proc/meminfo", _device, receiver);
-
                     var mem = GetMemUsage(receiver.ToString());
             
+                    //Get the battery level
                     AdbServer.GetClient().ExecuteRemoteCommand("dumpsys battery", _device, receiver);
-
                     GetBatteryLevel(receiver.ToString());
 
                     var time = DateTime.Now;
                     
+                    //Insert CPU/mem usage and the battery level into Resources
                     _database.InsertValuesInTableResources(_device.Serial, _device.Name, cpu, mem, _batteryLevel, time);
 
+                    //Insert the five most expensive processes into ResIntens
                     for (int i = 0; i < 5; i++)
                     {
                         _database.InsertValuesIntoTableResIntens(_device.Serial, _device.Name,
@@ -174,6 +186,7 @@ namespace AndroidDataRecorder.Backend
                             fiveProcesses[i].ToString(), time);
                     }
 
+                    //Invoke the DeviceWorkloadChanged event and wait 30 seconds
                     AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(_device));
                     Thread.Sleep(30000);
                 }
