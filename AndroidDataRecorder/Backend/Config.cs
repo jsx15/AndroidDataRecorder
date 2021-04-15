@@ -183,6 +183,12 @@ namespace AndroidDataRecorder.Backend
         {
             _source.RecordingDevices.Clear();
         }
+
+        /// <summary>
+        /// Get the dictionary of recording devices 
+        /// </summary>
+        /// <returns> The recording devices </returns>
+        public static Dictionary<string, bool> GetRecordingDevices() => _source.RecordingDevices;
         
         /// <summary>
         /// The representation of the config.json file as a c# class

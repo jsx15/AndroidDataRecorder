@@ -29,10 +29,8 @@ namespace AndroidDataRecorder.Backend
         /// It's designed as Singleton
         /// </summary>
         public sealed class CustomMonitor
-        {  
-            CustomMonitor()  
-            {  
-            }  
+        {
+            private CustomMonitor() {}  
             private static readonly object Padlock = new object();  
             private static CustomMonitor _instance = null;
             public event EventHandler<DeviceDataEventArgs> DeviceWorkloadChanged;
@@ -50,6 +48,11 @@ namespace AndroidDataRecorder.Backend
                     }  
                 }  
             }
+            
+            /// <summary>
+            /// Invoke the event for DeviceWorkloadChanged
+            /// </summary>
+            /// <param name="e"> The DeviceDataEvent that is invoked </param>
             public void OnDeviceWorkloadChanged(DeviceDataEventArgs e)
             {
                 if (this.DeviceWorkloadChanged == null)
@@ -97,7 +100,10 @@ namespace AndroidDataRecorder.Backend
             return true;
         }
 
-
+        /// <summary>
+        /// Disconnect a device that was connected over a wireless connection
+        /// </summary>
+        /// <param name="ipAddressDevice"> The ip address of the device </param>
         public static void DisconnectWirelessClient(String ipAddressDevice)
         {
             try
