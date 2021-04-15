@@ -14,19 +14,11 @@ namespace AndroidDataRecorder
     {
         public static void Main(string[] args)
         {
-
-
+            //Load data from the Config file and start the adb server
             Config.LoadConfig();
-            CreateHostBuilder(args).Build().Run();
-
-            Database.Database db = new Database.Database();
-            db.ConnectionToDatabase();
-
-            foreach (var dev in db.DeviceList())
-            {
-                Console.WriteLine(dev.serial);
-            }
             
+            //Create the razor pages
+            CreateHostBuilder(args).Build().Run();
         }
         
 

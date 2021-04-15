@@ -65,6 +65,24 @@ namespace AndroidDataRecorder.Backend
         }
 
         /// <summary>
+        /// Connect to already known devices
+        /// </summary>
+        private static void ConnectKnownDevices()
+        {
+            try
+            {
+                for (int i = 0; i < _source.KnownDevices.Count - 1; i++)
+                {
+                    AdbServer.ConnectWirelessClient(_source.KnownDevices[i]);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        /// <summary>
         /// Get the path to the adb.exe
         /// </summary>
         /// <returns> The path to adb.exe </returns>
@@ -101,30 +119,13 @@ namespace AndroidDataRecorder.Backend
         public static string GetApiToken() => _source.ApiToken;
 
         /// <summary>
-        /// Connect to already known devices
-        /// </summary>
-        private static void ConnectKnownDevices()
-        {
-            try
-            {
-                for (int i = 0; i < _source.KnownDevices.Count - 1; i++)
-                {
-                    AdbServer.ConnectWirelessClient(_source.KnownDevices[i]);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-        /// <summary>
         /// Change the value in adbPath
         /// </summary>
         /// <param name="path"> The path to the adb.exe </param>
         public static void ChangeAdbPath(string path)
         {
             _source.AdbPath = path;
+            SaveConfig();
         }
         
         /// <summary>
@@ -134,8 +135,49 @@ namespace AndroidDataRecorder.Backend
         public static void ChangeFfMpegPath(string path)
         {
             _source.FfmpegPath = path;
+            SaveConfig();
         }
 
+        /// <summary>
+        /// Change the value of videoDirPath
+        /// </summary>
+        /// <param name="path"> The path to the video directory </param>
+        public static void ChangeVideoDirPath(string path)
+        {
+            _source.VideoDirPath = path;
+            SaveConfig();
+        }
+        
+        /// <summary>
+        /// Change the value of JiraServerUrl
+        /// </summary>
+        /// <param name="url"> the url of the Jira server </param>
+        public static void ChangeJiraServerUrl(string url)
+        {
+            _source.JiraServerUrl = url;
+            SaveConfig();
+        }
+        
+        /// <summary>
+        /// Change the value of JiraUsername
+        /// </summary>
+        /// <param name="username"> The username for Jira </param>
+        public static void ChangeJiraUsername(string username)
+        {
+            _source.JiraUsername = username;
+            SaveConfig();
+        }
+        
+        /// <summary>
+        /// Change the value of ApiToken
+        /// </summary>
+        /// <param name="apiToken"> The api token of Jira </param>
+        public static void ChangeApiToken(string apiToken)
+        {
+            _source.ApiToken = apiToken;
+            SaveConfig();
+        }
+        
         /// <summary>
         /// Add a device to the knownDevices list
         /// </summary>
@@ -147,7 +189,7 @@ namespace AndroidDataRecorder.Backend
         }
         
         /// <summary>
-        /// Remove a device from the knownDevices list
+        /// Remove a device from the knownDevices list via index
         /// </summary>
         /// <param name="index"> The index of the device </param>
         public static void DeleteKnownDevice(int index)
@@ -156,6 +198,10 @@ namespace AndroidDataRecorder.Backend
             SaveConfig();
         }
 
+        /// <summary>
+        /// Remove a device from the knownDevices list via address
+        /// </summary>
+        /// <param name="address"> The address of the device </param>
         public static void DeleteKnownDevice(string address)
         {
             _source.KnownDevices.Remove(address);
@@ -168,6 +214,7 @@ namespace AndroidDataRecorder.Backend
         public static void ClearKnownDevices()
         {
             _source.KnownDevices.Clear();
+            SaveConfig();
         }
 
         /// <summary>
@@ -183,6 +230,7 @@ namespace AndroidDataRecorder.Backend
         public static void AddRecordingDevice(string name)
         {
             _source.RecordingDevices.Add(name, true);
+            SaveConfig();
         }
         
         /// <summary>
@@ -192,6 +240,7 @@ namespace AndroidDataRecorder.Backend
         public static void DeleteRecordingDevice(string name)
         {
             _source.RecordingDevices.Remove(name);
+            SaveConfig();
         }
         
         /// <summary>
@@ -200,6 +249,7 @@ namespace AndroidDataRecorder.Backend
         public static void ClearRecordingDevices()
         {
             _source.RecordingDevices.Clear();
+            SaveConfig();
         }
 
         /// <summary>
