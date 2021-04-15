@@ -9,7 +9,7 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// List for all markers
         /// </summary>
-        public static List<Marker> Markers = new List<Marker>();
+        public static List<Marker> Markers { get; set; }
 
         /// <summary>
         /// Selected device
@@ -26,6 +26,7 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public MarkerList()
         {
+            Markers = new List<Marker>(); 
             if (ActiveDeviceData != null)
             {
                 Markers = _data.ListWithMarker(ActiveDeviceData.Serial);

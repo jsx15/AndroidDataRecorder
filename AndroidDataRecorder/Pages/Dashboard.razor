@@ -1,6 +1,7 @@
 @page "/Dashboard"
 @using System.Threading;
 @using AndroidDataRecorder.Misc
+@using System.Globalization
 
 @inject IToastService ToastService;
 @page "/"
@@ -188,6 +189,7 @@
                         </tr>
                         </thead>
                         <tbody>
+                        @*@foreach (var marker in Enumerable.Reverse(_markerList.Markers))*@
                         @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                         {
                             <tr>
@@ -206,6 +208,9 @@
 
 
 @code {
+    
+    
+    
     /*
      * Current time and date
      */
