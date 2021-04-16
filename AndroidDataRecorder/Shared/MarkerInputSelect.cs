@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using AndroidDataRecorder.Misc;
 using Microsoft.AspNetCore.Components.Forms;
@@ -31,14 +32,22 @@ namespace AndroidDataRecorder.Shared
         /// <returns>Marker</returns>
         protected override bool TryParseValueFromString(string? value, out TValue result, out string? validationErrorMessage)
         {
-            if (typeof(TValue) == typeof(Marker))
+            try
             {
-                Console.WriteLine("Custom Input Select");
-                validationErrorMessage = null;
-                result = (TValue)(object) MarkerList.Markers.Find(x => x.MarkerId.Equals(Convert.ToInt32(value)));
+                if (typeof(TValue) == typeof(Marker))
+                {
+                    Console.WriteLine("Custom Input Select");
+                    validationErrorMessage = null;
+                    result = (TValue) (object) MarkerList.Markers.Find(x => x.MarkerId.Equals(Convert.ToInt32(value)));
 
-                return true;
+                    return true;
+                }
             }
+            catch (Exception)
+            {
+                return base.TryParseValueFromString(value, out result, out validationErrorMessage);
+            }
+
             return base.TryParseValueFromString(value, out result, out validationErrorMessage);
         }
     }

@@ -1,6 +1,7 @@
 ﻿@page "/ticket"
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Services
+@using AndroidDataRecorder.Backend
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -37,7 +38,7 @@
                                                 Log Entries: @filter.Logs.Count
                                             </div>
                                             <div class="col">
-                                                Timespan: @CalculateTimeSpan(filter.timeSpanMinus, filter.timeSpanPlus)
+                                                Timespan: @CalculateTimeSpan(filter.timeSpanMinus, filter.timeSpanPlus) minutes
                                             </div>
                                             <div class="col">
                                                 <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
@@ -61,11 +62,11 @@
             <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
                 <div class="row">
                     <div class="col-md-6 text-left">
-                        <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputText>
+                        <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
                     </div>
                     <div class="col-md-6 text-left">
                         <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
-                            @foreach (var type in Enum.GetValues(typeof(IssueType)))
+                            @foreach (var type in Enum.GetValues(typeof(TicketCreator.TicketType)))
                             {
                                 <option>@type</option>
                             }
@@ -77,11 +78,11 @@
 
                 <div class="row text-left">
                     <div class="col-md-6">
-                        <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Message" placeholder="Enter message..."></InputTextArea>
+                        <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
                     </div>
                     <div class="col-md-6">
                         <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
-                            @foreach (var priority in Enum.GetValues(typeof(PrioLevel)))
+                            @foreach (var priority in Enum.GetValues(typeof(TicketCreator.TicketPriority)))
                             {
                                 <option>@priority</option>
                             }
@@ -91,42 +92,19 @@
 
                 <br>
 
-                <div class="row">
-                    <div class="col-6 text-center">
-
-                    </div>
-                    <div class="col-6 text-left">
-                        <button class="btn btn-primary" type="submit">Create Ticket</button>
-                    </div>
+                <div class="d-flex flex-row-reverse">
+                    <button class="btn btn-primary m-3" type="submit">Create Ticket</button>
                 </div>
             </EditForm>
+
         </div>
+
     </div>
+
+
 </section>
 
 @code {
-    /*
-     * Enum with the priority levels
-     */
-    private enum PrioLevel
-    {
-        Highest,
-        High,
-        Medium,
-        Low,
-        Lowest
-    }
-
-    /*
-     * Enum with the task types
-     */
-    private enum IssueType
-    {
-        Task,
-        Bug,
-        Story
-    }
-
     /*
      * Instance of the ticket model class
      */
@@ -140,6 +118,16 @@
 
     private void HandleSubmit()
     {
+        TicketCreator tc = new TicketCreator();
+        
+        tc.CreateTicketTxt(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority,_ticketModel.Title, "JS",_ticketModel.Description);
+        
+        _filters.Clear();
+        LogBridge.Filters.Clear();
+        
+        _ticketModel.Description = String.Empty;
+        _ticketModel.Title = String.Empty;
+        
     }
 
     private double CalculateTimeSpan(double start, double stop)
@@ -156,34 +144,33 @@
     /*
      * Model class
      */
-
     private class TicketModel
 
     {
-    /*
-     * Description of the jira ticket
-     */
-    public string Description { get; set; }
+        /*
+         * Description of the jira ticket
+         */
+        public string Title { get; set; }
 
-    /*
-     * Message of the jira ticket
-     */
-    public string Message { get; set; }
+        /*
+         * Message of the jira ticket
+         */
+        public string Description { get; set; }
 
-    /*
-     * Priority of the jira ticket
-     */
-    public string Priority { get; set; }
+        /*
+         * Priority of the jira ticket
+         */
+        public TicketCreator.TicketPriority Priority { get; set; }
 
-    /*
-     * Type of the jira ticket
-     */
-    public string Type { get; set; }
+        /*
+         * Type of the jira ticket
+         */
+        public TicketCreator.TicketType Type { get; set; }
 
-    /*
-     * This is just for testing, okay?
-     */
-    public bool checkBoxVideo;
+        /*
+         * This is just for testing, okay?
+         */
+        public bool checkBoxVideo;
     }
 
 }
