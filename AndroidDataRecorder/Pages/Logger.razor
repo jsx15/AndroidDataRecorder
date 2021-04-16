@@ -20,36 +20,18 @@
             Filter
         </div>
         <div class="card-body">
-            @for (var i = 0; i<_filterList.Count; i++)
-            {
-                var filterModel = _filterList[i];
-            
-                Marker marker = null;
-                @if (i < _localSelectedMarkers.Count)
-                {
-                    marker = _localSelectedMarkers[i];
-                    filterModel.marker = marker;
-                }
-            
-            
+            @foreach(var filterModel in _filterList) {
+                
                 <EditForm Model="filterModel" OnSubmit="() => Submit(filterModel)">
                     <div class="row">
                         <div class="col">
                             Marker:
-                            <InputSelect class="form-control" @bind-Value="filterModel.marker">
-                                @if (marker is not null)
+                            <MarkerInputSelect class="form-control" @bind-Value="filterModel.marker">
+                                @foreach (var mar in MarkerList.Markers)
                                 {
-                                    <option value="@marker.markerId">@marker.timeStamp</option>
+                                    <option value="@mar.MarkerId">@mar.timeStamp</option>
                                 }
-                                else
-                                {
-                                    foreach (var allMarker in MarkerList.Markers)
-                                    {
-                                        <option value="@allMarker.markerId">@allMarker.timeStamp</option>
-                                    }
-                                }
-
-                            </InputSelect>
+                            </MarkerInputSelect>
                         </div>
                         <div class="col">
                             Timespan - (Minutes):
@@ -85,9 +67,9 @@
                         </div>
                     </div>
                 </EditForm>
-                
+
                 <br>
-           
+
             }
             <button class="btn btn-primary text-center" @onclick="AddFilter">Add Filter</button>
         </div>
@@ -213,26 +195,35 @@
         
         _localSelectedMarkers = MarkerBridge.selectedMarkers;
         
-        foreach (var unused in _localSelectedMarkers)
+        foreach (var mar in _localSelectedMarkers)
         {
-            _filterList.Add(new Filter());
+            _filterList.Add(new Filter(mar));
         }
     }
 
+    /*
+     * Add filter
+     */
     private void AddFilter()
     {
         _filterList.Add(new Filter());
         StateHasChanged();
     }
 
+    /*
+     * Add filter to bridge to ticket page
+     */
     private void AddFilterToBridge(Filter filter)
     {
         LogBridge.Filters.Add(filter);
     }
 
+    /*
+     * Convert timestamp
+     */
     private string TimeStampForLogTable(Filter filter)
     {
-        return filter.marker is not null ? filter.marker.timeStamp.ToString() : "";
+        return filter.marker.timeStamp.ToString();
     }
     
 

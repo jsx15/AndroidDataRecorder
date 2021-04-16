@@ -26,11 +26,11 @@
                 @foreach (var element in _elements)
                 {
                     <tr style="background: @element.Color" @onclick="() => RowSelected(element)">
-                        <td>@element.Marker.markerId</td>
+                        <td>@element.Marker.MarkerId</td>
                             <td>@element.Marker.timeStamp</td>
                             <td class="w-75">@element.Marker.message</td>
                         <td class="text-center">
-                            <button @onclick="() => DeleteButton(element.Marker.markerId)" @onclick:stopPropagation="true" class="btn btn-danger">
+                            <button @onclick="() => DeleteButton(element.Marker.MarkerId)" @onclick:stopPropagation="true" class="btn btn-danger">
                                 <span style="vertical-align: middle" class="oi oi-circle-x"></span>
                             </button>
                         </td>

@@ -1,31 +1,50 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.SqlTypes;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.WebEncoders.Testing;
 
 namespace AndroidDataRecorder.Misc
 {
     public class Filter
     { 
-        /*
-         * Marker
-         */
+        /// <summary>
+        /// Marker
+        /// </summary>
         public Marker marker { get; set; }
 
-        /*
-         * The Loglevel
-         */
+        /// <summary>
+        /// Loglevel
+        /// </summary>
         public string Level { get; set; }
 
-        /*
-         * TimeSpan for the marker --> plus or minus minutes
-         */
+        /// <summary>
+        /// TimeSpan for the marker --> plus or minus minutes
+        /// </summary>
         public double timeSpanMinus;
         public double timeSpanPlus;
 
-        /*
-         * List for LogEntries
-         */
+        /// <summary>
+        /// List for LogEntries
+        /// </summary>
         public List<LogEntry> Logs = new List<LogEntry>();
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="mar">Marker to set in Filter</param>
+        public Filter(Marker mar)
+        {
+         marker = mar;
+        }
+        
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Filter()
+        {
+         marker = new Marker();
+        }
     }
 }

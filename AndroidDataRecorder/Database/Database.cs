@@ -189,7 +189,7 @@ namespace AndroidDataRecorder.Database
             {
                 markerList.Add(new Marker()
                 {
-                    markerId = reader.GetInt32(0),
+                    MarkerId = reader.GetInt32(0),
                     deviceSerial = reader.GetString(1),
                     devicename = reader.GetString(2),
                     timeStamp = reader.GetDateTime(3),
