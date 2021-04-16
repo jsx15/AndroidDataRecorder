@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using AndroidDataRecorder.Backend;
-using AndroidDataRecorder.Misc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-
 
 namespace AndroidDataRecorder
 {
@@ -15,20 +9,9 @@ namespace AndroidDataRecorder
         public static void Main(string[] args)
         {
 
-
             Config.LoadConfig();
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 
-            Database.Database db = new Database.Database();
-            db.ConnectionToDatabase();
-            
-            db.InsertValuesIntoDeviceTable("$€r!@l33", "name");
-
-            foreach (var dev in db.DeviceList())
-            {
-                Console.WriteLine(dev.serial);
-            }
-            
         }
         
 
