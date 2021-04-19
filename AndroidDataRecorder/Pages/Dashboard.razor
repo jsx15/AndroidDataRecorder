@@ -269,7 +269,7 @@
     {
         if (ValidateMarker())
         {
-            _data.InsertValuesInTableMarker(MarkerList.GetDeviceName(), MarkerList.GetDeviceSerial(), CurrDateTime, _markerSetMessage);
+            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial() ,MarkerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
 
             ToastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
