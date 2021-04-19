@@ -33,7 +33,7 @@ namespace AndroidDataRecorder.Screenrecord
         }
 
         /// <summary>
-        /// start thread for screenrecord
+        /// start thread for screen record
         /// </summary>
         public void StartScreenrecord()
         {
@@ -51,7 +51,7 @@ namespace AndroidDataRecorder.Screenrecord
         }
 
         /// <summary>
-        /// prepare process for screenrecord
+        /// prepare process for screen record
         /// create path for files
         /// check for maximum video number -> delete file
         /// start merging files
@@ -67,7 +67,7 @@ namespace AndroidDataRecorder.Screenrecord
                 {
                     //path to adb.exe
                     FileName = Config.GetAdbPath(),
-                    //add arguments for screenrecord
+                    //add arguments for screen record
                     Arguments = "-s " + deviceSerial + " exec-out screenrecord --output-format=h264 - ",
                     //redirect standard input
                     RedirectStandardInput = true,
@@ -110,18 +110,18 @@ namespace AndroidDataRecorder.Screenrecord
                 //hide screen touch
                 Touches.HideTouches(deviceSerial);
             }
+
             Console.WriteLine("Record process finished " + _deviceObj.Name);
         }
 
-        
         /// <summary>
-        /// start and stop the screenrecord process
+        /// start and stop the screen record process
         /// create video file
         /// store the buffered input in the video file
         /// create stopwatch to handle record length
         /// </summary>
         /// <param name="path">path to store the video files</param>
-        /// <param name="scProc">adb screenrecord process</param>
+        /// <param name="scProc">adb screen record process</param>
         private void HandleScreenrecord(string path, Process scProc)
         {
             //get timestamp 
@@ -133,10 +133,10 @@ namespace AndroidDataRecorder.Screenrecord
             //check if path is null and stop if it is null
             if (path == null) return;
 
-            Console.WriteLine("Start recording " + _deviceObj.Name);
+            Console.WriteLine("Start recording " + _deviceObj.Name + "   " + Timestamp.GetTimestamp());
 
             //create byte buffer
-            var buffer = new byte[1024];
+            var buffer = new byte[100];
 
             //create file for filestream
             var output = File.Open(file, FileMode.Create);
@@ -147,18 +147,18 @@ namespace AndroidDataRecorder.Screenrecord
             //start stopwatch
             sw.Start();
 
-            //start screenrecord process
+            //start screen record process
             scProc.Start();
 
-            //create a buffered stream with the standard output of the screenrecord process
+            //create a buffered stream with the standard output of the screen record process
             var input = new BufferedStream(scProc.StandardOutput.BaseStream);
 
-            //store data in file while 
+            //store data from stream into file
             do
             {
-                //read the input buffer of the screenrecord process
+                //read the input buffer of the screen record process
                 var len = input.Read(buffer, 0, buffer.Length);
-
+             
                 //write buffer in video file
                 output.Write(buffer, 0, len);
 
@@ -174,7 +174,7 @@ namespace AndroidDataRecorder.Screenrecord
             //close input stream
             input.Close();
 
-            Console.WriteLine("Recording stopped " + _deviceObj.Name);
+            Console.WriteLine("Recording stopped " + _deviceObj.Name + "   " + Timestamp.GetTimestamp());
         }
 
         /// <summary>
@@ -184,7 +184,6 @@ namespace AndroidDataRecorder.Screenrecord
         {
             //set variable to false
             _record = false;
-            
             Console.WriteLine("stop recording marked " + _deviceObj.Name);
         }
     }
