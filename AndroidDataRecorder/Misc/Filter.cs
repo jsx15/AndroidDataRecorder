@@ -30,6 +30,8 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public List<LogEntry> Logs = new List<LogEntry>();
 
+        public List<ResourcesList> Resources = new List<ResourcesList>();
+
         /// <summary>
         /// Constructor
         /// </summary>

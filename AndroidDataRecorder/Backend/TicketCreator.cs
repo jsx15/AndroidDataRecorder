@@ -81,12 +81,12 @@ namespace AndroidDataRecorder.Backend
         }
         
         /// <summary>
-        /// Get a List of all projects
+        /// Get a List of all project keys
         /// </summary>
-        /// <returns>List with all projects</returns>
-        public List<Project> GetMyProjects()
+        /// <returns>List with all project keys</returns>
+        public List<string> GetMyProjects()
         {
-            return _jira.Projects.GetProjectsAsync().Result.ToList();
+            return _jira.Projects.GetProjectsAsync().Result.Select(pro => pro.Key).ToList();
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace AndroidDataRecorder.Backend
         /// <param name="summary">Summary of the created issue/ticket</param>
         /// <param name="description">Issue/ticket description</param>
         public void CreateTicket(List<Filter> combinedInfos, String projectKey, TicketType type,
-            TicketPriority priority,FileFormat format, String summary, [Optional] String description)
+            TicketPriority priority, FileFormat format, String summary, [Optional] String description)
         {
             var issue = _jira.CreateIssue(projectKey);
             issue.Type = type.ToString();

@@ -120,7 +120,7 @@
     {
         TicketCreator tc = new TicketCreator();
         
-        tc.CreateTicketTxt(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority,_ticketModel.Title, "JS",_ticketModel.Description);
+        tc.CreateTicket(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile,_ticketModel.Title,_ticketModel.Description);
         
         _filters.Clear();
         LogBridge.Filters.Clear();
