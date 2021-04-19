@@ -30,10 +30,14 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         public sealed class CustomMonitor
         {
-            private CustomMonitor() {}  
-            private static readonly object Padlock = new object();  
+            private CustomMonitor() {}
+            private static readonly object Padlock = new object(); 
             private static CustomMonitor _instance = null;
             public event EventHandler<DeviceDataEventArgs> DeviceWorkloadChanged;
+            
+            /// <summary>
+            /// Return a single instance of CustomMonitor if none already exists
+            /// </summary>
             public static CustomMonitor Instance
             {
                 get
@@ -55,9 +59,7 @@ namespace AndroidDataRecorder.Backend
             /// <param name="e"> The DeviceDataEvent that is invoked </param>
             public void OnDeviceWorkloadChanged(DeviceDataEventArgs e)
             {
-                if (this.DeviceWorkloadChanged == null)
-                    return;
-                this.DeviceWorkloadChanged((object) this, e);
+                DeviceWorkloadChanged?.Invoke((object) this, e);
             }
         }
 
