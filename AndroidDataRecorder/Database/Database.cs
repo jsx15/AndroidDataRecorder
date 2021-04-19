@@ -7,10 +7,12 @@ using AndroidDataRecorder.Misc;
 
 namespace AndroidDataRecorder.Database
 {
-
     public class Database
 
     {
+        /// <summary>
+        /// Path to the Database
+        /// </summary>
         private readonly string _datasource = "Data Source = " + System.IO.Path.GetFullPath(
             System.IO.Path.Combine(Environment.CurrentDirectory + System.IO.Path.DirectorySeparatorChar +
                                    "identifier.sqlite"));
@@ -84,9 +86,9 @@ namespace AndroidDataRecorder.Database
         /// <summary>
         /// Creates a list of Resources Table
         /// </summary>
-        /// <param name="deviceName"></param>
+        /// <param name="serial"></param>
         /// <returns> resList </returns>
-        public List<ResourcesList> ResourcesLists(string deviceName)
+        public List<ResourcesList> ResourcesLists(string serial)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -95,8 +97,8 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Resources
-                    WHERE DeviceName LIKE @deviceName";
-            command.Parameters.AddWithValue("@deviceName", deviceName);
+                    WHERE Serial LIKE @serial";
+            command.Parameters.AddWithValue("@Serial", serial);
 
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
@@ -166,9 +168,9 @@ namespace AndroidDataRecorder.Database
         /// <summary>
         /// Method which generate a List of Marker by searching specific Marker and return it
         /// </summary>
-        /// <param name="deviceName"></param>
+        /// <param name="serial"></param>
         /// <returns> ListOfMarker </returns>
-        public List<Marker> ListWithMarker(string deviceName)
+        public List<Marker> ListWithMarker(string serial)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -177,10 +179,45 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Marker
-               WHERE DeviceName LIKE @DeviceName";
+               WHERE Serial LIKE @serial";
 
             // use the Parameter DeviceName to search for it
-            command.Parameters.AddWithValue("@DeviceName", deviceName);
+            command.Parameters.AddWithValue("@Serial", serial);
+
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actual values of database
+            List<Marker> markerList = new List<Marker>();
+
+            while (reader.Read())
+            {
+                markerList.Add(new Marker()
+                {
+                    markerId = reader.GetInt32(0),
+                    serial = reader.GetString(1),
+                    devicename = reader.GetString(2),
+                    timeStamp = reader.GetDateTime(3),
+                    message = reader.GetString(4)
+                });
+            }
+
+            return markerList;
+        }
+        
+        /// <summary>
+        /// Creates a list of Marker
+        /// </summary>
+        /// <returns>markerList</returns>
+        public List<Marker> ListWithMarker()
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Marker";
 
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
@@ -331,16 +368,16 @@ namespace AndroidDataRecorder.Database
         /// <summary>
         /// Returns a List of Logs filtered by DeviceName
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="serial"></param>
         /// <returns>LogList</returns>
-        public List<LogEntry> LogListFilterByDevice(String device)
+        public List<LogEntry> LogListFilterByDevice(String serial)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
 
             // Query for the Parameter device, with if else condition
-            if (device.Equals("*") || device.Equals("") || device.StartsWith(""))
+            if (serial.Equals("*") || serial.Equals("") || serial.StartsWith(""))
             {
                 //insert Query
                 command.CommandText =
@@ -352,9 +389,9 @@ namespace AndroidDataRecorder.Database
                 //insert Query
                 command.CommandText =
                     @"SELECT * FROM Logs
-                      WHERE DeviceName LIKE @device";
+                      WHERE Serial LIKE @serial";
                 // use the Parameter DeviceName to search for it
-                command.Parameters.AddWithValue("@device", device);
+                command.Parameters.AddWithValue("@Serial", serial);
             }
 
             // init new reader
@@ -479,7 +516,7 @@ namespace AndroidDataRecorder.Database
         /// Returns a list of the table ResIntens
         /// </summary>
         /// <returns>resourcesIntensLists</returns>
-        public List<ResIntensList> ResourcesIntensLists(string deviceName)
+        public List<ResIntensList> ResourcesIntensLists(string serial)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -488,8 +525,8 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM ResIntens
-                    WHERE DeviceName LIKE @deviceName";
-            command.Parameters.AddWithValue("@deviceName", deviceName);
+                    WHERE Serial LIKE @serial";
+            command.Parameters.AddWithValue("@Serial", serial);
 
             // init new reader
             SQLiteDataReader reader = command.ExecuteReader();
@@ -510,7 +547,16 @@ namespace AndroidDataRecorder.Database
 
             return resourcesIntensLists;
         }
-
+        
+        ///<summary>
+        /// Methods for the table Device
+        /// </summary>
+        
+        /// <summary>
+        /// Method to Insert Values Into the table Device
+        /// </summary>
+        /// <param name="serialDevice"></param>
+        /// <param name="deviceName"></param>
         public void InsertValuesIntoDeviceTable(string serialDevice, string deviceName)
         {
             // create connection to the database
@@ -539,6 +585,10 @@ namespace AndroidDataRecorder.Database
 
         }
 
+        /// <summary>
+        /// Method to return a list of the table device
+        /// </summary>
+        /// <returns></returns>
         public List<DeviceList> DeviceList()
         {
             // create connection to the database
