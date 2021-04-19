@@ -1,5 +1,8 @@
 @using Blazored.Toast.Configuration
+@using AndroidDataRecorder.Services
 @inherits LayoutComponentBase
+
+@inject LogBridge LogBridge;
 
 <div class="page">
     <div class="@NavMenuCssClass">
@@ -64,7 +67,7 @@
      * Bool for showing navigation menu
      */
     private bool _collapseNavMenu;
-
+    
     /*
      * Adjusting CSS
      */
