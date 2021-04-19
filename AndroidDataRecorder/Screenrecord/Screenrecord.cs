@@ -172,7 +172,7 @@ namespace AndroidDataRecorder.Screenrecord
             output.Close();
 
             //close input stream
-            //input.Close();
+            input.Close();
 
             Console.WriteLine("Recording stopped " + _deviceObj.Name + "   " + Timestamp.GetTimestamp());
         }
