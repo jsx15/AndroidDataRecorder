@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using SharpAdbClient;
 
@@ -63,43 +62,6 @@ namespace AndroidDataRecorder.Misc
         public static string GetDeviceSerial()
         {
             return ActiveDeviceData is not null ? ActiveDeviceData.Serial : "";
-        }
-
-        /// <summary>
-        /// Device connection type
-        /// </summary>
-        /// <returns>Connection of selected device(Wifi or Usb)</returns>
-        public static string DeviceConnectionType()
-        {
-            try
-            {
-                return DeviceStates.ConnectionType(ActiveDeviceData).ToString();
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-        }
-
-        /// <summary>
-        /// Determine the ip address
-        /// </summary>
-        /// <returns>IP Address of selected device</returns>
-        public static string IpAddress()
-        {
-            try
-            {
-                return DeviceStates.IpAddress(ActiveDeviceData);
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-        }
-
-        public static string DeviceStatus()
-        {
-            return ActiveDeviceData is not null ? "connected" : "not connected";
         }
     }
 }

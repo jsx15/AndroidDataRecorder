@@ -2,6 +2,10 @@
 @using System.Threading;
 @using AndroidDataRecorder.Misc
 @using System.Globalization
+@using System.Net
+@using AndroidDataRecorder.Screenrecord
+@using SharpAdbClient
+@using AdbServer = AndroidDataRecorder.Backend.AdbServer
 
 @inject IToastService ToastService;
 @page "/"
@@ -14,208 +18,199 @@
 <br>
 
 <main class="justify-content-center">
-    <section id="device_information">
-        <div class="row">
-            <div class="col-md">
-                <div class="card text-center side-cards">
-                    <div class="card-header" style="color: white">
-                        Overview
-                    </div>
-                    <div class="card-body text-left">
-                        <div class="row">
-                            <div class="col-md">
-                                <p class="card-text">Current Device: </p>
-                                <p class="card-text">Connection: </p>
-                                <p class="card-text">IP-Address: </p>
-                            </div>
-                            <div class="col-md text-left">
-                                <p class="card-text">@MarkerList.GetDeviceName() </p>
-                                <p class="card-text">@MarkerList.DeviceConnectionType()</p>
-                                <p class="card-text">@MarkerList.IpAddress()</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer text-muted">
-                        <p>@MarkerList.DeviceStatus()</p>
+<section id="device_information">
+    <div class="row">
+        <div class="col-md">
+            <div class="card text-center side-cards">
+                <div class="card-header" style="color: white">
+                    Overview
+                </div>
+                <div class="card-body text-left">
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
+                        <table class="table table-bordered mb-0 text-left">
+                            <tbody>
+                            @foreach (var item in _attachedDeviceList)
+                            {
+                                <tr>
+                                    <td class="text-left" style="vertical-align: middle">
+                                        <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@MarkerList.GetDeviceSerial().Equals(item.Serial)/>
+                                        <label for="@item">@item.Name - @item.Serial - Connection: @DeviceStates.ConnectionType(item)</label>
+                                    </td>
+                                    <td class="text-right">
+                                        <button class="btn p-2 @LoggingButtonColor(item)" @onclick="() => OnLoggingButtonClick(item)">@LoggingText(item) Logging</button>
+                                        <button class="btn p-2 @RecordingButtonColor(item)" @onclick="() => OnRecordingButtonClick(item)">@RecordText(item) Recording</button>
+                                        <button class="btn btn-danger p-2" style="text-align: right" @onclick="() => DisconnectDevice(item)">Disconnect</button>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+                <div class="card-footer">
+                    <label>Selected device is @MarkerList.GetDeviceName() - @MarkerList.GetDeviceSerial()</label>
+                </div>
             </div>
-            <div class="col-md">
-                <div class="card text-center side-cards">
-                    <div class="card-header" style="color: white">
-                        Functions
+        </div>
+        <div class="col-md">
+            <div class="card text-center side-cards">
+                <div class="card-header" style="color: white">
+                    Functions
+                </div>
+                <div class="card-body text-left">
+                    <div class="row col">
+                        <textarea id="marker_message" type="text" class="form-control" name="marker_message" placeholder="Marker Message..." rows="2" @bind="_markerSetMessage"></textarea>
                     </div>
-                    <div class="card-body text-left">
-                        <div class="row">
-                            <div class="col-md">
-                                <p>
-                                    <btn class="btn @LogBtnColor " @onclick="LoggingBtnClick"> @LogBtnValue</btn>
-                                </p>
-                            </div>
-                            <div class="col-md text-left">
-                                <div style="visibility: @ProcessTextValue">
-                                    <div class="spinner-border text-danger" role="status"></div>
-                                    <span> Logging in Progress...</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row col">
-                            <textarea id="marker_message" type="text" class="form-control" name="marker_message" placeholder="Marker Message..." rows="2" @bind="_markerSetMessage"></textarea>
-                        </div>
-                        <div class="row col">
-                            <p class="card-text">@CurrDateTime</p>
-                        </div>
-                        <div class="row col justify-content-center">
-                            <p>
-                                <button class="btn btn-success" @onclick="GetMarkerTime">Set Marker</button>
-                            </p>
-                        </div>
+                    <div class="row col">
+                        <p class="card-text">@CurrDateTime</p>
+                    </div>
+                    <div class="row col justify-content-center">
+                        <p>
+                            <button class="btn btn-success" @onclick="GetMarkerTime">Set Marker</button>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <br>
+<br>
 
-    <section id="device_information">
-        <div class="row">
-            <div class="col-md">
-                <div class="card text-center side-cards">
-                    <div class="card-header" style="color: white">
-                        System Status
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3 text-left">
-                                <p>CPU: </p>
-                                <p>Memory: </p>
-                                <p>Battery: </p>
-                            </div>
-                            <div class="col-md-7">
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width:@cpuPercentage" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <br>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @memoryUsage" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <br>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @batterylevel" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <p>@cpuPercentage</p>
-                                <p>@memoryUsage</p>
-                                <p>@batterylevel</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-footer text-muted">
-                        <p style="color: #1e7e34">Systems Stats: Check</p>
-                    </div>
+<section id="device_information">
+    <div class="row">
+        <div class="col-md">
+            <div class="card text-center side-cards">
+                <div class="card-header" style="color: white">
+                    System Status
                 </div>
-            </div>
-            <div class="col-md">
-                <div class="card side-cards">
+                <div class="card-body">
                     <div class="row">
-                        <div class="col">
-                            <div class="table-responsive" >
-                                <table class="table table-hover" style="width: 100%; height:  100%; table-layout: auto">
-                                    <thead class="table-custom-head">
-                                    <tr>
-                                        <th scope="col">Process</th>
-                                        <th scope="col">CPU</th>
-                                        <th scope="col">Memory</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody style="font-size: small">
-                                    <tr>
-                                        <th>prcss</th>
-                                        <td>42%</td>
-                                        <td>12%</td>
-
-                                    </tr>
-                                    <tr>
-                                        <th>prcss</th>
-                                        <td>42%</td>
-                                        <td>12%</td>
-
-
-                                    </tr>
-                                    <tr>
-                                        <th>prcss</th>
-                                        <td>42%</td>
-                                        <td>12%</td>
-
-                                    </tr>
-                                    <tr>
-                                        <th>prcss</th>
-                                        <td>42%</td>
-                                        <td>12%</td>
-
-                                    </tr>
-                                    <tr>
-                                        <th>prcss</th>
-                                        <td>42%</td>
-                                        <td>12%</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                        <div class="col-md-3 text-left">
+                            <p>CPU: </p>
+                            <p>Memory: </p>
+                            <p>Battery: </p>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width:@cpuPercentage" aria-valuenow="12" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
+                            <br>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @memoryUsage" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <br>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: @batterylevel" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <p>@cpuPercentage</p>
+                            <p>@memoryUsage</p>
+                            <p>@batterylevel</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer text-muted">
+                    <p style="color: #1e7e34">Systems Stats: Check</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card side-cards">
+                <div class="row">
+                    <div class="col">
+                        <div class="table-responsive">
+                            <table class="table table-hover" style="width: 100%; height:  100%; table-layout: auto">
+                                <thead class="table-custom-head">
+                                <tr>
+                                    <th scope="col">Process</th>
+                                    <th scope="col">CPU</th>
+                                    <th scope="col">Memory</th>
+                                </tr>
+                                </thead>
+                                <tbody style="font-size: small">
+                                <tr>
+                                    <th>prcss</th>
+                                    <td>42%</td>
+                                    <td>12%</td>
+
+                                </tr>
+                                <tr>
+                                    <th>prcss</th>
+                                    <td>42%</td>
+                                    <td>12%</td>
+
+
+                                </tr>
+                                <tr>
+                                    <th>prcss</th>
+                                    <td>42%</td>
+                                    <td>12%</td>
+
+                                </tr>
+                                <tr>
+                                    <th>prcss</th>
+                                    <td>42%</td>
+                                    <td>12%</td>
+
+                                </tr>
+                                <tr>
+                                    <th>prcss</th>
+                                    <td>42%</td>
+                                    <td>12%</td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <br>
+    </div>
+</section>
 
-    <section id="testsection">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center" style="color: white">Marker</h3>
-            </div>
-            <div class="card-body">
-                <div style="height: 250px" class="table-wrapper-scroll-y scroll-bar">
-                    <table class="table table-bordered table-striped">
-                        <thead>
+<br>
+
+<section id="testsection">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center" style="color: white">Marker</h3>
+        </div>
+        <div class="card-body">
+            <div style="height: 250px" class="table-wrapper-scroll-y scroll-bar">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @*@foreach (var marker in Enumerable.Reverse(_markerList.Markers))*@
+                    @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+                    {
                         <tr>
-                            <th>Time</th>
-                            <th>Message</th>
+                            <td style="width: 30%">@marker.timeStamp</td>
+                            <td>@marker.message</td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        @*@foreach (var marker in Enumerable.Reverse(_markerList.Markers))*@
-                        @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
-                        {
-                            <tr>
-                                <td style="width: 30%">@marker.timeStamp</td>
-                                <td>@marker.message</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
+                    }
+                    </tbody>
+                </table>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
 </main>
 
 
 @code {
-    
-    
-    
     /*
      * Current time and date
      */
     DateTime CurrDateTime { get; set; }
-    
 
     /*
      * Database 
@@ -231,6 +226,16 @@
      * List of marker
      */
     private readonly MarkerList _markerList = new MarkerList();
+    
+    /*
+     * List of attached devices
+     */
+    List<DeviceData> _attachedDeviceList;
+    
+    /*
+     * Monitor to detect changes on connected devices
+     */
+    DeviceMonitor _monitor;
 
     /*
      * System stats (temporarily) 
@@ -246,30 +251,35 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        // ReSharper disable once ObjectCreationAsStatement
+        _attachedDeviceList = Backend.AdbServer.GetConnectedDevices();
+
+        _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
+        _monitor.DeviceChanged += DeviceChanged;
+        _monitor.DeviceDisconnected += DeviceChanged;
+        _monitor.DeviceConnected += DeviceChanged;
+        _monitor.Start();
+    // ReSharper disable once ObjectCreationAsStatement
         new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     /*
      * Set CurrDateTime to current time
      */
-
     private async void DateTimeCallback(object state)
     {
-        //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("yyyy-mm-dd hh:mm:ss.fff");
+    //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("yyyy-mm-dd hh:mm:ss.fff");
         CurrDateTime = DateTime.Now;
-        await InvokeAsync((StateHasChanged));
+        await InvokeAsync(StateHasChanged);
     }
 
     /*
      * Gets the time the marker was set and saves it in a list
      */
-
     private void GetMarkerTime()
     {
         if (ValidateMarker())
         {
-            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial() ,MarkerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
+            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), CurrDateTime, _markerSetMessage);
 
             ToastService.ShowSuccess("Message: " + _markerSetMessage, CurrDateTime.ToString());
             _markerSetMessage = string.Empty;
@@ -290,26 +300,106 @@
         return false;
     }
 
-
     /*
-     * Logging button
+     * Text for logging button
      */
-    private bool _toggleLoggingBtn;
-
-    /*
-     * Adjusting CSS for logging
-     */
-    private string LogBtnValue => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
-    private string ProcessTextValue => _toggleLoggingBtn ? "visible" : "hidden";
-    private string LogBtnColor => _toggleLoggingBtn ? "btn-danger" : "btn-success";
-
-    /*
-     * Toggle logging bool
-     */
-
-    void LoggingBtnClick()
+    private string LoggingText(DeviceData device)
     {
-        _toggleLoggingBtn = !_toggleLoggingBtn;
+        return AdbServer.DeviceIsLogging(device) ? "Stop" : "Start";
+    }
+
+    /*
+     * Logging button listener
+     */
+    private void OnLoggingButtonClick(DeviceData device)
+    {
+        if (AdbServer.DeviceIsLogging(device))
+        {
+            AdbServer.StopLogging(device);
+        }
+        else
+        {
+            AdbServer.InitializeLogging(device);
+        }
+    }
+
+    /*
+     * Color of logging button
+     */
+    private string LoggingButtonColor(DeviceData device)
+    {
+        return AdbServer.DeviceIsLogging(device) ? "btn-danger" : "btn-success";
+    }
+
+    /*
+     * Record button listener
+     */
+    private void OnRecordingButtonClick(DeviceData device)
+    {
+        if (RecController.IsRecording(device))
+        {
+            RecController.StopScrRec(device);
+        }
+        else
+        {
+            RecController.StartScrRec(device, 30000);
+        }
+    }
+
+    /*
+     * Text for record button
+     */
+    private string RecordText(DeviceData device)
+    {
+        return RecController.IsRecording(device) ? "Stop" : "Start";
+    }
+
+    /*
+     * Color for record button
+     */
+    private string RecordingButtonColor(DeviceData device)
+    {
+        return RecController.IsRecording(device) ? "btn-danger" : "btn-success";
+    }
+
+    /*
+     * Change selected device
+     */
+    void RadioSelection(ChangeEventArgs args)
+    {
+    // Find device by name (args only return string)
+        _markerList.SetDevice(_attachedDeviceList.Find(x => x.Serial.Equals(args.Value)));
+    }
+    
+    /*
+     * Disconnect only wireless devices -> remove them from attached devices
+     * USB devices cannot be disconnected
+     */
+    private void DisconnectDevice(DeviceData device)
+    {
+        if (DeviceStates.ConnectionType(device) is DeviceStates.ConnectionTypes.Wifi)
+        {
+            var split = device.ToString().Split(':');
+            AdbServer.DisconnectWirelessClient(split[0]);
+            _attachedDeviceList = AdbServer.GetConnectedDevices();
+        }
+        else
+        {
+            ToastService.ShowError("Only Wifi devices can be disconnected", "Error");
+        }
+    }
+    
+    /*
+     * Refresh device list on device changes
+     */
+    private void DeviceChanged(object sender, DeviceDataEventArgs e)
+    {
+        _attachedDeviceList = AdbServer.GetConnectedDevices();
+        if (MarkerList.ActiveDeviceData is not null && MarkerList.ActiveDeviceData.Serial.Equals(e.Device.Serial))
+        {
+            MarkerList.ActiveDeviceData = null;
+        }
+        InvokeAsync(StateHasChanged);
     }
 
 }

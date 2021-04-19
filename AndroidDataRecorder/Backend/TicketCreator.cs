@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading;
 using AndroidDataRecorder.Misc;
 using Atlassian.Jira;
 
@@ -34,7 +35,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Assignee field for Issue determined by username
         /// </summary>
-        private readonly string _assignee;
+        // private string _assignee;
         
         /// <summary>
         /// Supported issue/ticket types
@@ -72,8 +73,6 @@ namespace AndroidDataRecorder.Backend
         public TicketCreator()
         {
             _jira = Jira.CreateRestClient(_jiraServerUrl, _jiraUsername, _apiToken);
-            _assignee = _jira.Users.GetMyselfAsync().Result.DisplayName;
-            
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Tickets")))
             {
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Tickets"));
@@ -106,7 +105,6 @@ namespace AndroidDataRecorder.Backend
             issue.Type = type.ToString();
             issue.Priority = priority.ToString();
             issue.Summary = summary;
-            issue.Assignee = _assignee;
             issue.Description = description;
             issue.SaveChanges();
             String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
