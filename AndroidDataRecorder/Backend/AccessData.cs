@@ -275,7 +275,7 @@ namespace AndroidDataRecorder.Backend
         /// <returns> A MatchCollection with those cpu usages </returns>
         private MatchCollection GetCpuFiveProcesses(string queryString)
         {
-            var n = Regex.Matches(queryString, @"((?<=[A-Z]\s+)([0-9]+\.*[0-9]*)(?=\s+[0-9]+\.*[0-9]*\s+))");
+            var n = Regex.Matches(queryString, @"((?<=[A-Z]\s+)([0-9]+\.?[0-9]*)(?=\s+[0-9]+\.*[0-9]*\s+))");
             return n.Count != 0 ? n : null;
         }
         
@@ -286,7 +286,7 @@ namespace AndroidDataRecorder.Backend
         /// <returns> A MatchCollection with those mem usages </returns>
         private MatchCollection GetMemFiveProcesses(string queryString)
         {
-            var n = Regex.Matches(queryString, @"((?<=[0-9]+\.*[0-9]*\s+)([0-9]+\.?[0-9]*)(?=\s+[0-9]+\:[0-9]+\.[0-9]+))");
+            var n = Regex.Matches(queryString, @"((?<=[0-9]+\.?[0-9]*\s+)([0-9]+\.?[0-9]*)(?=\s+[0-9]+\:[0-9]+\.[0-9]+))");
             return n.Count != 0 ? n : null;
         }
     }
