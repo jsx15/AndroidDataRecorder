@@ -1,0 +1,176 @@
+﻿@page "/ticket"
+@using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Services
+@using AndroidDataRecorder.Backend
+
+@inject MarkerBridge MarkerBridge;
+@inject LogBridge LogBridge;
+
+
+<header>
+    <h1 class="text-center" style="color: white">Ticket</h1>
+    <br>
+</header>
+
+<section id="ticket_card">
+    <div class="card text-center">
+        <div class="card-header" style="color: white">
+            JIRA Issue
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive-md " style="overflow-x: hidden">
+                        <table class="table table-bordered table-striped mb-0">
+                            <tbody class="text-left logtable">
+                            @foreach (var filter in _filters)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col">
+                                                Marker @filter.marker.timeStamp
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                Log Entries: @filter.Logs.Count
+                                            </div>
+                                            <div class="col">
+                                                Timespan: @CalculateTimeSpan(filter.timeSpanMinus, filter.timeSpanPlus) minutes
+                                            </div>
+                                            <div class="col">
+                                                <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+                                                    <label>Include Video</label>
+                                                    <InputCheckbox class="form-check" @bind-Value="_ticketModel.checkBoxVideo">test</InputCheckbox>
+                                                </EditForm>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+
+            <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+                <div class="row">
+                    <div class="col-md-6 text-left">
+                        <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
+                    </div>
+                    <div class="col-md-6 text-left">
+                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
+                            @foreach (var type in Enum.GetValues(typeof(TicketCreator.TicketType)))
+                            {
+                                <option>@type</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="row text-left">
+                    <div class="col-md-6">
+                        <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
+                    </div>
+                    <div class="col-md-6">
+                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
+                            @foreach (var priority in Enum.GetValues(typeof(TicketCreator.TicketPriority)))
+                            {
+                                <option>@priority</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="d-flex flex-row-reverse">
+                    <button class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                </div>
+            </EditForm>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+@code {
+    /*
+     * Instance of the ticket model class
+     */
+    private readonly TicketModel _ticketModel = new TicketModel();
+
+    /*
+     * This is just for testing, okay?
+     */
+    private List<Filter> _filters = new List<Filter>();
+
+
+    private void HandleSubmit()
+    {
+        TicketCreator tc = new TicketCreator();
+        
+        tc.CreateTicketTxt(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority,_ticketModel.Title, "JS",_ticketModel.Description);
+        
+        _filters.Clear();
+        LogBridge.Filters.Clear();
+        
+        _ticketModel.Description = String.Empty;
+        _ticketModel.Title = String.Empty;
+        
+    }
+
+    private double CalculateTimeSpan(double start, double stop)
+    {
+        return start + stop;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _filters = LogBridge.Filters;
+    }
+
+    /*
+     * Model class
+     */
+    private class TicketModel
+
+    {
+        /*
+         * Description of the jira ticket
+         */
+        public string Title { get; set; }
+
+        /*
+         * Message of the jira ticket
+         */
+        public string Description { get; set; }
+
+        /*
+         * Priority of the jira ticket
+         */
+        public TicketCreator.TicketPriority Priority { get; set; }
+
+        /*
+         * Type of the jira ticket
+         */
+        public TicketCreator.TicketType Type { get; set; }
+
+        /*
+         * This is just for testing, okay?
+         */
+        public bool checkBoxVideo;
+    }
+
+}
