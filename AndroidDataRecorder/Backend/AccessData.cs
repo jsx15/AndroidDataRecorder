@@ -20,7 +20,11 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private int _batteryLevel;
 
-        private string cpuUsageCommand;
+        /// <summary>
+        /// The shell command to get the cpu usage
+        /// It is individually adapted to to Android version
+        /// </summary>
+        private string _cpuUsageCommand;
 
         /// <summary>
         /// The database to write into
@@ -116,7 +120,7 @@ namespace AndroidDataRecorder.Backend
             
             //Decide which command to use for accessing the cpu usage by checking the devices build version
             AdbServer.GetClient().ExecuteRemoteCommand("getprop ro.build.version.release", _device, receiver);
-            cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top -b -n 1" : "top -b -m 5 -n 1";
+            _cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top -b -n 1" : "top -b -m 5 -n 1";
             
             //Start the logging and accessing of the workload
             new Thread(() => SaveLogs(proc)).Start();
@@ -158,7 +162,7 @@ namespace AndroidDataRecorder.Backend
                     var receiver = new ConsoleOutputReceiver();
                     
                     //Get the cpu usage and the five most expensive processes
-                    AdbServer.GetClient().ExecuteRemoteCommand(cpuUsageCommand, _device, receiver);
+                    AdbServer.GetClient().ExecuteRemoteCommand(_cpuUsageCommand, _device, receiver);
                     var cpu = GetCpuUsage(receiver.ToString());
                     var fiveProcesses = GetFiveProcesses(receiver.ToString());
                     var cpuFiveProcesses = GetCpuFiveProcesses(receiver.ToString());
@@ -249,7 +253,7 @@ namespace AndroidDataRecorder.Backend
             var m = Regex.Match(queryString, @"(?<=level:\s+)([0-9]+)");
             if (m.Success)
             {
-                _batteryLevel = Int32.Parse(m.Groups[1].Value);
+                _batteryLevel = int.Parse(m.Groups[1].Value);
             }
         }
 
@@ -261,12 +265,7 @@ namespace AndroidDataRecorder.Backend
         private MatchCollection GetFiveProcesses(string queryString)
         {
             var n = Regex.Matches(queryString, @"((?<=[0-9]+\:[0-9]+\.[0-9]+\s)(.*)(?=\s))");
-            if (n.Count != 0)
-            {
-                return n;
-            }
-
-            return null;
+            return n.Count != 0 ? n : null;
         }
         
         /// <summary>
@@ -276,13 +275,8 @@ namespace AndroidDataRecorder.Backend
         /// <returns> A MatchCollection with those cpu usages </returns>
         private MatchCollection GetCpuFiveProcesses(string queryString)
         {
-            var n = Regex.Matches(queryString, @"((?<=[A-Z]\s+)([0-9]+\.[0-9])(?=\s+[0-9]+\.[0-9]\s+))");
-            if (n.Count != 0)
-            {
-                return n;
-            }
-
-            return null;
+            var n = Regex.Matches(queryString, @"((?<=[A-Z]\s+)([0-9]+\.*[0-9]*)(?=\s+[0-9]+\.*[0-9]*\s+))");
+            return n.Count != 0 ? n : null;
         }
         
         /// <summary>
@@ -292,13 +286,8 @@ namespace AndroidDataRecorder.Backend
         /// <returns> A MatchCollection with those mem usages </returns>
         private MatchCollection GetMemFiveProcesses(string queryString)
         {
-            var n = Regex.Matches(queryString, @"((?<=[0-9]+\.[0-9]\s+)([0-9]+\.[0-9])(?=\s+[0-9]+\:[0-9]+\.[0-9]+))");
-            if (n.Count != 0)
-            {
-                return n;
-            }
-
-            return null;
+            var n = Regex.Matches(queryString, @"((?<=[0-9]+\.*[0-9]*\s+)([0-9]+\.?[0-9]*)(?=\s+[0-9]+\:[0-9]+\.[0-9]+))");
+            return n.Count != 0 ? n : null;
         }
     }
 }
