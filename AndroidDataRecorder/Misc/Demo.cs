@@ -12,6 +12,7 @@ namespace AndroidDataRecorder.Misc
             public double timeSpanPlus;
             //public string level;
             public List<LogEntry> _logs = new List<LogEntry>();
+            public List<ResourcesList> Resources = new List<ResourcesList>();
         }
     }
 }

@@ -13,14 +13,20 @@ namespace AndroidDataRecorder.Misc
         
         public ResourcesList(){}
 
-        public ResourcesList(string _serial, string _deviceName, int _cpu, int _memory, int _battery, DateTime _timestamp)
+        public ResourcesList(string serial, string deviceName, int cpu, int memory, int battery, DateTime timestamp)
         {
-            serial = _serial;
-            deviceName = _deviceName;
-            cpu = _cpu;
-            memory = _memory;
-            battery = _battery;
-            timestamp = _timestamp;
+            this.serial = serial;
+            this.deviceName = deviceName;
+            this.cpu = cpu;
+            this.memory = memory;
+            this.battery = battery;
+            this.timestamp = timestamp;
+        }
+
+        public override string ToString()
+        {
+            return "##" + timestamp + " Device serial: " + serial + " Device name: " + deviceName + " CPU load: " +
+                   cpu + " Memory usage: " + memory + " Battery status: " + battery;
         }
     }
 }

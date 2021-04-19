@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using AndroidDataRecorder.Misc;
@@ -29,6 +30,11 @@ namespace AndroidDataRecorder.Backend
         /// API token for logging in
         /// </summary>
         private readonly String _apiToken = Config.GetApiToken();
+
+        /// <summary>
+        /// Assignee field for Issue determined by username
+        /// </summary>
+        private readonly string _assignee;
         
         /// <summary>
         /// Supported issue/ticket types
@@ -51,6 +57,12 @@ namespace AndroidDataRecorder.Backend
             Low,
             Lowest,
         }
+        
+        public enum FileFormat
+        {
+            TextFile,
+            JsonFile,
+        }
 
         /// <summary>
         /// Constructor which should only be initialized once 
@@ -58,66 +70,41 @@ namespace AndroidDataRecorder.Backend
         public TicketCreator()
         {
             _jira = Jira.CreateRestClient(_jiraServerUrl, _jiraUsername, _apiToken);
+            _assignee = _jira.Users.GetMyselfAsync().Result.DisplayName;
+            
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Tickets")))
             {
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Tickets"));
             }
         }
-
-        /// <summary>
-        /// Creates a ticket with .txt files attached
-        /// </summary>
-        /// <param name="combinedInfos">List of all selected markers</param>
-        /// <param name="projectKey">Jira project key needed for jira</param>
-        /// <param name="type">Ticket type</param>
-        /// <param name="priority">Ticket priority</param>
-        /// <param name="summary">Summary of the created issue/ticket</param>
-        /// <param name="assignee">Person who created the issue/ticket</param>
-        /// <param name="description">Issue/ticket description</param>
-        public void CreateTicketTxt(List<Demo.combinedInfo> combinedInfos, String projectKey, TicketType type,
-            TicketPriority priority, String summary, String assignee, [Optional] String description)
-        {
-            var issue = _jira.CreateIssue(projectKey);
-            issue.Type = type.ToString();
-            issue.Priority = priority.ToString();
-            issue.Summary = summary;
-            issue.Assignee = assignee;
-            issue.Description = description;
-            issue.SaveChanges();
-            String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
-                @"Tickets" + Path.DirectorySeparatorChar + GetDate()));
-
-            Directory.CreateDirectory(ticketDirPath);
-            
-            foreach (var info in combinedInfos)
-            {
-                String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info._marker.devicename + "_" +
-                                                             info._marker.markerId + ".txt"));
-                CreateMarkerFile(info , fileName);
-                issue.AddAttachment(fileName);
-            }
-            
-            
-        }
         
         /// <summary>
-        /// Creates a ticket with .json files attached
+        /// Get a List of all projects
+        /// </summary>
+        /// <returns>List with all projects</returns>
+        public List<Project> GetMyProjects()
+        {
+            return _jira.Projects.GetProjectsAsync().Result.ToList();
+        }
+
+        /// <summary>
+        /// Creates a ticket with files attached
         /// </summary>
         /// <param name="combinedInfos">List of all selected markers</param>
         /// <param name="projectKey">Jira project key needed for jira</param>
         /// <param name="type">Ticket type</param>
         /// <param name="priority">Ticket priority</param>
+        /// <param name="format">Output file format</param>
         /// <param name="summary">Summary of the created issue/ticket</param>
-        /// <param name="assignee">Person who created the issue/ticket</param>
         /// <param name="description">Issue/ticket description</param>
-        public void CreateTicketJson(List<Demo.combinedInfo> combinedInfos, String projectKey, TicketType type,
-            TicketPriority priority, String summary, String assignee, [Optional] String description)
+        public void CreateTicket(List<Demo.combinedInfo> combinedInfos, String projectKey, TicketType type,
+            TicketPriority priority,FileFormat format, String summary, [Optional] String description)
         {
             var issue = _jira.CreateIssue(projectKey);
             issue.Type = type.ToString();
             issue.Priority = priority.ToString();
             issue.Summary = summary;
-            issue.Assignee = assignee;
+            issue.Assignee = _assignee;
             issue.Description = description;
             issue.SaveChanges();
             String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
@@ -125,17 +112,27 @@ namespace AndroidDataRecorder.Backend
 
             Directory.CreateDirectory(ticketDirPath);
             
-            foreach (var info in combinedInfos)
+            if (format == FileFormat.TextFile)
             {
-                String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info._marker.devicename + "_" +
-                                                                               info._marker.markerId + ".json"));
-                CreateMarkerJson(info , fileName);
-                issue.AddAttachment(fileName);
+                foreach (var info in combinedInfos)
+                {
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info._marker.devicename + "_" 
+                        + info._marker.markerId + ".txt"));
+                    CreateMarkerFile(info , fileName); 
+                    issue.AddAttachment(fileName);
+                }
+            } else if (format == FileFormat.JsonFile)
+            {
+                foreach (var info in combinedInfos)
+                {
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info._marker.devicename + "_" 
+                        + info._marker.markerId + ".json"));
+                    CreateMarkerJson(info , fileName); 
+                    issue.AddAttachment(fileName);
+                }
             }
-            
-            
         }
-
+        
         /// <summary>
         /// private methode used in CreateTicketTxt, which creates files that will be attached
         /// </summary>
@@ -145,11 +142,13 @@ namespace AndroidDataRecorder.Backend
         {
             FileInfo fi = new FileInfo(file);
 
-            LogEntry markerLogEntry = new LogEntry(info._marker.serial, info._marker.devicename, info._marker.timeStamp,
-                info._marker.timeStamp, -1, -1, null, null, info._marker.message);
+            List<TicketEntry> list = new List<TicketEntry>();
+            info._logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
+            list.Add(new TicketEntry(info._marker.timeStamp,info._marker.ToString()));
             
-            info._logs.Add(markerLogEntry);
-            info._logs.Sort((x, y) => DateTime.Compare(x.timeStamp, y.timeStamp));
+            list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
+            
             try    
             {    
                 // Check if file already exists. If yes, delete it.     
@@ -168,9 +167,9 @@ namespace AndroidDataRecorder.Backend
                     sw.WriteLine("#Marker message: {0}", info._marker.message);
                     sw.WriteLine("####");
 
-                    foreach (var log in info._logs)
+                    foreach (var entry in list )
                     {
-                        sw.WriteLine(log.ToString());
+                        sw.WriteLine(entry.lineText);
                     }
                 }
             }    
@@ -189,13 +188,20 @@ namespace AndroidDataRecorder.Backend
         {
             FileInfo fi = new FileInfo(file);
             
-            LogEntry markerLogEntry = new LogEntry(info._marker.serial, info._marker.devicename, info._marker.timeStamp,
-                info._marker.timeStamp, -1, -1, null, null, info._marker.message);
+            //LogEntry markerLogEntry = new LogEntry(info._marker.serial, info._marker.devicename, info._marker.timeStamp,
+            // info._marker.timeStamp, -1, -1, null, null, info._marker.message);
 
-            info._logs.Add(markerLogEntry);
-            info._logs.Sort((x, y) => DateTime.Compare(x.timeStamp, y.timeStamp));
+            List<TicketEntry> list = new List<TicketEntry>();
+            info._logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
+            list.Add(new TicketEntry(info._marker.timeStamp,info._marker.ToString()));
+            
+            list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
 
-            String json = JsonSerializer.Serialize(info._logs);
+            //info._logs.Add(markerLogEntry);
+            //info._logs.Sort((x, y) => DateTime.Compare(x.timeStamp, y.timeStamp));
+
+            String json = JsonSerializer.Serialize(list);
 
             try
             {
@@ -221,7 +227,16 @@ namespace AndroidDataRecorder.Backend
             
             return temp.Replace(" ","_");
         }
-
-
+        
+        private class TicketEntry
+        {
+            public String lineText;
+            public DateTime timestamp;
+            public TicketEntry(DateTime timestamp, String lineText)
+            {
+                this.timestamp = timestamp;
+                this.lineText = lineText;
+            }
+        }
     }
 }

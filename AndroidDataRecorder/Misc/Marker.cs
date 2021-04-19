@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNetCore.SignalR.Protocol;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -24,6 +23,11 @@ namespace AndroidDataRecorder.Misc
             base.devicename = deviceName;
             base.timeStamp = time;
             base.message = message;
+        }
+
+        public override string ToString()
+        {
+            return "#"+ timeStamp +" MarkerID: " + markerId + "Message: " + message;
         }
     }
 
