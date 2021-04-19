@@ -4,8 +4,10 @@
 @using AndroidDataRecorder.Services
 
 
+
 @inject IToastService ToastService;
 @inject MarkerBridge MarkerBridge;
+@inject LogBridge LogBridge;
 
 <header>
     <h1 class="text-center" style="color: white">Logger</h1>
@@ -18,36 +20,18 @@
             Filter
         </div>
         <div class="card-body">
-            @for (var i = 0; i<_filterList.Count; i++)
-            {
-                var filterModel = _filterList[i];
-            
-                Marker marker = null;
-                @if (i < _localSelectedMarkers.Count)
-                {
-                    marker = _localSelectedMarkers[i];
-                    filterModel.TimeStamp = marker.timeStamp;
-                }
-            
-            
+            @foreach(var filterModel in _filterList) {
+                
                 <EditForm Model="filterModel" OnSubmit="() => Submit(filterModel)">
                     <div class="row">
                         <div class="col">
                             Marker:
-                            <InputSelect class="form-control" @bind-Value="filterModel.TimeStamp">
-                                @if (marker is not null)
+                            <MarkerInputSelect class="form-control" @bind-Value="filterModel.marker">
+                                @foreach (var mar in MarkerList.Markers)
                                 {
-                                    <option>@marker.timeStamp</option>
+                                    <option value="@mar.MarkerId">@mar.timeStamp</option>
                                 }
-                                else
-                                {
-                                    foreach (var allMarker in MarkerList.Markers)
-                                    {
-                                        <option>@allMarker.timeStamp</option>
-                                    }
-                                }
-                                
-                            </InputSelect>
+                            </MarkerInputSelect>
                         </div>
                         <div class="col">
                             Timespan - (Minutes):
@@ -78,13 +62,14 @@
                             </InputSelect>
                         </div>
                         <div class="col text-right d-flex">
-                            <button type="submit" class="align-self-end btn btn-md btn-primary">Apply filter</button>
+                            <button type="submit" class="mr-1 align-self-end btn btn-md btn-primary">Apply filter</button>
+                            <button class="mr-1 align-self-end btn btn-md btn-primary" @onclick="() => AddFilterToBridge(filterModel)">Add to Ticket</button>
                         </div>
                     </div>
                 </EditForm>
-                
+
                 <br>
-           
+
             }
             <button class="btn btn-primary text-center" @onclick="AddFilter">Add Filter</button>
         </div>
@@ -98,7 +83,7 @@
     {
         <div class="card text-center">
             <div class="card-header logger-card-header" style="color: white">
-                Log Table of @filter.TimeStamp 
+                Log Table of @TimeStampForLogTable(filter)
             </div>
 
             <div class="card-body">
@@ -145,6 +130,7 @@
 
 
 @code {
+    MarkerList _markerList = new MarkerList();
     
     /*
      * List with the Loglevels for the dropdown button
@@ -164,7 +150,7 @@
     /*
      *instance of Filtering class 
      */
-    readonly List<Filtering> _filterList = new List<Filtering>();
+    readonly List<Filter> _filterList = new List<Filter>();
     
     /*
      * Markers that were selected on the marker page
@@ -172,10 +158,12 @@
     List<Marker> _localSelectedMarkers = new List<Marker>();
     
     /*
-     * OnClick for the filter button
+     * OnClick for the apply filter button
      */
-    private void Submit(Filtering filtering)
+    private void Submit(Filter filtering)
     {
+        //filtering.marker = MarkerList.Markers.Find(x => x.markerId == filtering.markerID);
+        
         try
         {    
             //Check if a value is null
@@ -187,8 +175,8 @@
             {
                 //fill the Logs list with filtered log data
                 filtering.Logs = _data.LogListFilterByTimestampAndLogLevel(
-                    filtering.TimeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
-                    filtering.TimeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
+                    filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
+                    filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
             }
             
         }
@@ -207,44 +195,39 @@
         
         _localSelectedMarkers = MarkerBridge.selectedMarkers;
         
-        foreach (var unused in _localSelectedMarkers)
+        foreach (var mar in _localSelectedMarkers)
         {
-            _filterList.Add(new Filtering());
+            _filterList.Add(new Filter(mar));
         }
     }
 
-    public void AddFilter()
+    /*
+     * Add filter
+     */
+    private void AddFilter()
     {
-        _filterList.Add(new Filtering());
+        _filterList.Add(new Filter());
         StateHasChanged();
     }
 
     /*
-     * Model Class for the dropdowns in filtering
+     * Add filter to bridge to ticket page
      */
-    private class Filtering
+    private void AddFilterToBridge(Filter filter)
     {
-        /*
-         * TimeStamp in DateTime format
-         */
-        public DateTime TimeStamp { get; set; }
-        
-        /*
-         * The Loglevel
-         */
-        public string Level { get; set; }
-        
-        /*
-         * TimeSpan for the marker --> plus or minus minutes
-         */
-        public double timeSpanMinus;
-        public double timeSpanPlus;
-        
-        /*
-         * List for LogEntries
-         */
-        public List<LogEntry> Logs = new List<LogEntry>();
-
+        LogBridge.Filters.Add(filter);
+        ToastService.ShowSuccess("Filter added", "Success");
     }
+
+    /*
+     * Convert timestamp
+     */
+    private string TimeStampForLogTable(Filter filter)
+    {
+        return filter.marker.timeStamp.ToString();
+    }
+    
+
+    
 
 }

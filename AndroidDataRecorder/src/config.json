@@ -1,1 +1,1 @@
-{"adbPath":"","ffmpegPath":"", "videoDirPath":"","jiraServerUrl": "","jiraUsername": "","apiToken": "","knownDevices":[],"recordingDevices": {}}
+{"adbPath":"","ffmpegPath":"", "videoDirPath":"","jiraServerUrl": "https://androiddebugger.atlassian.net","jiraUsername": "","apiToken": "","knownDevices":[],"recordingDevices": {}}
