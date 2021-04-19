@@ -27,7 +27,7 @@
                         <div class="col">
                             Marker:
                             <MarkerInputSelect class="form-control" @bind-Value="filterModel.marker">
-                                @foreach (var mar in MarkerList.Markers)
+                                @foreach (var mar in _data.ListWithMarker())
                                 {
                                     <option value="@mar.MarkerId">@mar.timeStamp</option>
                                 }
