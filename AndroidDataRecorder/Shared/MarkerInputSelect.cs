@@ -36,7 +36,6 @@ namespace AndroidDataRecorder.Shared
             {
                 if (typeof(TValue) == typeof(Marker))
                 {
-                    Console.WriteLine("Custom Input Select");
                     validationErrorMessage = null;
                     result = (TValue) (object) MarkerList.Markers.Find(x => x.MarkerId.Equals(Convert.ToInt32(value)));
 
