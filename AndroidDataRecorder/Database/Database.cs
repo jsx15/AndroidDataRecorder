@@ -203,6 +203,41 @@ namespace AndroidDataRecorder.Database
 
             return markerList;
         }
+        
+        /// <summary>
+        /// Creates a list of Marker
+        /// </summary>
+        /// <returns>markerList</returns>
+        public List<Marker> ListWithMarker()
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Marker";
+
+            // init new reader
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            // fill the list with the actual values of database
+            List<Marker> markerList = new List<Marker>();
+
+            while (reader.Read())
+            {
+                markerList.Add(new Marker()
+                {
+                    markerId = reader.GetInt32(0),
+                    serial = reader.GetString(1),
+                    devicename = reader.GetString(2),
+                    timeStamp = reader.GetDateTime(3),
+                    message = reader.GetString(4)
+                });
+            }
+
+            return markerList;
+        }
 
         /// <summary>
         /// Delte the Marker which is equal with the param markeId

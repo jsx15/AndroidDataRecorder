@@ -1,3 +1,4 @@
+using System;
 using AndroidDataRecorder.Backend;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,8 @@ namespace AndroidDataRecorder
 
             Config.LoadConfig();
             CreateHostBuilder(args).Build().Run();
+
+
 
         }
         
