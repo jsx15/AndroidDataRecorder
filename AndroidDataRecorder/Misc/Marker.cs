@@ -57,7 +57,7 @@ namespace AndroidDataRecorder.Misc
 
         public override string ToString()
         {
-            return "#"+ timeStamp +" MarkerID: " + MarkerId + "Message: " + message;
+            return "####\n####  "+ timeStamp +" MarkerID:  " + MarkerId + "  MarkerMessage:  " + message + "\n####";
         }
     }
 
