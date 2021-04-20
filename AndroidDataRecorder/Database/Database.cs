@@ -525,7 +525,8 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM ResIntens
-                    WHERE Serial LIKE @serial";
+                    WHERE Serial LIKE @serial
+                    ORDER BY ResId DESC LIMIT 5";
             command.Parameters.AddWithValue("@Serial", serial);
 
             // init new reader

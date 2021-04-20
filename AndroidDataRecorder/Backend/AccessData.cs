@@ -118,6 +118,8 @@ namespace AndroidDataRecorder.Backend
             //Empty the logs before starting to log
             AdbServer.GetClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
             
+            receiver = new ConsoleOutputReceiver();
+            
             //Decide which command to use for accessing the cpu usage by checking the devices build version
             AdbServer.GetClient().ExecuteRemoteCommand("getprop ro.build.version.release", _device, receiver);
             _cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top -b -n 1" : "top -b -m 5 -n 1";
