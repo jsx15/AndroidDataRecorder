@@ -26,12 +26,22 @@
                     <div class="row">
                         <div class="col">
                             Marker:
-                            <MarkerInputSelect class="form-control" @bind-Value="filterModel.marker">
-                                @foreach (var mar in _data.ListWithMarker())
+                            <MarkerInputSelect class="form-control" ValueExpression="() => filterModel.marker" Value="filterModel.marker" ValueChanged="(Marker value) => MarkerChanged(value, filterModel)">
+                                @foreach (var mar in _data.ListWithMarker(filterModel.DeviceSerial))
                                 {
                                     <option value="@mar.MarkerId">@mar.timeStamp</option>
                                 }
                             </MarkerInputSelect>
+                        </div>
+                        <div class="col">
+                            Device:
+                            <InputSelect class="form-control" ValueExpression="() => filterModel.DeviceSerial" Value="@filterModel.DeviceSerial" ValueChanged="(string value) => DeviceChanged(value, filterModel)">
+                                <option value=@string.Empty>*</option>
+                                @foreach (var dev in _data.DeviceList())
+                                {
+                                    <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="col">
                             Timespan - (Minutes):
@@ -160,8 +170,6 @@
      */
     private void Submit(Filter filtering)
     {
-        //filtering.marker = MarkerList.Markers.Find(x => x.markerId == filtering.markerID);
-        
         try
         {    
             //Check if a value is null
@@ -222,7 +230,26 @@
      */
     private string TimeStampForLogTable(Filter filter)
     {
-        return filter.marker.timeStamp.ToString();
+        return filter.marker?.timeStamp.ToString();
     }
-  
+
+    private void DeviceChanged(string serial, Filter filterModel)
+    {
+        filterModel.DeviceSerial = serial;
+        if (!serial.Equals(string.Empty))
+        {
+            filterModel.marker = _data.ListWithMarker(serial).First();
+        }
+        else
+        {
+            filterModel.marker = new Marker();
+        }
+    }
+
+    private void MarkerChanged(Marker marker, Filter filterModel)
+    {
+        filterModel.marker = marker;
+        filterModel.DeviceSerial = marker.deviceSerial;
+    }
+
 }

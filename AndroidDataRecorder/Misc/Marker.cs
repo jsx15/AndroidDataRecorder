@@ -10,7 +10,7 @@ namespace AndroidDataRecorder.Misc
         /// MarkerID
         /// </summary>
         public int MarkerId { set; get; }
-        
+
         /// <summary>
         /// Constructor
         /// </summary>

@@ -172,6 +172,10 @@ namespace AndroidDataRecorder.Database
         /// <returns> ListOfMarker </returns>
         public List<Marker> ListWithMarker(string serial)
         {
+            if (serial.Equals(string.Empty))
+            {
+                return ListWithMarker();
+            }
             // create connection to the database
             var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
