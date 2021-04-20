@@ -5,6 +5,7 @@
 @using AndroidDataRecorder.Screenrecord
 @using SharpAdbClient
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
+@using System.Globalization
 
 @inject IToastService ToastService;
 @page "/"
@@ -59,7 +60,7 @@
                 <EditForm Model="_markerModel" OnSubmit="GetMarkerTime">
                     <div class="card-body text-left">
                         <div class="row col">
-                            <InputTextArea class="form-text" style="width: 800px" id="message" @bind-Value="_markerModel.markerMessage" placeholder="Enter description..."></InputTextArea>
+                            <InputTextArea class="form-text" style="width: 800px" id="message" @bind-Value="_markerModel.MarkerMessage" placeholder="Enter description..."></InputTextArea>
                         </div>
                         
                         <br>
@@ -70,6 +71,7 @@
                         <div class="row col justify-content-center">
                             <p>
                                 <button class="btn btn-success m-3" type="submit">Add Marker</button>
+                                <a href="/marker" class="btn btn-dark m-3">Show All Marker</a>
                             </p>
                         </div>
                     </div>
@@ -204,15 +206,7 @@
     /*
      * Instance of the marker model
      */
-    private MarkerModel _markerModel = new MarkerModel();
-    
-    ResIntensList resintenstemp = new ResIntensList();
-    /*
-     * System stats (temporarily) 
-     */
-    string cpuPercentage = "98%";
-    string memoryUsage = "54%";
-    string batterylevel = "86%";
+    private readonly MarkerModel _markerModel = new MarkerModel();
 
     /*
      * Set callback for timer and fill marker list on page load
@@ -221,7 +215,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _attachedDeviceList = Backend.AdbServer.GetConnectedDevices();
+        _attachedDeviceList = AdbServer.GetConnectedDevices();
 
         _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
         _monitor.DeviceChanged += DeviceChanged;
@@ -229,11 +223,7 @@
         _monitor.DeviceConnected += DeviceChanged;
         _monitor.Start();
         
-        //Add tmp entries to the resources list so that the table is not empty on init
-        for (int i = 0; i < 5; i++)
-        {
-            _intensResourcesList.Add(new ResIntensList(_serial: "processing...", _deviceName: "processing...", _cpu: 0.0, _memory: 0.0, _process: "processing...", _timestamp: DateTime.Now));
-        }
+        FillResIntListTmp();
         
         //EventHandler: IntensiveResources called every 30 seconds
         AdbServer.Instance.DeviceWorkloadChanged += IntensiveResources;
@@ -241,6 +231,18 @@
         //ReSharper disable once ObjectCreationAsStatement
         new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
+    }
+
+    /*
+     * Fill the _intensResourcesList List with temp data to avoid a empty table
+     */
+    private void FillResIntListTmp()
+    {
+        //Add tmp entries to the _intensResources list so that the table is not empty on init
+        for (int i = 0; i < 5; i++)
+        {
+            _intensResourcesList.Add(new ResIntensList(_serial: "processing...", _deviceName: "processing...", _cpu: 0.0, _memory: 0.0, _process: "processing...", _timestamp: DateTime.Now));
+        }
     }
     
     /*
@@ -272,7 +274,6 @@
      */
     private async void DateTimeCallback(object state)
     {
-    //CurrDateTime = DateTimeOffset.UtcNow.ToLocalTime().ToString("yyyy-mm-dd hh:mm:ss.fff");
         CurrDateTime = DateTime.Now;
         await InvokeAsync(StateHasChanged);
     }
@@ -284,10 +285,10 @@
     {
         if (ValidateMarker())
         {
-            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), CurrDateTime, _markerModel.markerMessage);
+            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), CurrDateTime, _markerModel.MarkerMessage);
 
-            ToastService.ShowSuccess("Message: " + _markerModel.markerMessage, CurrDateTime.ToString());
-            _markerModel.markerMessage = string.Empty;
+            ToastService.ShowSuccess("Message: " + _markerModel.MarkerMessage, CurrDateTime.ToString(CultureInfo.InvariantCulture));
+            _markerModel.MarkerMessage = string.Empty;
             _markerList.Update();
             
         }
@@ -299,7 +300,7 @@
 
     private bool ValidateMarker()
     {
-        if (!string.IsNullOrWhiteSpace(_markerModel.markerMessage) && MarkerList.ActiveDeviceData is not null)
+        if (!string.IsNullOrWhiteSpace(_markerModel.MarkerMessage) && MarkerList.ActiveDeviceData is not null)
         {
             return true;
         }
@@ -356,7 +357,7 @@
     /*
      * Text for record button
      */
-    private string RecordText(DeviceData device)
+    private static string RecordText(DeviceData device)
     {
         return RecController.IsRecording(device) ? "Stop" : "Start";
     }
@@ -364,7 +365,7 @@
     /*
      * Color for record button
      */
-    private string RecordingButtonColor(DeviceData device)
+    private static string RecordingButtonColor(DeviceData device)
     {
         return RecController.IsRecording(device) ? "btn-danger" : "btn-success";
     }
@@ -414,7 +415,7 @@
         /*
          * The message for the marker
          */
-        public string markerMessage { get; set; }
+        public string MarkerMessage { get; set; }
     }
     
 }
