@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Globalization;
 using AndroidDataRecorder.Misc;
 
 namespace AndroidDataRecorder.Database
@@ -464,8 +463,102 @@ namespace AndroidDataRecorder.Database
 
             return logList;
         }
+        
+        /// <summary>
+        /// Create a List of Logs filtered by logs
+        /// </summary>
+        /// <param name="loglevel"></param>
+        /// <returns>logList</returns>
+        public List<LogEntry> LogListFilteredByLog(string loglevel) 
+        {
+          // create connection to the database
+          var connection = ConnectionToDatabase();
+          var command = connection.CreateCommand();
 
-        ///<summary>
+          switch (loglevel)
+          {
+              case "V":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE Loglevel LIKE 'V'";
+                  break;
+              }
+
+              case "D":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE Loglevel LIKE 'V' OR Loglevel LIKE 'D'";
+                  break;
+              }
+
+              case "I":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE  Loglevel LIKE 'V' OR Loglevel LIKE 'D' OR Loglevel LIKE 'I'";
+                  break;
+              }
+
+              case "W":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE Loglevel LIKE 'V' OR Loglevel LIKE 'D' OR Loglevel LIKE'I' OR Loglevel LIKE 'W'";
+                  break;
+              }
+
+              case "E":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE  Loglevel LIKE 'V' OR Loglevel LIKE 'D' OR Loglevel LIKE 'I' 
+                       OR Loglevel LIKE 'W' OR Loglevel LIKE 'E' ";
+                  break;
+              }
+
+              case "F":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE  Loglevel LIKE'F'";
+                  break;
+              }
+          }
+          
+          // fill the list with the actual values of database
+          List<LogEntry> logList = new List<LogEntry>();
+          
+          try
+          {
+              // init new reader
+              SQLiteDataReader reader = command.ExecuteReader();
+
+              while (reader.Read())
+              {
+                  logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
+                      reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
+                      reader.GetString(7), reader.GetString(8), reader.GetString(9)));
+              }
+              
+          }
+          catch
+          {
+              // ReSharper disable once ObjectCreationAsStatement
+              new SQLiteException($"System can not access the values in the database.");
+          }
+          
+          return logList;
+      }
+
+      ///<summary>
         /// Methods for the table ResIntens
         /// </summary>
 
