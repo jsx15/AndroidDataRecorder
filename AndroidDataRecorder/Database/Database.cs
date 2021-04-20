@@ -22,8 +22,17 @@ namespace AndroidDataRecorder.Database
         /// <returns> connection </returns>
         public SQLiteConnection ConnectionToDatabase()
         {
-            var connection = new SQLiteConnection(_datasource);
-            connection.Open();
+            SQLiteConnection connection;
+            try
+            {
+                connection = new SQLiteConnection(_datasource);
+                connection.Open();
+            }
+            catch
+            {
+                throw new SQLiteException("Connection refused");
+            }
+
             return connection;
         }
 
@@ -78,8 +87,15 @@ namespace AndroidDataRecorder.Database
             p4.Value = battery;
             p5.Value = timestamp;
 
-            //Execute Query
-            command.ExecuteNonQuery();
+            try
+            {
+                //Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException($"System can not insert the values in the database.");
+            }
         }
 
         /// <summary>
@@ -98,22 +114,30 @@ namespace AndroidDataRecorder.Database
                 @"SELECT * FROM Resources
                     WHERE Serial LIKE @serial";
             command.Parameters.AddWithValue("@Serial", serial);
-
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
+            
             // fill the list with the actual values of database
             List<ResourcesList> resList = new List<ResourcesList>();
 
-            while (reader.Read())
+
+            try
             {
-                resList.Add(new ResourcesList(
-                    reader.GetString(1),
-                    reader.GetString(2),
-                    reader.GetInt32(3),
-                    reader.GetInt32(4),
-                    reader.GetInt32(5),
-                    reader.GetDateTime(6)));
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    resList.Add(new ResourcesList(
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        reader.GetInt32(3),
+                        reader.GetInt32(4),
+                        reader.GetInt32(5),
+                        reader.GetDateTime(6)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
             }
 
             return resList;
@@ -160,8 +184,15 @@ namespace AndroidDataRecorder.Database
             p2.Value = timestamp;
             p3.Value = markerMessage;
 
-            // Execute Query
-            command.ExecuteNonQuery();
+            try
+            {
+                // Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not insert the values in the database.");
+            }
         }
 
         /// <summary>
@@ -183,22 +214,29 @@ namespace AndroidDataRecorder.Database
             // use the Parameter DeviceName to search for it
             command.Parameters.AddWithValue("@Serial", serial);
 
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
             // fill the list with the actual values of database
             List<Marker> markerList = new List<Marker>();
 
-            while (reader.Read())
+            try
             {
-                markerList.Add(new Marker()
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    MarkerId = reader.GetInt32(0),
-                    deviceSerial = reader.GetString(1),
-                    devicename = reader.GetString(2),
-                    timeStamp = reader.GetDateTime(3),
-                    message = reader.GetString(4)
-                });
+                    markerList.Add(new Marker()
+                    {
+                        MarkerId = reader.GetInt32(0),
+                        deviceSerial = reader.GetString(1),
+                        devicename = reader.GetString(2),
+                        timeStamp = reader.GetDateTime(3),
+                        message = reader.GetString(4)
+                    });
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
             }
 
             return markerList;
@@ -217,30 +255,37 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Marker";
-
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
+            
             // fill the list with the actual values of database
             List<Marker> markerList = new List<Marker>();
 
-            while (reader.Read())
+            try
             {
-                markerList.Add(new Marker()
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    MarkerId = reader.GetInt32(0),
-                    deviceSerial = reader.GetString(1),
-                    devicename = reader.GetString(2),
-                    timeStamp = reader.GetDateTime(3),
-                    message = reader.GetString(4)
-                });
+                    markerList.Add(new Marker()
+                    {
+                        MarkerId = reader.GetInt32(0),
+                        deviceSerial = reader.GetString(1),
+                        devicename = reader.GetString(2),
+                        timeStamp = reader.GetDateTime(3),
+                        message = reader.GetString(4)
+                    });
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
             }
 
             return markerList;
         }
 
         /// <summary>
-        /// Delte the Marker which is equal with the param markeId
+        /// Delete the Marker which is equal with the param markerId
         /// </summary>
         /// <param name="markerId"></param>
         public void DeleteMarker(int markerId)
@@ -256,8 +301,15 @@ namespace AndroidDataRecorder.Database
             // use the Parameter DeviceName to search for it
             command.Parameters.AddWithValue("@markerID", markerId);
 
-            // Execute Query
-            command.ExecuteNonQuery();
+            try
+            {
+                // Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
+            }
 
         }
 
@@ -323,8 +375,15 @@ namespace AndroidDataRecorder.Database
             p7.Value = app;
             p8.Value = logMessage;
 
-            //Execute Query
-            command.ExecuteNonQuery();
+            try
+            {
+                //Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not insert the values in the database.");
+            }
         }
 
         /// <summary>
@@ -340,24 +399,32 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Logs";
-
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
+            
+            // insert values into the list
             List<LogEntry> logsList = new List<LogEntry>();
 
-            while (reader.Read())
+            try
             {
-                logsList.Add(new LogEntry(
-                    reader.GetString(1),
-                    reader.GetString(2),
-                    reader.GetDateTime(3),
-                    reader.GetDateTime(4),
-                    reader.GetInt32(5),
-                    reader.GetInt32(6),
-                    reader.GetString(7),
-                    reader.GetString(8),
-                    reader.GetString(9)));
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    logsList.Add(new LogEntry(
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        reader.GetDateTime(3),
+                        reader.GetDateTime(4),
+                        reader.GetInt32(5),
+                        reader.GetInt32(6),
+                        reader.GetString(7),
+                        reader.GetString(8),
+                        reader.GetString(9)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
             }
 
             return logsList;
@@ -392,18 +459,25 @@ namespace AndroidDataRecorder.Database
                 // use the Parameter DeviceName to search for it
                 command.Parameters.AddWithValue("@Serial", serial);
             }
-
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
+            
             // fill the list with the actual values of database
             List<LogEntry> logList = new List<LogEntry>();
 
-            while (reader.Read())
+            try
             {
-                logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
-                    reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
-                    reader.GetString(7), reader.GetString(8), reader.GetString(9)));
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
+                        reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
+                        reader.GetString(7), reader.GetString(8), reader.GetString(9)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
             }
 
             return logList;
@@ -446,19 +520,25 @@ namespace AndroidDataRecorder.Database
                 command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
                 command.Parameters.AddWithValue("@loglevel", loglevel);
             }
-
-
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
+            
             // fill the list with the actual values of database
             List<LogEntry> logList = new List<LogEntry>();
 
-            while (reader.Read())
+            try
             {
-                logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
-                    reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
-                    reader.GetString(7), reader.GetString(8), reader.GetString(9)));
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
+                        reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
+                        reader.GetString(7), reader.GetString(8), reader.GetString(9)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
             }
 
             return logList;
@@ -551,8 +631,7 @@ namespace AndroidDataRecorder.Database
           }
           catch
           {
-              // ReSharper disable once ObjectCreationAsStatement
-              new SQLiteException($"System can not access the values in the database.");
+              throw new SQLiteException($"System can not access the values in the database.");
           }
           
           return logList;
@@ -601,8 +680,15 @@ namespace AndroidDataRecorder.Database
             p4.Value = process;
             p5.Value = timestamp;
 
-            //Execute Query
-            command.ExecuteNonQuery();
+            try
+            {
+                //Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not insert the values in the database.");
+            }
         }
 
         /// <summary>
@@ -621,23 +707,29 @@ namespace AndroidDataRecorder.Database
                     WHERE Serial LIKE @serial";
             command.Parameters.AddWithValue("@Serial", serial);
 
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
             // fill the list with the actual values of database
             List<ResIntensList> resourcesIntensLists = new List<ResIntensList>();
 
-            while (reader.Read())
+            try
             {
-                resourcesIntensLists.Add(new ResIntensList(
-                    reader.GetName(1),
-                    reader.GetString(2),
-                    reader.GetDouble(3),
-                    reader.GetDouble(4),
-                    reader.GetString(5),
-                    reader.GetDateTime(6)));
-            }
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
 
+                while (reader.Read())
+                {
+                    resourcesIntensLists.Add(new ResIntensList(
+                        reader.GetName(1),
+                        reader.GetString(2),
+                        reader.GetDouble(3),
+                        reader.GetDouble(4),
+                        reader.GetString(5),
+                        reader.GetDateTime(6)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
+            }
             return resourcesIntensLists;
         }
         
@@ -673,8 +765,15 @@ namespace AndroidDataRecorder.Database
             p0.Value = serialDevice;
             p1.Value = deviceName;
 
-            //Execute Query
-            command.ExecuteNonQuery();
+            try
+            {
+                //Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not insert the values in the database.");
+            }
 
         }
 
@@ -691,23 +790,27 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Devices";
-
-            // init new reader
-            SQLiteDataReader reader = command.ExecuteReader();
-
+            
             // fill the list with the actual values of database
             List<DeviceList> deviceList = new List<DeviceList>();
-
-            while (reader.Read())
+            
+            try
             {
-                deviceList.Add(new DeviceList(
-                    reader.GetString(0),
-                    reader.GetString(1)));
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
 
+                while (reader.Read())
+                {
+                    deviceList.Add(new DeviceList(
+                        reader.GetString(0),
+                        reader.GetString(1)));
+                }
             }
-
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
+            }
             return deviceList;
-
         }
     }
 }
