@@ -1,5 +1,5 @@
-@using Blazored.Toast.Configuration
 @using AndroidDataRecorder.Services
+@using System.Collections.Specialized
 @inherits LayoutComponentBase
 
 @inject LogBridge LogBridge;
@@ -37,6 +37,7 @@
                 <NavLink class="nav-link" href="/ticket" Match="NavLinkMatch.All">
                     <span class="oi oi-arrow-left"></span>
                     <span class="item-text pl-2">Ticket</span>
+                    <span class="p-2 item-text">@LogBridge.Filters.Count</span>
                 </NavLink>
             </li>
             <li class="nav-item px-3">
@@ -75,6 +76,17 @@
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        LogBridge.Filters.CollectionChanged += OnLogBridgeChanged;
+    }
+
+    private void OnLogBridgeChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
     }
 
 }

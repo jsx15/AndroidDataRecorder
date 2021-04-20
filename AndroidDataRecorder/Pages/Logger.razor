@@ -191,7 +191,7 @@
     {
         base.OnInitialized();
         
-        _localSelectedMarkers = MarkerBridge.selectedMarkers;
+        _localSelectedMarkers = MarkerBridge.selectedMarkers.ToList();
         
         foreach (var mar in _localSelectedMarkers)
         {
@@ -214,7 +214,7 @@
     private void AddFilterToBridge(Filter filter)
     {
         LogBridge.Filters.Add(filter);
-        ToastService.ShowSuccess("Filter added", "Success");
+        ToastService.ShowSuccess("Filter added to Ticket", "Success");
     }
 
     /*

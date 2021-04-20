@@ -138,7 +138,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _filters = LogBridge.Filters;
+        _filters = LogBridge.Filters.ToList();
     }
 
     /*
