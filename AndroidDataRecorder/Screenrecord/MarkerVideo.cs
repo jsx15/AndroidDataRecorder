@@ -78,11 +78,17 @@ namespace AndroidDataRecorder.Screenrecord
             //check if there is a file in this range
             if (fileList.Count == 0) return;
 
-            //get last or newest file of this list
-            var fileInfo = new FileInfo(fileList[^1]);
-
-            //wait till recording of this file is done
-            while (HandleFiles.IsFileLocked(fileInfo)) {}
+            //check every file in time range if it´s in use
+            for(var i = 0; i<fileList.Count;i++)
+            {
+                //wait while file in use
+                while (Screenrecord.FilesInUse.Contains(fileList[i]))
+                {
+                }
+                
+                //check if file exists -> maybe timeout while recording
+                if (!File.Exists(fileList[i])) fileList.Remove(fileList[i]);
+            }
 
             //concatenate all video parts
             HandleFiles.ConcVideoFiles(fileList, Config.GetVideoDirPath, textFilePath, videoName);

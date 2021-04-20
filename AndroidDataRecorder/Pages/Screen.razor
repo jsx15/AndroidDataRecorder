@@ -21,7 +21,7 @@
 
     public void StartRecord()
     {
-        bool isActive = RecController.StartScrRec(MarkerList.ActiveDeviceData, 5000);
+        bool isActive = RecController.StartScrRec(MarkerList.ActiveDeviceData, 10000);
 
         if (isActive)
         {
@@ -48,8 +48,8 @@
         _marker.markerId = 1;
         _marker.devicename = "hero2lte";
         _marker.timeStamp = DateTime.Now;
-        _marker.deviceSerial = "9885b64548364a5158";
-        startTime = DateTime.Now.AddMinutes(-2);
+        _marker.deviceSerial =MarkerList.GetDeviceSerial();
+        startTime = DateTime.Now.AddMinutes(-5);
         endTime = DateTime.Now.AddMinutes(2);
         Console.WriteLine("Marker created:\n" + "Marker time: " + _marker.timeStamp + "\nstartTime: "+startTime+"\nendtime: "+endTime);
     }
