@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.SqlTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.WebEncoders.Testing;
+using SharpAdbClient;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -31,6 +32,8 @@ namespace AndroidDataRecorder.Misc
         public List<LogEntry> Logs = new List<LogEntry>();
 
         public List<ResourcesList> Resources = new List<ResourcesList>();
+
+        public string DeviceSerial = "";
 
         /// <summary>
         /// Constructor
