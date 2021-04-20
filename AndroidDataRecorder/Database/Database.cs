@@ -484,72 +484,12 @@ namespace AndroidDataRecorder.Database
         }
 
         /// <summary>
-        /// Creates a List of Log List, which is filtered by the params timeStamp1, timeStamp2 and Loglevel
-        /// </summary>
-        /// <param name="timeStamp1"></param>
-        /// <param name="timeStamp2"></param>
-        /// <param name="loglevel"></param>
-        /// <returns>LogList</returns>
-        public List<LogEntry> LogListFilterByTimestampAndLogLevel(DateTime timeStamp1, DateTime timeStamp2,
-            string loglevel)
-        {
-            // create connection to the database
-            var connection = ConnectionToDatabase();
-            var command = connection.CreateCommand();
-
-            if (loglevel.Equals("*") || loglevel.Equals("") || loglevel.StartsWith(" "))
-            {
-                //insert Query
-                command.CommandText =
-                    @"SELECT * FROM Logs
-                    WHERE SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-
-                // use the Parameter DeviceName to search for it
-                command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                command.Parameters.AddWithValue("@loglevel", loglevel);
-            }
-            else
-            {
-                //insert Query
-                command.CommandText =
-                    @"SELECT * FROM Logs
-                    WHERE Loglevel LIKE @loglevel AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                // use the Parameter DeviceName to search for it
-                command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                command.Parameters.AddWithValue("@loglevel", loglevel);
-            }
-            
-            // fill the list with the actual values of database
-            List<LogEntry> logList = new List<LogEntry>();
-
-            try
-            {
-                // init new reader
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
-                        reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
-                        reader.GetString(7), reader.GetString(8), reader.GetString(9)));
-                }
-            }
-            catch
-            {
-                throw new SQLiteException("System can not access the values in the database.");
-            }
-
-            return logList;
-        }
-        
-        /// <summary>
         /// Create a List of Logs filtered by logs
         /// </summary>
         /// <param name="loglevel"></param>
         /// <returns>logList</returns>
-        public List<LogEntry> LogListFilteredByLog(string loglevel) 
+        public List<LogEntry> LogListFilteredByLog(DateTime timeStamp1, DateTime timeStamp2,
+            string loglevel) 
         {
           // create connection to the database
           var connection = ConnectionToDatabase();
@@ -557,39 +497,17 @@ namespace AndroidDataRecorder.Database
 
           switch (loglevel)
           {
-              case "V":
+              case "F":
               {
                   //insert Query
                   command.CommandText =
                       @"SELECT * FROM Logs
-                    WHERE Loglevel LIKE 'V'";
-                  break;
-              }
-
-              case "D":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
-                    WHERE Loglevel LIKE 'V' OR Loglevel LIKE 'D'";
-                  break;
-              }
-
-              case "I":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
-                    WHERE  Loglevel LIKE 'V' OR Loglevel LIKE 'D' OR Loglevel LIKE 'I'";
-                  break;
-              }
-
-              case "W":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
-                    WHERE Loglevel LIKE 'V' OR Loglevel LIKE 'D' OR Loglevel LIKE'I' OR Loglevel LIKE 'W'";
+                    WHERE Loglevel LIKE 'F' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                  
+                  //use the Parameter DeviceName to search for it
+                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                  
                   break;
               }
 
@@ -598,17 +516,69 @@ namespace AndroidDataRecorder.Database
                   //insert Query
                   command.CommandText =
                       @"SELECT * FROM Logs
-                    WHERE  Loglevel LIKE 'V' OR Loglevel LIKE 'D' OR Loglevel LIKE 'I' 
-                       OR Loglevel LIKE 'W' OR Loglevel LIKE 'E' ";
+                    WHERE Loglevel LIKE 'E' OR Loglevel LIKE 'F' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                  
+                  //use the Parameter DeviceName to search for it
+                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                  
                   break;
               }
 
-              case "F":
+              case "W":
               {
                   //insert Query
                   command.CommandText =
                       @"SELECT * FROM Logs
-                    WHERE  Loglevel LIKE'F'";
+                    WHERE  Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                  
+                  //use the Parameter DeviceName to search for it
+                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                  
+                  break;
+              }
+
+              case "I":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE'W' OR Loglevel LIKE 'I' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                  
+                  //use the Parameter DeviceName to search for it
+                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                  
+                  break;
+              }
+
+              case "D":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE  Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' 
+                       OR Loglevel LIKE 'I' OR Loglevel LIKE 'D' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                  
+                  //use the Parameter DeviceName to search for it
+                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                  
+                  break;
+              }
+
+              case "V":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs
+                    WHERE SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                  
+                  //use the Parameter DeviceName to search for it
+                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+                  
                   break;
               }
           }

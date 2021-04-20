@@ -74,7 +74,7 @@
             <button class="btn btn-primary text-center" @onclick="AddFilter">Add Filter</button>
             
             <div class="card-footer text-right">
-                <a href="/logger" class="btn btn-success">Create a ticket</a>
+                <a href="/ticket" class="btn btn-success">Go to ticket creation</a>
             </div>
         </div>
     </div>
@@ -176,7 +176,7 @@
             else
             {
                 //fill the Logs list with filtered log data
-                filtering.Logs = _data.LogListFilterByTimestampAndLogLevel(
+                filtering.Logs = _data.LogListFilteredByLog(
                     filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
                     filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
             }
