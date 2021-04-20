@@ -16,6 +16,8 @@ namespace AndroidDataRecorder
             //Create the razor pages
             CreateHostBuilder(args).Build().Run();
 
+           
+
         }
         
 
