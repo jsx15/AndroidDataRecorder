@@ -82,6 +82,7 @@ namespace AndroidDataRecorder.Backend
             var result = Server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
             monitor.DeviceConnected += OnDeviceConnected;
+            monitor.DeviceChanged += OnDeviceChanged;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
             monitor.Start();
             Instance = CustomMonitor.Instance;
@@ -141,9 +142,6 @@ namespace AndroidDataRecorder.Backend
                 {
                     deviceList.Add(device);
                 }
-                
-                //Invoke the MultipleSameDevices event if the devicelist contains the same device multiple times
-                if(Client.GetDevices().FindAll(x => x.Serial.Equals(device.Serial)).Count > 1) Instance.OnMultipleSameDevicesConnected(new EventArgs());
             }
 
             return deviceList;
@@ -231,6 +229,17 @@ namespace AndroidDataRecorder.Backend
             Console.WriteLine($"The device {e.Device} has connected to this PC");
         }
 
+        /// <summary>
+        /// Check if the device is connected multiple times when it changes it's state
+        /// If so, invoke the MultipleSameDevices event
+        /// </summary>
+        /// <param name="sender"> The sender </param>
+        /// <param name="e"> Event to recognize devices </param>
+        private static void OnDeviceChanged(object sender, DeviceDataEventArgs e)
+        {
+            if(Client.GetDevices().FindAll(x => x.Serial.Equals(e.Device.Serial)).Count > 1) Instance.OnMultipleSameDevicesConnected(new EventArgs());
+        }
+        
         /// <summary>
         /// Display a toast
         /// </summary>
