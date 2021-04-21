@@ -492,8 +492,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="loglevel"></param>
         /// <returns>logList</returns>
-        public List<LogEntry> LogListFilteredByLog(DateTime timeStamp1, DateTime timeStamp2,
-            string loglevel) 
+        public List<LogEntry> LogListFilteredByLog(DateTime timeStamp1, DateTime timeStamp2, string loglevel) 
         {
           // create connection to the database
           var connection = ConnectionToDatabase();
@@ -501,6 +500,14 @@ namespace AndroidDataRecorder.Database
 
           switch (loglevel)
           {
+              case "*":
+              {
+                  //insert Query
+                  command.CommandText =
+                      @"SELECT * FROM Logs";
+
+                  break;
+              }
               case "F":
               {
                   //insert Query
