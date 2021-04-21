@@ -219,7 +219,7 @@
 
         _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
         _monitor.DeviceChanged += DeviceChanged;
-        _monitor.DeviceDisconnected += DeviceChanged;
+        _monitor.DeviceDisconnected += OnDeviceDisconnected;
         _monitor.DeviceConnected += DeviceChanged;
         _monitor.Start();
         
@@ -403,11 +403,16 @@
     private void DeviceChanged(object sender, DeviceDataEventArgs e)
     {
         _attachedDeviceList = AdbServer.GetConnectedDevices();
+        
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
+    {
         if (MarkerList.ActiveDeviceData is not null && MarkerList.ActiveDeviceData.Serial.Equals(e.Device.Serial))
         {
             MarkerList.ActiveDeviceData = null;
         }
-        InvokeAsync(StateHasChanged);
     }
 
     public class MarkerModel
