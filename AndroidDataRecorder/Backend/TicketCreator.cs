@@ -93,7 +93,7 @@ namespace AndroidDataRecorder.Backend
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
             var token = tokenSource.Token;
             var tmp = _jira.Priorities.GetPrioritiesAsync(token).Result;
-            return tmp.ToList();
+            return tmp.OrderBy(x => x.Name).ToList();
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace AndroidDataRecorder.Backend
             var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
             var token = tokenSource.Token;
             var tmp = _jira.IssueTypes.GetIssueTypesAsync(token).Result;
-            return tmp.ToList();
+            return tmp.OrderBy(x => x.Name).ToList();
         }
 
         /// <summary>

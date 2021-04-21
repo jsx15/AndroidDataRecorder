@@ -2,9 +2,12 @@
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Services
 @using AndroidDataRecorder.Backend
+@using Atlassian.Jira
+@using System.IO
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
+@inject IToastService ToastService;
 
 
 <header>
@@ -66,9 +69,12 @@
                     </div>
                     <div class="col-md-6 text-left">
                         <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
-                            @foreach (var type in Enum.GetValues(typeof(TicketCreator.TicketType)))
+                            @if (_tc.IssueTypeList is not null)
                             {
-                                <option>@type</option>
+                                @foreach (var type in _tc.IssueTypeList)
+                                {
+                                    <option>@type</option>
+                                }
                             }
                         </InputSelect>
                     </div>
@@ -82,16 +88,29 @@
                     </div>
                     <div class="col-md-6">
                         <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
-                            @foreach (var priority in Enum.GetValues(typeof(TicketCreator.TicketPriority)))
-                            {
-                                <option>@priority</option>
+                            @if (_tc.PriorityList is not null) {
+                                @foreach (var priority in _tc.PriorityList)
+                                {
+                                    <option>@priority</option>
+                                }
                             }
                         </InputSelect>
+                        <br>
+                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.ProjectKey">
+                            @if (_tc.KeyList is not null)
+                            {
+                                @foreach (var priority in _tc.KeyList)
+                                {
+                                    <option>@priority</option>
+                                }
+                            }
+                        </InputSelect>
+                        
                     </div>
                 </div>
-
+                
                 <br>
-
+                
                 <div class="d-flex flex-row-reverse">
                     <button class="btn btn-primary m-3" type="submit">Create Ticket</button>
                 </div>
@@ -108,7 +127,7 @@
     /*
      * Instance of the ticket model class
      */
-    private readonly TicketModel _ticketModel = new TicketModel();
+    private TicketModel _ticketModel;
 
     /*
      * This is just for testing, okay?
@@ -116,11 +135,15 @@
     private List<Filter> _filters = new List<Filter>();
 
 
+    /*
+     * Connection to Jira
+     */
+    TicketCreator _tc;
+    
     private void HandleSubmit()
     {
-        TicketCreator tc = new TicketCreator();
-        
-        tc.CreateTicket(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile,_ticketModel.Title,_ticketModel.Description);
+
+        _tc.CreateTicket(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile,_ticketModel.Title,_ticketModel.Description);
         
         _filters.Clear();
         LogBridge.Filters.Clear();
@@ -138,6 +161,19 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        try
+        {
+            _tc = new TicketCreator();
+        }
+        catch (IOException)
+        {
+            ToastService.ShowError("Ticket directory could not be created", "Error");
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("No internet connection", "Error");
+        }
+        _ticketModel = new TicketModel(_tc.IssueTypeList.First(), _tc.PriorityList.First(), _tc.KeyList.First());
         _filters = LogBridge.Filters;
     }
 
@@ -160,17 +196,29 @@
         /*
          * Priority of the jira ticket
          */
-        public TicketCreator.TicketPriority Priority { get; set; }
+        public IssuePriority Priority { get; set; }
 
         /*
          * Type of the jira ticket
          */
-        public TicketCreator.TicketType Type { get; set; }
+        public IssueType Type { get; set; }
+        
+        /*
+         * Project key
+         */
+        public string ProjectKey { get; set; }
 
         /*
          * This is just for testing, okay?
          */
         public bool checkBoxVideo;
+
+        public TicketModel(IssueType type, IssuePriority prio, string key)
+        {
+            Type = type;
+            Priority = prio;
+            ProjectKey = key;
+        }
     }
 
 }
