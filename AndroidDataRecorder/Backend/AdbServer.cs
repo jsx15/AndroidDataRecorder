@@ -141,11 +141,11 @@ namespace AndroidDataRecorder.Backend
                 {
                     deviceList.Add(device);
                 }
+                
+                //Invoke the MultipleSameDevices event if the devicelist contains the same device multiple times
+                if(Client.GetDevices().FindAll(x => x.Serial.Equals(device.Serial)).Count > 1) Instance.OnMultipleSameDevicesConnected(new EventArgs());
             }
 
-            //Invoke the MultipleSameDevices event if the devicelist contains the same device multiple times
-            if(Client.GetDevices().Count != Client.GetDevices().Distinct().Count()) Instance.OnMultipleSameDevicesConnected(new EventArgs());
-            
             return deviceList;
         }
 
