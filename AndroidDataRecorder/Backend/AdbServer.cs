@@ -81,11 +81,11 @@ namespace AndroidDataRecorder.Backend
         {
             var result = Server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
+            Instance = CustomMonitor.Instance;
             monitor.DeviceConnected += OnDeviceConnected;
             monitor.DeviceChanged += OnDeviceChanged;
             monitor.DeviceDisconnected += OnDeviceDisconnected;
             monitor.Start();
-            Instance = CustomMonitor.Instance;
         }
 
         /// <summary>

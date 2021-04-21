@@ -1,8 +1,11 @@
 @using AndroidDataRecorder.Services
 @using System.Collections.Specialized
+@using System.Threading
+@using AndroidDataRecorder.Backend
 @inherits LayoutComponentBase
 
 @inject LogBridge LogBridge;
+@inject IToastService ToastService;
 
 <div class="page">
     <div class="@NavMenuCssClass">
@@ -69,10 +72,11 @@
     private string NavMenuCssClass => _collapseNavMenu ? "sidebar-min" : "sidebar";
     private string Content => _collapseNavMenu ? "content-max" : "content-min";
 
+    private bool _eventTimer = false;
+
     /*
      * Toggle navigation menu
      */
-
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
@@ -82,11 +86,31 @@
     {
         base.OnInitialized();
         LogBridge.Filters.CollectionChanged += OnLogBridgeChanged;
+        AdbServer.Instance.MultipleSameDevices += OnSameDevice;
     }
 
     private void OnLogBridgeChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
         InvokeAsync(StateHasChanged);
+    }
+
+    private void OnSameDevice(object sender, EventArgs e)
+    {
+        if (!_eventTimer)
+        {
+            ToastService.ShowWarning("Device connected multiple times. Please restart ADB Server", "Warning");
+            new Thread(() =>
+            {
+                ToggleEventTimer();
+                Thread.Sleep(500);
+                ToggleEventTimer();
+            }).Start();
+        }
+    }
+
+    private void ToggleEventTimer()
+    {
+        _eventTimer = !_eventTimer;
     }
 
 }
