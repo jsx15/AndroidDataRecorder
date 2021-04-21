@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using GrokNet;
@@ -56,7 +57,7 @@ namespace AndroidDataRecorder.Backend
         {
             _device = device;
         }
-        
+
         /// <summary>
         /// Starts a Stopwatch and gives the device 30 seconds to change its state to online
         /// If the device state changes to online it starts logging
@@ -82,6 +83,7 @@ namespace AndroidDataRecorder.Backend
                                 watch.Stop();
                                 _device = d;
                                 if(!_database.DeviceList().Exists(x => x.serial.Equals(_device.Serial))) _database.InsertValuesIntoDeviceTable(_device.Serial, _device.Name);
+                                new Thread(SaveApps).Start();
                                 InitializeProcess();
                             }
                         }
@@ -114,7 +116,7 @@ namespace AndroidDataRecorder.Backend
             };
             
             var receiver = new ConsoleOutputReceiver();
-            
+
             //Empty the logs before starting to log
             AdbServer.GetClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
             
@@ -129,6 +131,22 @@ namespace AndroidDataRecorder.Backend
             AccessWorkload();
         }
 
+        /// <summary>
+        /// Save the third party apps into the according table
+        /// </summary>
+        private void SaveApps()
+        {
+            var receiver = new ConsoleOutputReceiver();
+            
+            _database.DeleteApp(_device.Serial);
+            AdbServer.GetClient().ExecuteRemoteCommand("pm list packages -3", _device, receiver);
+            var appList = receiver.ToString().Split("\r\n").ToList();
+            for (var i = 0; i < appList.Count - 1; i++)
+            {
+                _database.InsertValuesIntoAppTable(appList[i], _device.Serial);
+            }
+        }
+        
         /// <summary>
         /// Write all the logs consistently into the database table Logs
         /// </summary>
