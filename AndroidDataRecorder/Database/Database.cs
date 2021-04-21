@@ -813,7 +813,7 @@ namespace AndroidDataRecorder.Database
             command.CommandText =
                 @"INSERT INTO App(AppName, Serial)
                 VALUES (@app, @serialFK)";
-
+            
             // Define parameters to insert new values in the table
             SQLiteParameter p0 = new SQLiteParameter("@app", DbType.String);
             SQLiteParameter p1 = new SQLiteParameter("@serialFK", DbType.String);
@@ -833,12 +833,13 @@ namespace AndroidDataRecorder.Database
             }
             catch
             {
-                throw new SQLiteException("System can not insert the values in the database.");
+                throw new SQLiteException("Can not insert the Values into the Database");
             }
-            
+
+
         }
         
-        public List<AppList> AppList()
+        public List<AppList> AppList(string serial)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -846,7 +847,12 @@ namespace AndroidDataRecorder.Database
 
             //insert Query
             command.CommandText =
-                @"SELECT * FROM App";
+                @"SELECT * FROM App
+                    WHERE Serial LIKE @serial
+                    GROUP BY AppName, Serial";
+            
+            command.Parameters.AddWithValue("@Serial", serial);
+
 
             // fill the list with the actual values of database
             List<AppList> appList = new List<AppList>();
@@ -870,9 +876,31 @@ namespace AndroidDataRecorder.Database
 
             return appList;
         }
+        
+        public void DeleteApp(string serial)
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+            //insert Query
+            command.CommandText =
+                @"DELETE FROM App
+                    WHERE Serial LIKE @serial";
 
-        
-        
+            // use the Parameter DeviceName to search for it
+            command.Parameters.AddWithValue("@Serial", serial);
+
+            try
+            {
+                // Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
+            }
+
+        }
 
     }
 
