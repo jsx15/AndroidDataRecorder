@@ -114,7 +114,7 @@ namespace AndroidDataRecorder.Database
                 @"SELECT * FROM Resources
                     WHERE Serial LIKE @serial";
             command.Parameters.AddWithValue("@Serial", serial);
-            
+
             // fill the list with the actual values of database
             List<ResourcesList> resList = new List<ResourcesList>();
 
@@ -206,6 +206,7 @@ namespace AndroidDataRecorder.Database
             {
                 return ListWithMarker();
             }
+
             // create connection to the database
             var connection = ConnectionToDatabase();
             var command = connection.CreateCommand();
@@ -245,7 +246,7 @@ namespace AndroidDataRecorder.Database
 
             return markerList;
         }
-        
+
         /// <summary>
         /// Creates a list of Marker
         /// </summary>
@@ -259,7 +260,7 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Marker";
-            
+
             // fill the list with the actual values of database
             List<Marker> markerList = new List<Marker>();
 
@@ -403,7 +404,7 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Logs";
-            
+
             // insert values into the list
             List<LogEntry> logsList = new List<LogEntry>();
 
@@ -463,7 +464,7 @@ namespace AndroidDataRecorder.Database
                 // use the Parameter DeviceName to search for it
                 command.Parameters.AddWithValue("@Serial", serial);
             }
-            
+
             // fill the list with the actual values of database
             List<LogEntry> logList = new List<LogEntry>();
 
@@ -492,133 +493,133 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="loglevel"></param>
         /// <returns>logList</returns>
-        public List<LogEntry> LogListFilteredByLog(DateTime timeStamp1, DateTime timeStamp2, string loglevel) 
+        public List<LogEntry> LogListFilteredByLog(DateTime timeStamp1, DateTime timeStamp2, string loglevel)
         {
-          // create connection to the database
-          var connection = ConnectionToDatabase();
-          var command = connection.CreateCommand();
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
 
-          switch (loglevel)
-          {
-              case "*":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs";
+            switch (loglevel)
+            {
+                case "*":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs";
 
-                  break;
-              }
-              case "F":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
+                    break;
+                }
+                case "F":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs
                     WHERE Loglevel LIKE 'F' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                  
-                  //use the Parameter DeviceName to search for it
-                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                  
-                  break;
-              }
 
-              case "E":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
+                    //use the Parameter DeviceName to search for it
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+
+                    break;
+                }
+
+                case "E":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs
                     WHERE Loglevel LIKE 'E' OR Loglevel LIKE 'F' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                  
-                  //use the Parameter DeviceName to search for it
-                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                  
-                  break;
-              }
 
-              case "W":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
+                    //use the Parameter DeviceName to search for it
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+
+                    break;
+                }
+
+                case "W":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs
                     WHERE  Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                  
-                  //use the Parameter DeviceName to search for it
-                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                  
-                  break;
-              }
 
-              case "I":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
+                    //use the Parameter DeviceName to search for it
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+
+                    break;
+                }
+
+                case "I":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs
                     WHERE Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE'W' OR Loglevel LIKE 'I' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                  
-                  //use the Parameter DeviceName to search for it
-                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                  
-                  break;
-              }
 
-              case "D":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
+                    //use the Parameter DeviceName to search for it
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+
+                    break;
+                }
+
+                case "D":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs
                     WHERE  Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' 
                        OR Loglevel LIKE 'I' OR Loglevel LIKE 'D' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                  
-                  //use the Parameter DeviceName to search for it
-                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                  
-                  break;
-              }
 
-              case "V":
-              {
-                  //insert Query
-                  command.CommandText =
-                      @"SELECT * FROM Logs
+                    //use the Parameter DeviceName to search for it
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
+
+                    break;
+                }
+
+                case "V":
+                {
+                    //insert Query
+                    command.CommandText =
+                        @"SELECT * FROM Logs
                     WHERE SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
-                  
-                  //use the Parameter DeviceName to search for it
-                  command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
-                  command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
-                  
-                  break;
-              }
-          }
-          
-          // fill the list with the actual values of database
-          List<LogEntry> logList = new List<LogEntry>();
-          
-          try
-          {
-              // init new reader
-              SQLiteDataReader reader = command.ExecuteReader();
 
-              while (reader.Read())
-              {
-                  logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
-                      reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
-                      reader.GetString(7), reader.GetString(8), reader.GetString(9)));
-              }
-              
-          }
-          catch
-          {
-              throw new SQLiteException($"System can not access the values in the database.");
-          }
-          
-          return logList;
-      }
+                    //use the Parameter DeviceName to search for it
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
 
-      ///<summary>
+                    break;
+                }
+            }
+
+            // fill the list with the actual values of database
+            List<LogEntry> logList = new List<LogEntry>();
+
+            try
+            {
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    logList.Add(new LogEntry(reader.GetString(1), reader.GetString(2), reader.GetDateTime(3),
+                        reader.GetDateTime(4), reader.GetInt32(5), reader.GetInt32(6),
+                        reader.GetString(7), reader.GetString(8), reader.GetString(9)));
+                }
+
+            }
+            catch
+            {
+                throw new SQLiteException($"System can not access the values in the database.");
+            }
+
+            return logList;
+        }
+
+        ///<summary>
         /// Methods for the table ResIntens
         /// </summary>
 
@@ -712,13 +713,14 @@ namespace AndroidDataRecorder.Database
             {
                 throw new SQLiteException("System can not access the values in the database.");
             }
+
             return resourcesIntensLists;
         }
-        
+
         ///<summary>
         /// Methods for the table Device
         /// </summary>
-        
+
         /// <summary>
         /// Method to Insert Values Into the table Device
         /// </summary>
@@ -772,10 +774,10 @@ namespace AndroidDataRecorder.Database
             //insert Query
             command.CommandText =
                 @"SELECT * FROM Devices";
-            
+
             // fill the list with the actual values of database
             List<DeviceList> deviceList = new List<DeviceList>();
-            
+
             try
             {
                 // init new reader
@@ -792,7 +794,87 @@ namespace AndroidDataRecorder.Database
             {
                 throw new SQLiteException("System can not access the values in the database.");
             }
+
             return deviceList;
         }
+
+
+        ///<summary>
+        /// Methods for the table App
+        /// </summary>
+
+        public void InsertValuesIntoAppTable(string app, string serialFK)
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"INSERT INTO App(AppName, Serial)
+                VALUES (@app, @serialFK)";
+
+            // Define parameters to insert new values in the table
+            SQLiteParameter p0 = new SQLiteParameter("@app", DbType.String);
+            SQLiteParameter p1 = new SQLiteParameter("@serialFK", DbType.String);
+
+            // Add the parameters to the table
+            command.Parameters.Add(p0);
+            command.Parameters.Add(p1);
+
+            // define the Values which will be insert to the table
+            p0.Value = app;
+            p1.Value = serialFK;
+
+            try
+            {
+                //Execute Query
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                throw new SQLiteException("System can not insert the values in the database.");
+            }
+            
+        }
+        
+        public List<AppList> AppList()
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM App";
+
+            // fill the list with the actual values of database
+            List<AppList> appList = new List<AppList>();
+
+            try
+            {
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    appList.Add(new AppList(
+                        reader.GetString(1),
+                        reader.GetString(2)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
+            }
+
+            return appList;
+        }
+
+        
+        
+
     }
+
+
 }

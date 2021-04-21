@@ -14,9 +14,16 @@ namespace AndroidDataRecorder
             Config.LoadConfig();
             
             //Create the razor pages
-            CreateHostBuilder(args).Build().Run();
+            //CreateHostBuilder(args).Build().Run();
 
-           
+            Database.Database db = new Database.Database();
+
+            foreach (var app in db.AppList())
+            {
+                Console.WriteLine(app.appName + " " + app.serialFK);
+            }
+
+
 
         }
         
