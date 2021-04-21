@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using SharpAdbClient;
@@ -34,6 +35,7 @@ namespace AndroidDataRecorder.Backend
             private static readonly object Padlock = new object(); 
             private static CustomMonitor _instance = null;
             public event EventHandler<DeviceDataEventArgs> DeviceWorkloadChanged;
+            public event EventHandler<EventArgs> MultipleSameDevices;
             
             /// <summary>
             /// Return a single instance of CustomMonitor if none already exists
@@ -60,6 +62,15 @@ namespace AndroidDataRecorder.Backend
             public void OnDeviceWorkloadChanged(DeviceDataEventArgs e)
             {
                 DeviceWorkloadChanged?.Invoke((object) this, e);
+            }
+            
+            /// <summary>
+            /// Invoke the event for MultipleSameDevices
+            /// </summary>
+            /// <param name="e"> The Event that is invoked </param>
+            public void OnMultipleSameDevicesConnected(EventArgs e)
+            {
+                MultipleSameDevices?.Invoke((object) this, e);
             }
         }
 
@@ -132,6 +143,9 @@ namespace AndroidDataRecorder.Backend
                 }
             }
 
+            //Invoke the MultipleSameDevices event if the devicelist contains the same device multiple times
+            if(Client.GetDevices().Count != Client.GetDevices().Distinct().Count()) Instance.OnMultipleSameDevicesConnected(new EventArgs());
+            
             return deviceList;
         }
 
