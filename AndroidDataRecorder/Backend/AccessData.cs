@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using AndroidDataRecorder.Database;
 using GrokNet;
 using SharpAdbClient;
 
@@ -29,7 +31,11 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// The database to write into
         /// </summary>
-        private readonly Database.Database _database = new Database.Database();
+        private readonly TableDevices _tableDevices = new TableDevices();
+        private readonly TableApp _tableApp = new TableApp();
+        private readonly TableLogs _tableLogs = new TableLogs();
+        private readonly TableResources _tableResources = new TableResources();
+        private readonly TableResIntens _tableResIntens = new TableResIntens();
         
         /// <summary>
         /// The grok to filter the logs
@@ -56,7 +62,7 @@ namespace AndroidDataRecorder.Backend
         {
             _device = device;
         }
-        
+
         /// <summary>
         /// Starts a Stopwatch and gives the device 30 seconds to change its state to online
         /// If the device state changes to online it starts logging
@@ -81,7 +87,8 @@ namespace AndroidDataRecorder.Backend
                             {
                                 watch.Stop();
                                 _device = d;
-                                if(!_database.DeviceList().Exists(x => x.serial.Equals(_device.Serial))) _database.InsertValuesIntoDeviceTable(_device.Serial, _device.Name);
+                                if(!_tableDevices.DeviceList().Exists(x => x.serial.Equals(_device.Serial))) _tableDevices.InsertValues(_device.Serial, _device.Name);
+                                new Thread(SaveApps).Start();
                                 InitializeProcess();
                             }
                         }
@@ -114,7 +121,7 @@ namespace AndroidDataRecorder.Backend
             };
             
             var receiver = new ConsoleOutputReceiver();
-            
+
             //Empty the logs before starting to log
             AdbServer.GetClient().ExecuteRemoteCommand("logcat -b all -c", _device, receiver);
             
@@ -130,6 +137,22 @@ namespace AndroidDataRecorder.Backend
         }
 
         /// <summary>
+        /// Save the third party apps into the according table
+        /// </summary>
+        private void SaveApps()
+        {
+            var receiver = new ConsoleOutputReceiver();
+            
+            _tableApp.DeleteRow(_device.Serial);
+            AdbServer.GetClient().ExecuteRemoteCommand("pm list packages -3", _device, receiver);
+            var appList = receiver.ToString().Split("\r\n").ToList();
+            for (var i = 0; i < appList.Count - 1; i++)
+            {
+                _tableApp.InsertValues(appList[i], _device.Serial);
+            }
+        }
+        
+        /// <summary>
         /// Write all the logs consistently into the database table Logs
         /// </summary>
         /// <param name="proc"> The process to be executed </param>
@@ -143,7 +166,7 @@ namespace AndroidDataRecorder.Backend
                     line = _device.Serial + " " + _device.Name + " " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + line;
                     
                     var grokResult = _grok.Parse(line);
-                    _database.InsertValuesInTableLogs(grokResult[0].Value.ToString(), grokResult[1].Value.ToString(), 
+                    _tableLogs.InsertValues(grokResult[0].Value.ToString(), grokResult[1].Value.ToString(), 
                         Convert.ToDateTime(grokResult[2].Value), Convert.ToDateTime(grokResult[3].Value), 
                         Convert.ToInt32(grokResult[4].Value), Convert.ToInt32(grokResult[5].Value), 
                         grokResult[6].Value.ToString(), grokResult[7].Value.ToString(), grokResult[8].Value.ToString());
@@ -181,12 +204,12 @@ namespace AndroidDataRecorder.Backend
                     var time = DateTime.Now;
                     
                     //Insert CPU/mem usage and the battery level into Resources
-                    _database.InsertValuesInTableResources(_device.Serial, _device.Name, cpu, mem, _batteryLevel, time);
+                    _tableResources.InsertValues(_device.Serial, _device.Name, cpu, mem, _batteryLevel, time);
 
                     //Insert the five most expensive processes into ResIntens
                     for (int i = 0; i < 5; i++)
                     {
-                        _database.InsertValuesIntoTableResIntens(_device.Serial, _device.Name,
+                        _tableResIntens.InsertValues(_device.Serial, _device.Name,
                             double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             double.Parse(memFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             fiveProcesses[i].ToString(), time);
