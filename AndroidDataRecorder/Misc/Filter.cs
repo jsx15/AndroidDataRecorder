@@ -39,9 +39,11 @@ namespace AndroidDataRecorder.Misc
         /// Constructor
         /// </summary>
         /// <param name="mar">Marker to set in Filter</param>
-        public Filter(Marker mar)
+        /// <<param name="deviceSerial">serial of the device</param>
+        public Filter(Marker mar, string deviceSerial)
         {
          marker = mar;
+         DeviceSerial = deviceSerial;
         }
         
         /// <summary>

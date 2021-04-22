@@ -211,7 +211,7 @@
         
         foreach (var mar in _localSelectedMarkers)
         {
-            _filterList.Add(new Filter(mar));
+            _filterList.Add(new Filter(mar, mar.deviceSerial));
         }
     }
 
