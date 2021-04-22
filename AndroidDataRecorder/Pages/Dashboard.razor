@@ -179,9 +179,14 @@
     DateTime CurrDateTime { get; set; }
 
     /*
-     * Database 
+     * Acces to table marker 
      */
-    readonly AndroidDataRecorder.Database.Database _data = new AndroidDataRecorder.Database.Database();
+    readonly Database.TableMarker _dataMarker = new AndroidDataRecorder.Database.TableMarker();
+    
+    /*
+     * Acces to table marker 
+     */
+    readonly Database.TableResIntens _dataResIntens = new AndroidDataRecorder.Database.TableResIntens();
 
     /*
      * List of marker
@@ -254,7 +259,7 @@
         {
             if (true)
             {
-                _intensResourcesList = _data.ResourcesIntensLists(MarkerList.GetDeviceSerial());
+                _intensResourcesList = _dataResIntens.GetList(MarkerList.GetDeviceSerial());
                 InvokeAsync(StateHasChanged);
             }
             else
@@ -285,7 +290,7 @@
     {
         if (ValidateMarker())
         {
-            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), CurrDateTime, _markerModel.MarkerMessage);
+            _dataMarker.InsertValues(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), CurrDateTime, _markerModel.MarkerMessage);
 
             ToastService.ShowSuccess("Message: " + _markerModel.MarkerMessage, CurrDateTime.ToString(CultureInfo.InvariantCulture));
             _markerModel.MarkerMessage = string.Empty;

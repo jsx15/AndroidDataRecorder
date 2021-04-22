@@ -17,7 +17,7 @@
                 <EditForm Model="_filterModel">
                     Device:
                     <InputSelect class="form-control" ValueExpression="() => _filterModel.DeviceSerial" Value="@_filterModel.DeviceSerial" ValueChanged="((string value) => DeviceChanged(value))">
-                        @foreach (var dev in _data.DeviceList())
+                        @foreach (var dev in _dataDevice.DeviceList())
                         {
                             <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
                         }
@@ -61,9 +61,14 @@
 
 @code {
     /*
-     * Database
+     * Table marker instance
      */
-    readonly AndroidDataRecorder.Database _data = new AndroidDataRecorder.Database();
+    readonly TableMarker _dataMarker = new TableMarker();
+    
+    /*
+     * Table marker instance
+     */
+    readonly TableDevices _dataDevice = new TableDevices();
 
     /*
      * Table class
@@ -95,8 +100,8 @@
         
         MarkerBridge.selectedMarkers.Clear();
         
-        _filterModel.DeviceSerial = _data.DeviceList().First().serial;
-        foreach (var mar in _data.ListWithMarker(_filterModel.DeviceSerial))
+        _filterModel.DeviceSerial = _dataDevice.DeviceList().First().serial;
+        foreach (var mar in _dataMarker.GetList(_filterModel.DeviceSerial))
         {   
             _markers.Add(new TableElement(mar));
         }
@@ -124,7 +129,7 @@
      */
     private void DeleteButton(int markerId)
     {
-        _data.DeleteMarker(markerId);
+        _dataMarker.DeleteRow(markerId);
     }
 
     /*
@@ -137,7 +142,7 @@
         
         _filterModel.DeviceSerial = e;
         
-        foreach (var mar in _data.ListWithMarker(_filterModel.DeviceSerial))
+        foreach (var mar in _dataMarker.GetList(_filterModel.DeviceSerial))
         {   
             _markers.Add(new TableElement(mar));
         }

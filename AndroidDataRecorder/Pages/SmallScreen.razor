@@ -82,7 +82,7 @@
     /*
      * Database
      */
-    AndroidDataRecorder.Database _database = new AndroidDataRecorder.Database();
+    TableMarker _dataMarker = new TableMarker();
     
     /*
      * MarkerList
@@ -108,7 +108,7 @@
     {
         
         // New Databasemethod
-        _database.InsertValuesInTableMarker(MarkerList.GetDeviceName(), MarkerList.GetDeviceSerial(), DateTime.Now, "Marker from pi");
+        _dataMarker.InsertValues(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
 
         _markerList.Update();
     }
