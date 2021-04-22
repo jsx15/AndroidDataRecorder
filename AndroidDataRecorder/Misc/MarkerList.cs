@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AndroidDataRecorder.Database;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Misc
@@ -18,7 +19,7 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// Database
         /// </summary>
-        private readonly Database.Database _data = new Database.Database();
+        private readonly TableMarker _data = new TableMarker();
 
         /// <summary>
         /// Constructor
@@ -28,7 +29,7 @@ namespace AndroidDataRecorder.Misc
             Markers = new List<Marker>(); 
             if (ActiveDeviceData != null)
             {
-                Markers = _data.ListWithMarker(ActiveDeviceData.Serial);
+                Markers = _data.GetList(ActiveDeviceData.Serial);
             }
         }
 
@@ -37,7 +38,7 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public void Update()
         {
-            Markers = _data.ListWithMarker(ActiveDeviceData.Serial);
+            Markers = _data.GetList(ActiveDeviceData.Serial);
         }
 
         /// <summary>

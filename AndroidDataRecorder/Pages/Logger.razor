@@ -31,7 +31,7 @@
                                 {
                                     <option value="0"></option>
                                 }
-                                @foreach (var mar in _data.ListWithMarker(filterModel.DeviceSerial).OrderBy(x => x.timeStamp))
+                                @foreach (var mar in _dataMarker.GetList(filterModel.DeviceSerial).OrderBy(x => x.timeStamp))
                                 {
                                     <option value="@mar.MarkerId">@mar.timeStamp | @mar.message</option>
                                 }
@@ -41,7 +41,7 @@
                             Device:
                             <InputSelect class="form-control" ValueExpression="() => filterModel.DeviceSerial" Value="@filterModel.DeviceSerial" ValueChanged="(string value) => DeviceChanged(value, filterModel)">
                                 <option value=@string.Empty>*</option>
-                                @foreach (var dev in _data.DeviceList())
+                                @foreach (var dev in _dataDevice.DeviceList())
                                 {
                                     <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
                                 }
@@ -159,9 +159,19 @@
     List<double> timeSpanMinutes = new List<double>{0,0.5,1,2,3,4,5,6};
 
     /*
-     * Database instance
+     * Table Logs instance
      */
-    private readonly Database _data = new Database();
+    private readonly TableLogs _dataLogs = new TableLogs();
+    
+    /*
+     * Table Logs instance
+     */
+    private readonly TableMarker _dataMarker = new TableMarker();
+    
+    /*
+     * Table Logs instance
+     */
+    private readonly TableDevices _dataDevice = new TableDevices();
 
     /*
      *instance of Filtering class 
@@ -188,7 +198,7 @@
             else
             {
                 //fill the Logs list with filtered log data
-                filtering.Logs = _data.LogListFilteredByLog(
+                filtering.Logs = _dataLogs.GetList( filtering.marker.deviceSerial,
                     filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
                     filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
             }
@@ -247,7 +257,7 @@
     private void DeviceChanged(string serial, Filter filterModel)
     {
         filterModel.DeviceSerial = serial;
-        filterModel.marker = !serial.Equals(string.Empty) ? _data.ListWithMarker(serial).First() : null;
+        filterModel.marker = !serial.Equals(string.Empty) ? _dataMarker.GetList(serial).First() : null;
         filterModel.Logs.Clear();
     }
 
