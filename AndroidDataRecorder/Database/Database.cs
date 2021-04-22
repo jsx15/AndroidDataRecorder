@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using AndroidDataRecorder.Misc;
+using AndroidDataRecorder.Screenrecord;
 
 namespace AndroidDataRecorder.Database
 {
@@ -141,6 +142,50 @@ namespace AndroidDataRecorder.Database
             }
 
             return resList;
+        }
+
+        public List<ResourcesList> ResourcesListFilteredByDeviceAndTimeStamp(string serial, DateTime t1, DateTime t2)
+        {
+            // create connection to the database
+            var connection = ConnectionToDatabase();
+            var command = connection.CreateCommand();
+
+            //insert Query
+            command.CommandText =
+                @"SELECT * FROM Resources
+                    WHERE Serial LIKE @serial AND Timestamp BETWEEN  @t1 AND @t2";
+            
+            command.Parameters.AddWithValue("@serial", serial);
+            command.Parameters.AddWithValue("@t1", t1);
+            command.Parameters.AddWithValue("@t2", t2);
+            
+            // fill the list with the actual values of database
+            List<ResourcesList> resList = new List<ResourcesList>();
+
+
+            try
+            {
+                // init new reader
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    resList.Add(new ResourcesList(
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        reader.GetInt32(3),
+                        reader.GetInt32(4),
+                        reader.GetInt32(5),
+                        reader.GetDateTime(6)));
+                }
+            }
+            catch
+            {
+                throw new SQLiteException("System can not access the values in the database.");
+            }
+
+            return resList;
+
         }
 
         ///<summary>
@@ -335,8 +380,7 @@ namespace AndroidDataRecorder.Database
         /// <param name="app"></param>
         /// <param name="logMessage"></param>
         public void InsertValuesInTableLogs(string deviceSerial, string deviceName, DateTime systemTimestamp,
-            DateTime deviceTimestamp,
-            int pid, int tid, string loglevel, string app, string logMessage)
+            DateTime deviceTimestamp, int pid, int tid, string loglevel, string app, string logMessage)
         {
             // create connection to the database
             var connection = ConnectionToDatabase();
@@ -716,6 +760,7 @@ namespace AndroidDataRecorder.Database
 
             return resourcesIntensLists;
         }
+        
 
         ///<summary>
         /// Methods for the table Device
