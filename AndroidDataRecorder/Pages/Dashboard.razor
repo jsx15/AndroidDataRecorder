@@ -66,7 +66,7 @@
                         <br>
                         
                         <div class="row col">
-                            <p class="card-text" style="font-size: large">@CurrDateTime</p>
+                            <p class="card-text" style="font-size: large">@DateTime.Now</p>
                         </div>
                         <div class="row col justify-content-center">
                             <p>
@@ -172,12 +172,7 @@
 
 
 @code {
-
-    /*
-     * Current time and date
-     */
-    DateTime CurrDateTime { get; set; }
-
+    
     /*
      * Database 
      */
@@ -227,10 +222,6 @@
         
         //EventHandler: IntensiveResources called every 30 seconds
         AdbServer.Instance.DeviceWorkloadChanged += IntensiveResources;
-        
-        //ReSharper disable once ObjectCreationAsStatement
-        new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-
     }
 
     /*
@@ -268,15 +259,6 @@
             Console.WriteLine("crashed");
         }
     }
-    
-    /*
-     * Set CurrDateTime to current time
-     */
-    private async void DateTimeCallback(object state)
-    {
-        CurrDateTime = DateTime.Now;
-        await InvokeAsync(StateHasChanged);
-    }
 
     /*
      * Gets the time the marker was set and saves it in a list
@@ -285,9 +267,9 @@
     {
         if (ValidateMarker())
         {
-            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), CurrDateTime, _markerModel.MarkerMessage);
+            _data.InsertValuesInTableMarker(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), DateTime.Now, _markerModel.MarkerMessage);
 
-            ToastService.ShowSuccess("Message: " + _markerModel.MarkerMessage, CurrDateTime.ToString(CultureInfo.InvariantCulture));
+            ToastService.ShowSuccess("Message: " + _markerModel.MarkerMessage, DateTime.Now.ToString(CultureInfo.InvariantCulture));
             _markerModel.MarkerMessage = string.Empty;
             _markerList.Update();
             
