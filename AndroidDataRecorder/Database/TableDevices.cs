@@ -14,7 +14,7 @@ namespace AndroidDataRecorder.Database
         /// </summary>
         /// <param name="serialDevice"></param>
         /// <param name="deviceName"></param>
-        public void DeviceTable(string serialDevice, string deviceName)
+        public void InsertValues(string serialDevice, string deviceName)
         {
             // create connection to the database
             var connection = db.ConnectionToDatabase();
