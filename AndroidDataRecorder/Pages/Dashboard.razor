@@ -6,6 +6,14 @@
 @using SharpAdbClient
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 @using System.Globalization
+@using Plotly.Blazor
+@using Plotly.Blazor.Traces.ScatterLib
+@using Plotly.Blazor.LayoutLib
+@using Plotly.Blazor
+@using Plotly.Blazor.ConfigLib
+@using Plotly.Blazor.LayoutLib.YAxisLib
+@using Plotly.Blazor.Traces
+@using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
 
 @inject IToastService ToastService;
 @page "/"
@@ -84,52 +92,41 @@
 <br>
 
 <section id="SystemStatus">
-    <div class="card">
+    <div class="card" style="height: available">
             <div class="card-header text-center" style="color: white">
                 System Stats
             </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6 text-center">
-                    <h3>Cpu usage history</h3>
-                </div>
-                <div class="col-md-6 text-center">
-                    <h3>Top 5 expensive processes</h3>
-                </div>
-            </div>
-            
-            <br>
-            
-            <div class="row">
                 <div class="col-md-6">
-                    Here should be a chart....
+                    <PlotlyChart @bind-Config="plotlyConfig" @bind-Layout="plotlyLayout" @bind-Data="chartData" @ref="chart"/>
                 </div>
                 <div class="col-md-6">
                     <div class="table-responsive text-center table-bordered">
-                        <table class="table table-hover" style="width: 100%; height:  100%; table-layout: auto">
-                            <thead>
-                            <tr>
-                                <th scope="col">Timestamp</th>
-                                <th scope="col">Device</th>
-                                <th scope="col">Process</th>
-                                <th scope="col">CPU</th>
-                                <th scope="col">Memory</th>
-                            </tr>
-                            </thead>
-                            <tbody style="font-size: small">
-                            @foreach (var res in _intensResourcesList)
-                            {
+                            <table class="table table-hover" style="width: 100%; height:  100%; table-layout: auto">
+                                <thead>
                                 <tr>
-                                    <td>@res.timestamp</td>
-                                    <td>@res.deviceName</td>
-                                    <td>@res.process</td>
-                                    <td>@res.cpu%</td>
-                                    <td>@res.memory%</td>
+                                    <th scope="col">Timestamp</th>
+                                    <th scope="col">Device</th>
+                                    <th scope="col">Process</th>
+                                    <th scope="col">CPU</th>
+                                    <th scope="col">Memory</th>
                                 </tr>
-                            }
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody style="font-size: small">
+                                @foreach (var res in Enumerable.Reverse(_intensResourcesList))
+                                {
+                                    <tr>
+                                        <td>@res.timestamp</td>
+                                        <td>@res.deviceName</td>
+                                        <td>@res.process</td>
+                                        <td>@res.cpu%</td>
+                                        <td>@res.memory%</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
                 </div>
             </div>
         </div>
@@ -153,7 +150,6 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @*@foreach (var marker in Enumerable.Reverse(_markerList.Markers))*@
                     @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
                     {
                         <tr>
@@ -209,9 +205,79 @@
     private readonly MarkerModel _markerModel = new MarkerModel();
 
     /*
+     * the chart for the cpu usage
+     */
+    PlotlyChart chart;
+    
+    /*
+     * Config settings for the plotly cpu chart
+     */
+    Config plotlyConfig = new Config()
+    {
+        Responsive = true,
+        DisplayModeBar = DisplayModeBarEnum.False,
+    };
+    
+    /*
+     * Layout settings for the plotly cpu chart
+     */
+    Layout plotlyLayout = new Layout()
+    {
+        AutoSize = true,
+        
+        Title = new Plotly.Blazor.LayoutLib.Title()
+        {
+            Text = "CPU/Memory usage"
+        },
+        
+        YAxis = new List<YAxis>()
+        {
+            new YAxis()
+            {
+                Title = new Title()
+                {
+                    Text = "Usage in %"
+                },
+                
+                Range = new List<object> {0, 100},
+            }
+        },
+        
+        XAxis = new List<XAxis>()
+        {
+            new XAxis()
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title()
+                {
+                    Text = "Timestamp",
+                }
+            }
+        }
+    };
+    
+    /*
+     * IList for the chart data
+     */
+    IList<ITrace> chartData = new List<ITrace>()
+    {
+        new Scatter()
+        {
+            Name = "CPU",
+            Mode = ModeFlag.Lines | ModeFlag.Markers,
+        },
+        
+        new Scatter()
+        {
+            Name = "Memory",
+            Mode = ModeFlag.Lines | ModeFlag.Markers,
+
+        },
+        
+    };
+
+    /*
      * Set callback for timer and fill marker list on page load
      */
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -224,15 +290,36 @@
         _monitor.Start();
         
         FillResIntListTmp();
-        
+
         //EventHandler: IntensiveResources called every 30 seconds
         AdbServer.Instance.DeviceWorkloadChanged += IntensiveResources;
         
+        //Eventhandler: CPU chart is refreshed every 30 seconds
+        AdbServer.Instance.DeviceWorkloadChanged += FillChartWithCpuData;
+
+
         //ReSharper disable once ObjectCreationAsStatement
         new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
     }
 
+    /*
+     * Eventhandler method for cpu chart
+     */
+    private void FillChartWithCpuData(object sender, DeviceDataEventArgs e)
+    {
+        if (!(chart.Data.FirstOrDefault() is Scatter scatter)) return;
+        scatter.X = _data.ResourcesLists(MarkerList.GetDeviceSerial()).Select(x => (object) x.timestamp).TakeLast(15).ToList();
+        scatter.Y = _data.ResourcesLists(MarkerList.GetDeviceSerial()).Select(x => (object) x.cpu).TakeLast(15).ToList();
+        
+        if (!(chart.Data[1] is Scatter scatterMemory)) return;
+        scatterMemory.X = _data.ResourcesLists(MarkerList.GetDeviceSerial()).Select(x => (object) x.timestamp).TakeLast(15).ToList();
+        scatterMemory.Y = _data.ResourcesLists(MarkerList.GetDeviceSerial()).Select(x => (object) x.memory).TakeLast(15).ToList();
+        
+        Console.WriteLine("Action");
+        chart.React();
+    }
+    
     /*
      * Fill the _intensResourcesList List with temp data to avoid a empty table
      */
@@ -252,16 +339,8 @@
     {
         try
         {
-            if (true)
-            {
-                _intensResourcesList = _data.ResourcesIntensLists(MarkerList.GetDeviceSerial());
-                InvokeAsync(StateHasChanged);
-            }
-            else
-            {
-                Console.WriteLine("Does that happen for real?");
-            }
-     
+            _intensResourcesList = _data.ResourcesIntensLists(MarkerList.GetDeviceSerial());
+            InvokeAsync(StateHasChanged);
         }
         catch (Exception)
         {
