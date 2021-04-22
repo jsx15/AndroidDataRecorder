@@ -1,0 +1,122 @@
+@page "/chart"
+@using Plotly.Blazor
+@using Plotly.Blazor.ConfigLib
+@using Plotly.Blazor.LayoutLib
+@using Plotly.Blazor.Traces
+@using Plotly.Blazor.Traces.ScatterLib
+@using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
+@using SharpAdbClient
+@using Config = Plotly.Blazor.Config
+@using AdbServer = AndroidDataRecorder.Backend.AdbServer
+@using AndroidDataRecorder.Misc
+
+<PlotlyChart @bind-Config="_plotlyConfig" @bind-Layout="_plotlyLayout" @bind-Data="_chartData" @ref="_chart"/>
+
+@code {
+    /*
+     * the chart for the cpu usage
+     */
+    PlotlyChart _chart;
+    
+    /*
+     * Config settings for the plotly cpu chart
+     */
+    Config _plotlyConfig = new Config()
+    {
+        Responsive = true,
+        DisplayModeBar = DisplayModeBarEnum.False,
+    };
+    
+    /*
+     * Layout settings for the plotly cpu chart
+     */
+    Layout _plotlyLayout = new Layout()
+    {
+        AutoSize = true,
+        
+        Title = new Plotly.Blazor.LayoutLib.Title()
+        {
+            Text = "CPU/Memory usage"
+        },
+        
+        YAxis = new List<YAxis>()
+        {
+            new YAxis()
+            {
+                Title = new Title()
+                {
+                    Text = "Usage in %"
+                },
+                
+                Range = new List<object> {0, 100},
+            }
+        },
+        
+        XAxis = new List<XAxis>()
+        {
+            new XAxis()
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title()
+                {
+                    Text = "Timestamp",
+                },
+                
+            }
+        }
+    };
+    
+    /*
+     * IList for the chart data
+     */
+    IList<ITrace> _chartData = new List<ITrace>()
+    {
+        new Scatter()
+        {
+            Name = "CPU",
+            Mode = ModeFlag.Lines | ModeFlag.Markers,
+        },
+        
+        new Scatter()
+        {
+            Name = "Memory",
+            Mode = ModeFlag.Lines | ModeFlag.Markers,
+
+        },
+        
+    };
+    
+    /*
+     * Device serial
+     */
+    [Parameter]
+    public string DeviceSerial { get; set; }
+    
+    /*
+     * Database 
+     */
+    readonly AndroidDataRecorder.Database.Database _data = new AndroidDataRecorder.Database.Database();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+    //Eventhandler: CPU chart is refreshed every 30 seconds
+        AdbServer.Instance.DeviceWorkloadChanged += FillChartWithCpuData;
+    }
+    
+    /*
+     * Eventhandler method for cpu chart
+     */
+    private void FillChartWithCpuData(object sender, DeviceDataEventArgs e)
+    {
+        if (!(_chart.Data.FirstOrDefault() is Scatter scatter)) return;
+        scatter.X = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
+        scatter.Y = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.cpu).TakeLast(15).ToList();
+        
+        if (!(_chart.Data[1] is Scatter scatterMemory)) return;
+        scatterMemory.X = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
+        scatterMemory.Y = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.memory).TakeLast(15).ToList();
+        
+        _chart.React();
+    }
+}
