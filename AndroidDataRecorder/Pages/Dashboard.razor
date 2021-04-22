@@ -9,9 +9,7 @@
 @using Plotly.Blazor
 @using Plotly.Blazor.Traces.ScatterLib
 @using Plotly.Blazor.LayoutLib
-@using Plotly.Blazor
 @using Plotly.Blazor.ConfigLib
-@using Plotly.Blazor.LayoutLib.YAxisLib
 @using Plotly.Blazor.Traces
 @using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
 
@@ -250,7 +248,8 @@
                 Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title()
                 {
                     Text = "Timestamp",
-                }
+                },
+                
             }
         }
     };
@@ -289,14 +288,12 @@
         _monitor.DeviceConnected += DeviceChanged;
         _monitor.Start();
         
-        FillResIntListTmp();
 
         //EventHandler: IntensiveResources called every 30 seconds
         AdbServer.Instance.DeviceWorkloadChanged += IntensiveResources;
         
         //Eventhandler: CPU chart is refreshed every 30 seconds
         AdbServer.Instance.DeviceWorkloadChanged += FillChartWithCpuData;
-
 
         //ReSharper disable once ObjectCreationAsStatement
         new Timer(DateTimeCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -319,19 +316,7 @@
         Console.WriteLine("Action");
         chart.React();
     }
-    
-    /*
-     * Fill the _intensResourcesList List with temp data to avoid a empty table
-     */
-    private void FillResIntListTmp()
-    {
-        //Add tmp entries to the _intensResources list so that the table is not empty on init
-        for (int i = 0; i < 5; i++)
-        {
-            _intensResourcesList.Add(new ResIntensList(_serial: "processing...", _deviceName: "processing...", _cpu: 0.0, _memory: 0.0, _process: "processing...", _timestamp: DateTime.Now));
-        }
-    }
-    
+
     /*
      * FIll list every 30 seconds with the latest 5 most expensive resources
      */
@@ -385,7 +370,6 @@
         }
         return false;
     }
-    
 
     /*
      * Text for logging button
