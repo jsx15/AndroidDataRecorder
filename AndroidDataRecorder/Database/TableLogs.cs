@@ -196,10 +196,12 @@ namespace AndroidDataRecorder.Database
                     //insert Query
                     command.CommandText =
                         @"SELECT * FROM Logs
-                    WHERE Serial LIKE @serial";
+                    WHERE Serial LIKE @serial AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
                     
                     // use the Parameter to search for it
                     command.Parameters.AddWithValue("@serial", serial);
+                    command.Parameters.AddWithValue("@timeStamp1", timeStamp1);
+                    command.Parameters.AddWithValue("@timeStamp2", timeStamp2);
 
                     break;
                 }
