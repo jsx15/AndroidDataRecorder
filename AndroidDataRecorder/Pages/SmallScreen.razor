@@ -15,18 +15,23 @@
             </div>
         </div>
     </div>
-
-    <div class="row p-3">
-        <div class="col-auto text-center">
-            <div class="card">
-                <PerformanceChart DeviceSerial="b3fb6aa8"></PerformanceChart>
+    
+    <button class="btn btn-block" >
+        <div class="row p-3">
+            <div class="col text-center">
+                <div class="card">
+                    Click on the card to change the device. Current Device is @device
+                    <PerformanceChart DeviceSerial="@MarkerList.GetDeviceSerial()"></PerformanceChart>
+                </div>
             </div>
         </div>
-    </div>
+    </button>
 </div>
 
 
 @code {
+    
+    string device = MarkerList.GetDeviceName();
     /*
      * Bool for logging button
      */
