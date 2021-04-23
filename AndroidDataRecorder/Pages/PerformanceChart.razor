@@ -94,7 +94,7 @@
     /*
      * Database 
      */
-    readonly AndroidDataRecorder.Database.Database _data = new AndroidDataRecorder.Database.Database();
+    readonly AndroidDataRecorder.Database.TableResources _data = new AndroidDataRecorder.Database.TableResources();
 
     protected override void OnInitialized()
     {
@@ -110,12 +110,12 @@
     private void FillChartWithCpuData(object sender, DeviceDataEventArgs e)
     {
         if (!(_chart.Data.FirstOrDefault() is Scatter scatter)) return;
-        scatter.X = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
-        scatter.Y = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.cpu).TakeLast(15).ToList();
+        scatter.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
+        scatter.Y = _data.GetList(DeviceSerial).Select(x => (object) x.cpu).TakeLast(15).ToList();
         
         if (!(_chart.Data[1] is Scatter scatterMemory)) return;
-        scatterMemory.X = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
-        scatterMemory.Y = _data.ResourcesLists(DeviceSerial).Select(x => (object) x.memory).TakeLast(15).ToList();
+        scatterMemory.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
+        scatterMemory.Y = _data.GetList(DeviceSerial).Select(x => (object) x.memory).TakeLast(15).ToList();
         
         _chart.React();
     }

@@ -240,7 +240,7 @@
         try
         {
 		
-            _intensResourcesList = _data.ResourcesIntensLists(MarkerList.GetDeviceSerial());
+            _intensResourcesList = _dataResIntens.GetList(MarkerList.GetDeviceSerial());
             InvokeAsync(StateHasChanged);
 
         }
