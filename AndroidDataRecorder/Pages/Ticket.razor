@@ -68,15 +68,15 @@
                         <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
                     </div>
                     <div class="col-md-6 text-left">
-                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
+                        <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
                             @if (_tc.IssueTypeList is not null)
                             {
                                 @foreach (var type in _tc.IssueTypeList)
                                 {
-                                    <option>@type</option>
+                                    <option value="@type.Id">@type</option>
                                 }
                             }
-                        </InputSelect>
+                        </IssueTypeInputSelect>
                     </div>
                 </div>
 
@@ -87,21 +87,21 @@
                         <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
                     </div>
                     <div class="col-md-6">
-                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
+                        <IssuePriorityInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
                             @if (_tc.PriorityList is not null) {
                                 @foreach (var priority in _tc.PriorityList)
                                 {
-                                    <option>@priority</option>
+                                    <option value="@priority.Id">@priority</option>
                                 }
                             }
-                        </InputSelect>
+                        </IssuePriorityInputSelect>
                         <br>
                         <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.ProjectKey">
                             @if (_tc.KeyList is not null)
                             {
-                                @foreach (var priority in _tc.KeyList)
+                                @foreach (var projectKey in _tc.KeyList)
                                 {
-                                    <option>@priority</option>
+                                    <option>@projectKey</option>
                                 }
                             }
                         </InputSelect>
