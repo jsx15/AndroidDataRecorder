@@ -6,6 +6,9 @@
 @using SharpAdbClient
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 @using System.Globalization
+@using Plotly.Blazor
+@using Plotly.Blazor.LayoutLib
+@using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
 
 @inject IToastService ToastService;
 @page "/"
@@ -91,7 +94,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <PerformanceChart deviceSerial="@MarkerList.GetDeviceSerial()"></PerformanceChart>
+                    <PerformanceChart PlotlyLayout="layout" deviceSerial="@MarkerList.GetDeviceSerial()"></PerformanceChart>
                 </div>
                 <div class="col-md-6">
                     <div class="table-responsive text-center table-bordered">
@@ -388,6 +391,44 @@
             MarkerList.ActiveDeviceData = null;
         }
     }
+    
+    /*
+     * Layout for performance chart
+     */
+    Layout layout = new Layout()
+    {
+        AutoSize = true,
+
+        Title = new Plotly.Blazor.LayoutLib.Title()
+        {
+            Text = "CPU/Memory usage"
+        },
+        
+        YAxis = new List<YAxis>()
+        {
+            new YAxis()
+            {
+                Title = new Title()
+                {
+                    Text = "Usage in %"
+                },
+                
+                Range = new List<object> {0, 100},
+            }
+        },
+        
+        XAxis = new List<XAxis>()
+        {
+            new XAxis()
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title()
+                {
+                    Text = "Timestamp",
+                },
+                
+            }
+        }
+    };
 
     public class MarkerModel
     {

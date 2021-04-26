@@ -143,7 +143,7 @@ namespace AndroidDataRecorder.Backend
 
             List<TicketEntry> list = new List<TicketEntry>();
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
-            //info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
             list.Add(new TicketEntry(info.marker.timeStamp,info.marker.ToString()));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
@@ -190,7 +190,7 @@ namespace AndroidDataRecorder.Backend
 
             List<TicketEntry> list = new List<TicketEntry>();
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
-            //info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
             list.Add(new TicketEntry(info.marker.timeStamp,info.marker.ToString()));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));

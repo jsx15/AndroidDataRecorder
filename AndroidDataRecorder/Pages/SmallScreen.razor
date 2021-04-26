@@ -1,51 +1,57 @@
 @page "/Pi"
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Database
+@using Plotly.Blazor
+@using Plotly.Blazor.LayoutLib
+@using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
+
 @layout PiLayout
+
 <div class="master">
-    <div class="row p-3">
+    <div class="row p-1">
         <div class="col-sm-6">
             <div class="card">
                 <button class="btn @BtnColor text-center top-row" @onclick="ToggleBtn">@LoggingBtnText</button>
             </div>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-6" style="height: 50px">
             <div class="card">
                 <button class="btn btn-primary text-center top-row" @onclick="CreateMarker">Set Marker</button>
             </div>
         </div>
     </div>
-    
-    <button class="btn btn-block" >
-        <div class="row p-3">
-            <div class="col text-center">
+
+    <div class="row">
+        <div class="col text-center">
+            <button class="btn" style="height: 320px" @onclick="OnChartButtonClicked">
                 <div class="card">
                     Click on the card to change the device. Current Device is @device
-                    <PerformanceChart DeviceSerial="@MarkerList.GetDeviceSerial()"></PerformanceChart>
+                    <PerformanceChart PlotlyLayout="layout" DeviceSerial="@MarkerList.GetDeviceSerial()"></PerformanceChart>
                 </div>
-            </div>
+            </button>
         </div>
-    </button>
+    </div>
+
 </div>
 
 
 @code {
-    
+
     string device = MarkerList.GetDeviceName();
     /*
      * Bool for logging button
      */
     private bool _toggleLoggingBtn;
-    
+
     /*
      * Database
      */
-    TableMarker _dataMarker = new TableMarker();
-    
+    readonly TableMarker _dataMarker = new TableMarker();
+
     /*
      * MarkerList
      */
-    MarkerList _markerList = new MarkerList();
+    readonly MarkerList _markerList = new MarkerList();
 
     /*
      * Adjusting CSS
@@ -64,11 +70,51 @@
 
     private void CreateMarker()
     {
-        
-        // New Databasemethod
+    // New Databasemethod
         _dataMarker.InsertValues(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
 
         _markerList.Update();
     }
+
+    private void OnChartButtonClicked()
+    {
+        Console.WriteLine("clicked");
+    }
+    
+    Layout layout = new Layout()
+    {
+        AutoSize = true,
+        Width = 700,
+        Height = 300,
+        Title = new Plotly.Blazor.LayoutLib.Title()
+        {
+            Text = "CPU/Memory usage"
+        },
+        
+        YAxis = new List<YAxis>()
+        {
+            new YAxis()
+            {
+                Title = new Title()
+                {
+                    Text = "Usage in %"
+                },
+                
+                Range = new List<object> {0, 100},
+            }
+        },
+        
+        XAxis = new List<XAxis>()
+        {
+            new XAxis()
+            {
+                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title()
+                {
+                    Text = "Timestamp",
+                },
+                
+            }
+        }
+    };
 
 }

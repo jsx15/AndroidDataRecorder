@@ -2,6 +2,7 @@
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Services
 @using AndroidDataRecorder.Backend
+@using AndroidDataRecorder.Database
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -114,12 +115,21 @@
      * This is just for testing, okay?
      */
     private List<Filter> _filters = new List<Filter>();
-
+    
+    /*
+     * Resources data table
+     */
+    readonly TableResources _dataResources = new TableResources();
 
     private void HandleSubmit()
     {
         TicketCreator tc = new TicketCreator();
 
+        foreach (var filter in _filters)
+        {
+            filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
+        }
+        
         tc.CreateTicket(_filters, "ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
         
         _filters.Clear();
