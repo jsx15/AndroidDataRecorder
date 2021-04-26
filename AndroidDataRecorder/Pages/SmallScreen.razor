@@ -4,6 +4,8 @@
 @using Plotly.Blazor
 @using Plotly.Blazor.LayoutLib
 @using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
+@using AndroidDataRecorder.Backend
+@using SharpAdbClient
 
 @layout PiLayout
 
@@ -25,8 +27,8 @@
         <div class="col text-center">
             <button class="btn" style="height: 320px" @onclick="OnChartButtonClicked">
                 <div class="card">
-                    Click on the card to change the device. Current Device is @device
-                    <PerformanceChart PlotlyLayout="layout" DeviceSerial="@MarkerList.GetDeviceSerial()"></PerformanceChart>
+                    Click on the card to change the device. Current Device is 
+                    <PerformanceChart PlotlyLayout="layout" DeviceSerial="_deviceserial"></PerformanceChart>
                 </div>
             </button>
         </div>
@@ -36,8 +38,6 @@
 
 
 @code {
-
-    string device = MarkerList.GetDeviceName();
     /*
      * Bool for logging button
      */
@@ -52,6 +52,11 @@
      * MarkerList
      */
     readonly MarkerList _markerList = new MarkerList();
+    
+    /*
+     * Current shown device
+     */
+    string _deviceserial;
 
     /*
      * Adjusting CSS
@@ -60,6 +65,14 @@
 
     private string LoggingBtnText => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (MarkerList.ActiveDeviceData is not null)
+        {
+            _deviceserial = MarkerList.ActiveDeviceData.Serial;
+        }
+    }
     /*
      * Toggle logging button
      */
@@ -116,5 +129,6 @@
             }
         }
     };
+    
 
 }
