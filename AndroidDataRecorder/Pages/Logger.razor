@@ -193,7 +193,7 @@
             //Check if a value is null
             if (filtering.Level == null)
             {
-                ToastService.ShowError("Unable to search!", "Error");
+                ToastService.ShowError("Filter level not set", "Error");
             }
             else
             {
@@ -201,6 +201,9 @@
                 filtering.Logs = _dataLogs.GetList( filtering.marker.deviceSerial,
                     filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
                     filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
+
+                // TODO Method returns all Resources instead of a timespan
+                // filtering.Resources = _data.ResourcesLists(filtering.DeviceSerial);
             }
             
         }
