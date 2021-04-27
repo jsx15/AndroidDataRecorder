@@ -210,7 +210,9 @@ namespace AndroidDataRecorder.Database
                     //insert Query
                     command.CommandText =
                         @"SELECT * FROM Logs
-                    WHERE Serial LIKE @serial AND Loglevel LIKE 'F' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
+                    WHERE Serial LIKE @serial 
+                      AND Serial LIKE @serial AND Loglevel LIKE 'F' 
+                      AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
 
                     //use the Parameter to search for it
                     command.Parameters.AddWithValue("@serial", serial);
@@ -225,7 +227,8 @@ namespace AndroidDataRecorder.Database
                     //insert Query
                     command.CommandText =
                         @"SELECT * FROM Logs
-                    WHERE Serial LIKE @serial AND Loglevel LIKE 'E' OR Loglevel LIKE 'F' 
+                    WHERE Serial LIKE @serial 
+                    AND Serial LIKE @serial AND Loglevel LIKE 'E' OR Loglevel LIKE 'F' 
                     AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
 
                     //use the Parameter to search for it
@@ -241,7 +244,8 @@ namespace AndroidDataRecorder.Database
                     //insert Query
                     command.CommandText =
                         @"SELECT * FROM Logs
-                    WHERE  Serial LIKE @serial AND Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' 
+                    WHERE  Serial LIKE @serial 
+                    AND Serial LIKE @serial AND Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' 
                     AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
 
                     //use the Parameter to search for it
@@ -257,7 +261,8 @@ namespace AndroidDataRecorder.Database
                     //insert Query
                     command.CommandText =
                         @"SELECT * FROM Logs
-                    WHERE Serial LIKE @serial AND Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE'W' 
+                    WHERE Serial LIKE @serial 
+                    AND Serial LIKE @serial AND Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE'W' 
                     OR Loglevel LIKE 'I' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
 
                     //use the Parameter to search for it
@@ -273,7 +278,8 @@ namespace AndroidDataRecorder.Database
                     //insert Query
                     command.CommandText =
                         @"SELECT * FROM Logs
-                    WHERE  Serial LIKE @serial AND Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' 
+                    WHERE  Serial LIKE @serial 
+                    AND Serial LIKE @serial AND Loglevel LIKE 'F' OR Loglevel LIKE 'E' OR Loglevel LIKE 'W' 
                        OR Loglevel LIKE 'I' OR Loglevel LIKE 'D' AND SystemTimestamp BETWEEN @timeStamp1 AND @timeStamp2";
 
                     //use the Parameter to search for it
