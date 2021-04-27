@@ -36,27 +36,17 @@
                     Add Device
                 </div>
                 <div class="card-body text-left side-cards">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p>IP-Address: </p>
+                    <EditForm Model="_device" OnSubmit="AddButtonPressed">
+                        <div class="row">
+                            <label>IP-address:</label>
+                            <InputText type="text" class="form-control" placeholder="192.168.100.5" @bind-Value="_device.IpAddress"/>
                         </div>
-                        <div class="col-md-8">
-                            <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349" @bind="ipAddress">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p>Port: </p>
-                        </div>
-                        <div class="col-md-8">
-                            <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555" @bind="portAddress">
-                        </div>
-                    </div>
-                    <br>
-                    <div class="row justify-content-center">
-                        <button type="submit" class="btn btn-success" @onclick="AddButtonPressed">Add Device</button>
-                    </div>
 
+                        <br>
+                        <div class="row justify-content-center">
+                            <button type="submit" class="btn btn-success">Add Device</button>
+                        </div>
+                    </EditForm>
                     <br>
 
                     <h4 class="text-center">Known Devices</h4>
@@ -67,16 +57,11 @@
                             {
                                 <tr>
                                     <td>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <p>
-                                                    @item
-                                                </p>
-                                            </div>
-                                            <div class="col-6 text-right">
-                                                <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button> <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
-                                            </div>
-                                        </div>
+                                        @item
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button>
+                                        <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
                                     </td>
                                 </tr>
                             }
@@ -101,6 +86,11 @@
      * ADB version used
      */
     private int _adbVersion;
+    
+    /*
+     * Model for Editform
+     */
+    private Device _device = new Device();
 
     /*
      * Set device list
@@ -111,12 +101,8 @@
         _adbVersion = AdbServer.GetAdbVersion();
     }
     
-    /*
-     * Binded values
-     */
-    private string ipAddress;
-    private string portAddress;
-
+    
+    
     /*
      * Add device to known devices
      */
@@ -125,15 +111,15 @@
         try
         {
             // Check for 3 dots and valid range
-            if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out var address))
+            if (_device.IpAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(_device.IpAddress, out var address))
             {
-                ToastService.ShowSuccess("Device with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
-
-                // Add device to config file
-                Config.AddKnownDevice(address.ToString());
-
                 // Attach device to ADB
-                AdbServer.ConnectWirelessClient(address.ToString());
+                if (AdbServer.ConnectWirelessClient(address.ToString()))
+                {
+                    // Add device to config file
+                    Config.AddKnownDevice(address.ToString());
+                    ToastService.ShowSuccess("Device with IP-Address: " + address + " successfully added!", "Success");
+                }
             }
         }
         catch (Exception)
@@ -173,5 +159,10 @@
     private static void RemoveDevice(string address)
     {
         Config.DeleteKnownDevice(address);
+    }
+
+    private class Device
+    {
+        public string IpAddress;
     }
 }

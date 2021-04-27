@@ -38,8 +38,6 @@ namespace AndroidDataRecorder.Shared
                 if (typeof(TValue) == typeof(IssueType))
                 {
                     validationErrorMessage = null;
-                    //Database.TableMarker data = new Database.TableMarker();
-                    //result = (TValue) (object)data.GetList().Find(x => x.MarkerId.Equals(Convert.ToInt32(value)))!;
 
                     result = (TValue) (object) new IssueType(value);
 

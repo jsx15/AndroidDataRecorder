@@ -126,15 +126,20 @@ namespace AndroidDataRecorder.Backend
         {
             try
             {
-                var interval = Int32.Parse(_source.AccessWorkloadInterval);
+                var interval = int.Parse(_source.AccessWorkloadInterval);
                 //The interval should be between 1 and 60 seconds
-                if (interval > 0 && interval <= 60) return 1000 * interval;
+                if (interval > 0 && interval <= 60)
+                {
+                    return 1000 * interval;
+                }
+                return 5000;
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                return 5000;
             }
             
-            return 5000;
+            
         }
 
         /// <summary>

@@ -15,12 +15,7 @@ namespace AndroidDataRecorder.Shared
         /// <returns>MarkerID</returns>
         protected override string? FormatValueAsString(TValue? value)
         {
-            if (typeof(TValue) == typeof(Marker))
-            {
-                return (value as Marker)?.GetMarkerId();
-
-            }
-            return base.FormatValueAsString(value);
+            return typeof(TValue) == typeof(Marker) ? (value as Marker)?.GetMarkerId() : base.FormatValueAsString(value);
         }
         
         /// <summary>
