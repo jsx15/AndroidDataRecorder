@@ -152,6 +152,12 @@ namespace AndroidDataRecorder.Backend
                     issue.AddAttachment(fileName);
                 }
             }
+
+            foreach (var filename in from filter in combinedInfos where filter.CreateVideo select Config.GetVideoDirPath + "marker_" + filter.marker.MarkerId +
+                filter.marker.devicename + ".mp4")
+            {
+                issue.AddAttachment(filename);
+            }
         }
         
         /// <summary>

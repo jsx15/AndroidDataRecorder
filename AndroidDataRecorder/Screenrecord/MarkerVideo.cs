@@ -95,6 +95,8 @@ namespace AndroidDataRecorder.Screenrecord
 
             //delete text file
             HandleFiles.DeleteFile(textFilePath);
+
+            RecController.ThreadCounter--;
         }
     }
 }

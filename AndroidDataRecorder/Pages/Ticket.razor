@@ -4,6 +4,8 @@
 @using AndroidDataRecorder.Backend
 @using Atlassian.Jira
 @using System.IO
+@using System.Threading
+@using AndroidDataRecorder.Screenrecord
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -46,7 +48,7 @@
                                             <div class="col">
                                                 <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
                                                     <label>Include Video</label>
-                                                    <InputCheckbox class="form-check" @bind-Value="_ticketModel.checkBoxVideo">test</InputCheckbox>
+                                                    <InputCheckbox class="form-check" @bind-Value="filter.CreateVideo">test</InputCheckbox>
                                                 </EditForm>
                                             </div>
                                         </div>
@@ -142,8 +144,17 @@
     
     private void HandleSubmit()
     {
+        foreach (var filter in _filters.Where(filter => filter.CreateVideo))
+        {
+            RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
+        }
 
-        _tc.CreateTicket(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile,_ticketModel.Title,_ticketModel.Description);
+        while (RecController.ThreadCounter != 0)
+        {
+            Thread.Sleep(500);
+        }
+
+        _tc.CreateTicket(_filters,_ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile,_ticketModel.Title,_ticketModel.Description);
         
         _filters.Clear();
         LogBridge.Filters.Clear();
