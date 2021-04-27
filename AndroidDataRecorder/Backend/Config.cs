@@ -119,6 +119,26 @@ namespace AndroidDataRecorder.Backend
         public static string GetApiToken() => _source.ApiToken;
 
         /// <summary>
+        /// Gets the accessWorkloadInterval and convert it to int. Then returns it in milliseconds
+        /// </summary>
+        /// <returns> Returns the value but if not possible returns a default interval of 5000 ms </returns>
+        public static int GetAccessWorkloadInterval()
+        {
+            try
+            {
+                var interval = Int32.Parse(_source.AccessWorkloadInterval);
+                //The interval should be between 1 and 60 seconds
+                if (interval > 0 && interval <= 60) return 1000 * interval;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
+            return 5000;
+        }
+
+        /// <summary>
         /// Change the value in adbPath
         /// </summary>
         /// <param name="path"> The path to the adb.exe </param>
@@ -177,6 +197,24 @@ namespace AndroidDataRecorder.Backend
             _source.ApiToken = apiToken;
             SaveConfig();
         }
+
+        /// <summary>
+        /// Change the value of accessWorkloadInterval
+        /// </summary>
+        /// <param name="accessWorkloadInterval"> The interval at which the cpu/mem usage is accessed </param>
+        public static void ChangeAccessWorkloadInterval(int accessWorkloadInterval)
+        {
+            try
+            {
+                _source.AccessWorkloadInterval = accessWorkloadInterval.ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
+            SaveConfig();
+        }
         
         /// <summary>
         /// Add a device to the knownDevices list
@@ -222,42 +260,7 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <returns> The list of known devices </returns>
         public static List<string> GetKnownDevices() => _source.KnownDevices;
-        
-        /// <summary>
-        /// Add a recording device
-        /// </summary>
-        /// <param name="name"> The name of the device </param>
-        public static void AddRecordingDevice(string name)
-        {
-            _source.RecordingDevices.Add(name, true);
-            SaveConfig();
-        }
-        
-        /// <summary>
-        /// Remove a device from the recordingDevices list
-        /// </summary>
-        /// <param name="name"> The name of the device </param>
-        public static void DeleteRecordingDevice(string name)
-        {
-            _source.RecordingDevices.Remove(name);
-            SaveConfig();
-        }
-        
-        /// <summary>
-        /// Clear the whole recordingDevices list
-        /// </summary>
-        public static void ClearRecordingDevices()
-        {
-            _source.RecordingDevices.Clear();
-            SaveConfig();
-        }
 
-        /// <summary>
-        /// Get the dictionary of recording devices 
-        /// </summary>
-        /// <returns> The recording devices </returns>
-        public static Dictionary<string, bool> GetRecordingDevices() => _source.RecordingDevices;
-        
         /// <summary>
         /// The representation of the config.json file as a c# class
         /// </summary>
@@ -269,8 +272,8 @@ namespace AndroidDataRecorder.Backend
             public string JiraServerUrl { get; set; }
             public string JiraUsername { get; set; }
             public string ApiToken { get; set; }
+            public string AccessWorkloadInterval { get; set; }
             public List<string> KnownDevices { get; set; }
-            public Dictionary<string, bool> RecordingDevices { get; set; }
         }
     }
 }

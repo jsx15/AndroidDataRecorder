@@ -217,7 +217,7 @@ namespace AndroidDataRecorder.Backend
 
                     //Invoke the DeviceWorkloadChanged event and wait 30 seconds
                     AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(_device));
-                    Thread.Sleep(2000);
+                    Thread.Sleep(Config.GetAccessWorkloadInterval());
                 }
             }
             catch (Exception e)
