@@ -132,7 +132,6 @@ namespace AndroidDataRecorder.Backend
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
             }
             
             return 5000;

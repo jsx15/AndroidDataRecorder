@@ -210,7 +210,7 @@ namespace AndroidDataRecorder.Backend
                     for (int i = 0; i < 5; i++)
                     {
                         _tableResIntens.InsertValues(_device.Serial, _device.Name,
-                            double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
+                            System.Math.Round((double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture) / _cpuTotal) * 100, 2),
                             double.Parse(memFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             fiveProcesses[i].ToString(), time);
                     }
