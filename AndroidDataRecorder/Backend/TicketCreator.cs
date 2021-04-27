@@ -65,7 +65,8 @@ namespace AndroidDataRecorder.Backend
             PriorityList = GetPriorities();
             IssueTypeList = GetIssueTypes();
             KeyList = GetProjectKeys();
-            
+
+
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Tickets")))
             {
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Tickets"));
@@ -126,8 +127,15 @@ namespace AndroidDataRecorder.Backend
             issue.Priority = priority;
             issue.Summary = summary;
             issue.Description = description;
-            issue.SaveChanges();
-            
+            try
+            {
+                issue.SaveChanges();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new IssueTypeNotSupported();
+            }
+
             String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
                 @"Tickets" + Path.DirectorySeparatorChar + GetDate()));
 

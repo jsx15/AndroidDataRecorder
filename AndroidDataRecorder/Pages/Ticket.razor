@@ -32,22 +32,30 @@
                                 <tr>
                                     <td>
                                         <div class="row">
-                                            <div class="col">
+                                            <div class="col-4">
                                                 Marker @filter.marker.timeStamp
+                                            </div>
+                                            <div class="col-4">
+                                                <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+                                                    <label>
+                                                        Create Video:
+                                                        <InputCheckbox type="checkbox" @bind-Value="_ticketModel.checkBoxVideo"/>
+                                                    </label>
+                                                    
+                                                </EditForm>
+                                            </div>
+                                            <div class="col-4 text-right">
+                                                <button @onclick="() => DeleteButton(filter)" class="btn btn-danger">
+                                                    <span style="vertical-align: middle" class="oi oi-circle-x"></span>
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col">
+                                            <div class="col-4">
                                                 Log Entries: @filter.Logs.Count
                                             </div>
-                                            <div class="col">
+                                            <div class="col-4">
                                                 Timespan: @CalculateTimeSpan(filter.timeSpanMinus, filter.timeSpanPlus) minutes
-                                            </div>
-                                            <div class="col">
-                                                <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
-                                                    <label>Include Video</label>
-                                                    <InputCheckbox class="form-check" @bind-Value="_ticketModel.checkBoxVideo">test</InputCheckbox>
-                                                </EditForm>
                                             </div>
                                         </div>
                                     </td>
@@ -69,7 +77,7 @@
                     </div>
                     <div class="col-md-6 text-left">
                         <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
-                            @if (_tc.IssueTypeList is not null)
+                            @if (_tc is not null)
                             {
                                 @foreach (var type in _tc.IssueTypeList)
                                 {
@@ -88,7 +96,7 @@
                     </div>
                     <div class="col-md-6">
                         <IssuePriorityInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
-                            @if (_tc.PriorityList is not null) {
+                            @if (_tc is not null) {
                                 @foreach (var priority in _tc.PriorityList)
                                 {
                                     <option value="@priority.Id">@priority</option>
@@ -97,7 +105,7 @@
                         </IssuePriorityInputSelect>
                         <br>
                         <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.ProjectKey">
-                            @if (_tc.KeyList is not null)
+                            @if (_tc is not null)
                             {
                                 @foreach (var projectKey in _tc.KeyList)
                                 {
@@ -112,7 +120,7 @@
                 <br>
                 
                 <div class="d-flex flex-row-reverse">
-                    <button class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
                 </div>
             </EditForm>
 
@@ -134,6 +142,10 @@
      */
     private List<Filter> _filters = new List<Filter>();
 
+    /*
+     * True if ticketcreator is not valid
+     */
+    private bool _createTicketButtonDisable;
 
     /*
      * Connection to Jira
@@ -143,7 +155,15 @@
     private void HandleSubmit()
     {
 
-        _tc.CreateTicket(_filters,"ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile,_ticketModel.Title,_ticketModel.Description);
+        try
+        {
+            _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
+        }
+        catch (IssueTypeNotSupported)
+        {
+            ToastService.ShowError("Issue type not supported", "Error");
+            return;
+        }
         
         _filters.Clear();
         LogBridge.Filters.Clear();
@@ -168,13 +188,25 @@
         catch (IOException)
         {
             ToastService.ShowError("Ticket directory could not be created", "Error");
+            _createTicketButtonDisable = true;
+            _ticketModel = new TicketModel();
+            return;
         }
         catch (Exception)
         {
             ToastService.ShowError("No internet connection", "Error");
+            _createTicketButtonDisable = true;
+            _ticketModel = new TicketModel();
+            return;
         }
         _ticketModel = new TicketModel(_tc.IssueTypeList.First(), _tc.PriorityList.First(), _tc.KeyList.First());
         _filters = LogBridge.Filters.ToList();
+    }
+
+    private void DeleteButton(Filter filter)
+    {
+        _filters.Remove(filter);
+        LogBridge.Filters.Remove(filter);
     }
 
     /*
@@ -219,6 +251,8 @@
             Priority = prio;
             ProjectKey = key;
         }
+        
+        public TicketModel() {}
     }
 
 }
