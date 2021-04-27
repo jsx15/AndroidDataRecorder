@@ -4,6 +4,7 @@
 @using AndroidDataRecorder.Backend
 @using Atlassian.Jira
 @using System.IO
+@using AndroidDataRecorder.Database
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -113,12 +114,11 @@
                                 }
                             }
                         </InputSelect>
-                        
                     </div>
                 </div>
-                
+
                 <br>
-                
+
                 <div class="d-flex flex-row-reverse">
                     <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
                 </div>
@@ -146,6 +146,11 @@
      * True if ticketcreator is not valid
      */
     private bool _createTicketButtonDisable;
+    
+    /*
+     * Resources data table
+     */
+    readonly TableResources _dataResources = new TableResources();
 
     /*
      * Connection to Jira
@@ -154,7 +159,11 @@
     
     private void HandleSubmit()
     {
-
+        foreach (var filter in _filters)
+        {
+            filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
+        }
+        
         try
         {
             _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);

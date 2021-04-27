@@ -10,7 +10,7 @@
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 @using AndroidDataRecorder.Misc
 
-<PlotlyChart @bind-Config="_plotlyConfig" @bind-Layout="_plotlyLayout" @bind-Data="_chartData" @ref="_chart"/>
+<PlotlyChart @bind-Config="_plotlyConfig" @bind-Layout="PlotlyLayout" @bind-Data="_chartData" @ref="_chart"/>
 
 @code {
     /*
@@ -30,10 +30,13 @@
     /*
      * Layout settings for the plotly cpu chart
      */
-    Layout _plotlyLayout = new Layout()
-    {
+    [Parameter]
+    public Layout PlotlyLayout { get; set; }
+    /*{
         AutoSize = true,
-        
+        Width = 700,
+        Height = 250,
+       
         Title = new Plotly.Blazor.LayoutLib.Title()
         {
             Text = "CPU/Memory usage"
@@ -64,7 +67,7 @@
             }
         }
     };
-    
+    */
     /*
      * IList for the chart data
      */
