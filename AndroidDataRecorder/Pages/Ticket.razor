@@ -39,10 +39,10 @@
                                                 Marker @filter.marker.timeStamp
                                             </div>
                                             <div class="col-4">
-                                                <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+                                                <EditForm Model="@filter" OnSubmit="@HandleSubmit">
                                                     <label>
                                                         Create Video:
-                                                        <InputCheckbox type="checkbox" @bind-Value="_ticketModel.checkBoxVideo"/>
+                                                        <InputCheckbox type="checkbox" @bind-Value="filter.CreateVideo"/>
                                                     </label>
                                                     
                                                 </EditForm>
@@ -95,10 +95,10 @@
 
                 <div class="row text-left">
                     <div class="col-md-6">
-                        <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
+                        <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
                     </div>
                     <div class="col-md-6">
-                        <IssuePriorityInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
+                        <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
                             @if (_tc is not null) {
                                 @foreach (var priority in _tc.PriorityList)
                                 {
@@ -107,7 +107,7 @@
                             }
                         </IssuePriorityInputSelect>
                         <br>
-                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.ProjectKey">
+                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.ProjectKey">
                             @if (_tc is not null)
                             {
                                 @foreach (var projectKey in _tc.KeyList)
@@ -190,8 +190,8 @@
         _filters.Clear();
         LogBridge.Filters.Clear();
         
-        _ticketModel.Description = String.Empty;
-        _ticketModel.Title = String.Empty;
+        _ticketModel.Description = string.Empty;
+        _ticketModel.Title = string.Empty;
         
     }
 
@@ -261,11 +261,6 @@
          * Project key
          */
         public string ProjectKey { get; set; }
-
-        /*
-         * This is just for testing, okay?
-         */
-        public bool checkBoxVideo;
 
         public TicketModel(IssueType type, IssuePriority prio, string key)
         {
