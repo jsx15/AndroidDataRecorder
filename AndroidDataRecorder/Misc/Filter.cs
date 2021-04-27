@@ -31,9 +31,21 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public List<LogEntry> Logs = new List<LogEntry>();
 
+        /*
+         * Resources usage of device
+         */
         public List<ResourcesList> Resources = new List<ResourcesList>();
 
+        /*
+         * Serial of device
+         * Initialization is empty for blazor dropdown
+         */
         public string DeviceSerial = "";
+        
+        /*
+         * Bool for video
+         */
+        public bool CreateVideo;
 
         /// <summary>
         /// Constructor

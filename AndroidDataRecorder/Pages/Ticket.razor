@@ -5,6 +5,8 @@
 @using Atlassian.Jira
 @using System.IO
 @using AndroidDataRecorder.Database
+@using System.Threading
+@using AndroidDataRecorder.Screenrecord
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -114,6 +116,7 @@
                                 }
                             }
                         </InputSelect>
+                        
                     </div>
                 </div>
 
@@ -159,6 +162,16 @@
     
     private void HandleSubmit()
     {
+        foreach (var filter in _filters.Where(filter => filter.CreateVideo))
+        {
+            RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
+        }
+
+        while (RecController.ThreadCounter != 0)
+        {
+            Thread.Sleep(500);
+        }
+        
         foreach (var filter in _filters)
         {
             filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));

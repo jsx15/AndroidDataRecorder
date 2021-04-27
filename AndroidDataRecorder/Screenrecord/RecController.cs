@@ -11,6 +11,9 @@ namespace AndroidDataRecorder.Screenrecord
         // dictionary so handle all running screen record devices
         private static readonly Dictionary<string, Screenrecord> RecordList = new Dictionary<string, Screenrecord>();
 
+        //count variable to count running concat threads
+        public static int ThreadCounter; 
+        
         /// <summary>
         /// method to start screen recording for a special device
         /// </summary>
@@ -79,6 +82,9 @@ namespace AndroidDataRecorder.Screenrecord
         /// <param name="videoLength">video length of the separate video parts</param>
         public static void StartCreatingVideo(Marker marker, DateTime startTime, DateTime endTime, int videoLength)
         {
+            //count new up coming thread
+            ThreadCounter++;
+            
             //Thread to start video creation
             new Thread (()=> MarkerVideo.CreateVideo(marker.devicename,marker.deviceSerial,startTime,endTime,marker.MarkerId,videoLength)).Start();
             
