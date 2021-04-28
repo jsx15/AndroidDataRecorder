@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using System.Threading;
 using AndroidDataRecorder.Misc;
 using Atlassian.Jira;
+using Newtonsoft.Json;
 
 namespace AndroidDataRecorder.Backend
 {
@@ -147,7 +148,7 @@ namespace AndroidDataRecorder.Backend
                 {
                     String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.marker.devicename+ "_" +
                         info.marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".txt"));
-                    CreateMarkerFile(info , fileName); 
+                    CreateMarkerFile(info , fileName, projectKey); 
                     issue.AddAttachment(fileName);
                 }
             } else if (format == FileFormat.JsonFile)
@@ -173,14 +174,29 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <param name="info">combinedInfo object</param>
         /// <param name="file">File path</param>
-        private void CreateMarkerFile(Filter info, String file)
+        /// <param name="projectKey">Project Key</param>
+        private void CreateMarkerFile(Filter info, String file, string projectKey)
         {
             FileInfo fi = new FileInfo(file);
-
+            
+            /*
             List<TicketEntry> list = new List<TicketEntry>();
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
-            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
-            list.Add(new TicketEntry(info.marker.timeStamp,info.marker.ToString()));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
+                "##" + key + "##" + resourcesList)));
+            list.Add(new TicketEntry(info.marker.timeStamp,"###"+ key + "###" + info.marker));
+            */
+            
+            List<TicketEntry> list = new List<TicketEntry>();
+            
+            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.devicename,
+                entry.deviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.message)));
+            
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
+                resourcesList.deviceName, resourcesList.serial, resourcesList.cpu, resourcesList.memory, resourcesList.battery)));
+            
+            list.Add(new TicketEntry(info.marker.timeStamp, info.marker.devicename, info.marker.deviceSerial,
+                info.marker.message, info.marker.MarkerId));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
             
@@ -205,7 +221,7 @@ namespace AndroidDataRecorder.Backend
 
                     foreach (var entry in list )
                     {
-                        sw.WriteLine(entry.lineText);
+                        sw.WriteLine(entry.ToString(projectKey));
                     }
                 }
             }
@@ -225,14 +241,22 @@ namespace AndroidDataRecorder.Backend
             FileInfo fi = new FileInfo(file);
 
             List<TicketEntry> list = new List<TicketEntry>();
-            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
-            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
-            list.Add(new TicketEntry(info.marker.timeStamp,info.marker.ToString()));
+            
+            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.devicename,
+                entry.deviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.message)));
+            
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
+                resourcesList.deviceName, resourcesList.serial, resourcesList.cpu, resourcesList.memory, resourcesList.battery)));
+            
+            list.Add(new TicketEntry(info.marker.timeStamp, info.marker.devicename, info.marker.deviceSerial,
+                info.marker.message, info.marker.MarkerId));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
-            
-            String json = JsonSerializer.Serialize(list);
 
+            //List<string> entries = new List<string>();
+            //list.ForEach(entry => entries.Add(entry.ToString()));
+            string json = JsonConvert.SerializeObject(list.ToArray());
+            
             try
             {
                 if (fi.Exists)
@@ -257,14 +281,117 @@ namespace AndroidDataRecorder.Backend
             return DateTime.Now.ToString("MM-dd-yy_HH-mm-ss");
         }
         
+        /// <summary>
+        /// helper class 
+        /// </summary>
         private class TicketEntry
         {
-            public String lineText;
             public DateTime timestamp;
-            public TicketEntry(DateTime timestamp, String lineText)
+            public string DeviceName;
+            public string DeviceSerial;
+            
+            public string Message;
+
+            public string DeviceTimestamp;
+            public string Pid;
+            public string Tid;
+            public string Loglevel;
+            public string App;
+
+            public string Cpu;
+            public string Memory;
+            public string Battery;
+
+            public string MarkerId;
+
+            /// <summary>
+            /// Constructor for Logs
+            /// </summary>
+            /// <param name="timestamp">timestamp</param>
+            /// <param name="deviceName">deviceName</param>
+            /// <param name="deviceSerial">deviceSerial</param>
+            /// <param name="deviceTimestamp">deviceTimestamp</param>
+            /// <param name="pid">Pid</param>
+            /// <param name="tid">Tid</param>
+            /// <param name="loglevel">Loglevel</param>
+            /// <param name="app">App</param>
+            /// <param name="message">Message</param>
+            public TicketEntry(DateTime timestamp, string deviceName, string deviceSerial, DateTime deviceTimestamp,
+                int pid, int tid, string loglevel, string app, string message)
             {
                 this.timestamp = timestamp;
-                this.lineText = lineText;
+                Message = message;
+                DeviceName = deviceName;
+                DeviceSerial = deviceSerial;
+                DeviceTimestamp = deviceTimestamp.ToString(CultureInfo.InvariantCulture);
+                Pid = pid.ToString();
+                Tid = tid.ToString();
+                Loglevel = loglevel;
+                App = app;
+            }
+            
+            /// <summary>
+            /// Constructor for Resource
+            /// </summary>
+            /// <param name="timestamp">Timestamp</param>
+            /// <param name="deviceName">DeviceName</param>
+            /// <param name="deviceSerial">DeviceSerial</param>
+            /// <param name="cpu">Cpu</param>
+            /// <param name="memory">Memory</param>
+            /// <param name="battery">Battery</param>
+            public TicketEntry(DateTime timestamp, string deviceName, string deviceSerial, int cpu,
+                int memory, int battery)
+            {
+                this.timestamp = timestamp;
+                DeviceName = deviceName;
+                DeviceSerial = deviceSerial;
+                Cpu = cpu.ToString();
+                Memory = memory.ToString();
+                Battery = battery.ToString();
+            }
+            
+            /// <summary>
+            /// Constructor for Marker
+            /// </summary>
+            /// <param name="timestamp">Timestamp</param>
+            /// <param name="deviceName">DeviceName</param>
+            /// <param name="deviceSerial">DeviceSerial</param>
+            /// <param name="message">Message</param>
+            /// <param name="markerId">MarkerId</param>
+            public TicketEntry(DateTime timestamp, string deviceName, string deviceSerial, string message, int markerId)
+            {
+                this.timestamp = timestamp;
+                Message = message;
+                DeviceName = deviceName;
+                DeviceSerial = deviceSerial;
+                MarkerId = markerId.ToString();
+            }
+
+            /// <summary>
+            /// overrides ToString()
+            /// </summary>
+            /// <returns>string for line in TextFile</returns>
+            public string ToString(string key)
+            {
+                if (DeviceTimestamp != null)
+                {
+                    return timestamp +" "+ DeviceSerial +" "+ DeviceName + " "  + DeviceTimestamp + " " + Pid + " " +
+                           Tid + " " + Loglevel + " " + App + ": " + Message;
+                }
+                
+                if (Cpu != null)
+                {
+                    return "##" + key + "## " + timestamp + "Device serial: " + DeviceSerial + " Device name: " + DeviceName + " CPU load: " +
+                           Cpu + " Memory usage: " + Memory + " Battery status: " + Battery;
+                }
+                
+                if (MarkerId != null)
+                {
+                    return "###" + key + "### " + timestamp +" MarkerID:  " + MarkerId + "  MarkerMessage:  " + Message;
+                }
+                
+                return timestamp + " " + DeviceSerial + " " + DeviceName;
+
             }
         }
     }
