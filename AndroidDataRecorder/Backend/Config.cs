@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using SharpAdbClient;
@@ -20,11 +23,6 @@ namespace AndroidDataRecorder.Backend
         private static Source _source;
 
         /// <summary>
-        /// Bool variable to check if connected to the AdbServer
-        /// </summary>
-        private static bool _connected;
-        
-        /// <summary>
         /// Load the config.json file into the Source class object
         /// Initialize the ADBServer with the given path to the adb.exe
         /// Connect to known devices
@@ -33,22 +31,25 @@ namespace AndroidDataRecorder.Backend
         {
             _source = JsonConvert.DeserializeObject<Source>(File.ReadAllText(Path, Encoding.Default));
 
-            while (!_connected)
-            {
-                try
-                {
-                    if (_source != null) AdbServer.InitializeAdbServer(_source.AdbPath);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    Console.WriteLine("No valid path to the adb.exe \nPlease define one: \n");
-                    if (_source != null) _source.AdbPath = Console.ReadLine();
-                }
-                
-                _connected = true;
-            }
+            CheckFfmpegPath();
+            CheckVideoDirPath();
 
+            if (!ValidateJiraUsername() || !ValidateApiToken() || !ValidateJiraServerUrl())
+            {
+                Console.WriteLine("At least one of the Ticket creation variables is not set \nShould they be adjusted? Type y for yes");
+                if (Console.ReadLine().Equals("y"))
+                {
+                    CheckJiraServerUrl();
+                    CheckJiraUsername();
+                    CheckApiToken();
+                }
+            }
+            
+            CheckWorkloadInterval();
+            CheckAdbPath();
+            
+            SaveConfig();
+            
             ConnectKnownDevices();
         }
 
@@ -79,6 +80,209 @@ namespace AndroidDataRecorder.Backend
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the path to the adb.exe is correct and if not asks the user to type in a correct path
+        /// </summary>
+        private static void CheckAdbPath()
+        {
+            while (true)
+            {
+                try
+                {
+                    if (_source != null) AdbServer.InitializeAdbServer(_source.AdbPath);
+                    Console.WriteLine("Success !!!");
+                    return;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("No valid path to the adb.exe \nPlease define one:");
+                    if (_source != null) _source.AdbPath = Console.ReadLine();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Checks if the path to the ffmpeg.exe is correct and if not asks the user to type in a correct path
+        /// </summary>
+        private static void CheckFfmpegPath()
+        {
+            while (true)
+            {
+                if (!File.Exists(_source.FfmpegPath))
+                {
+                    Console.WriteLine("No valid path to the ffmpeg.exe \nPlease define one:");
+                    _source.FfmpegPath = Console.ReadLine();
+                }
+                else
+                {
+                    Console.WriteLine("Success !!!");
+                    return;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Checks if the path to the video directory is correct and if not asks the user to type in a correct path
+        /// </summary>
+        private static void CheckVideoDirPath()
+        {
+            while (true)
+            {
+                if (_source.VideoDirPath != null &&
+                    !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar))
+                {
+                    _source.VideoDirPath += System.IO.Path.DirectorySeparatorChar;
+                }
+                if (!Directory.Exists(_source.VideoDirPath))
+                {
+                    Console.WriteLine("No valid path to the video directory \nPlease define one:");
+                    _source.VideoDirPath = Console.ReadLine();
+                }
+                else
+                {
+                    Console.WriteLine("Success !!!");
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if the URL to the Jira server is correct and if not asks the user to type in a correct URL
+        /// </summary>
+        private static void CheckJiraServerUrl()
+        {
+            while (true)
+            {
+                //Creating the HttpWebRequest and Setting the Request method HEAD
+                if (ValidateJiraServerUrl())
+                {
+                    Console.WriteLine("Success !!!");
+                    return;
+                }
+                
+                Console.WriteLine("No valid URL to the Jira server \nPlease define one:");
+                _source.JiraServerUrl = Console.ReadLine();
+            }
+        }
+
+        /// <summary>
+        /// Checks if the Jira Server Url is a correct  Url
+        /// </summary>
+        /// <returns> true if it is and false if not</returns>
+        private static bool ValidateJiraServerUrl()
+        {
+            try
+            {
+                //Creating the HttpWebRequest and Setting the Request method HEAD
+                if (WebRequest.Create(_source.JiraServerUrl!) is HttpWebRequest request)
+                {
+                    request.Method = "HEAD";
+                    HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                    response?.Close();
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+        
+        /// <summary>
+        /// Checks if the Jira Username is empty and if yes asks the user to type in a Username
+        /// </summary>
+        private static void CheckJiraUsername()
+        {
+            while (true)
+            {
+                if (ValidateJiraUsername())
+                {
+                    Console.WriteLine("Success !!!");
+                    return;
+                }
+                
+                Console.WriteLine("No valid Jira Username \nPlease define one:"); 
+                _source.JiraUsername = Console.ReadLine();
+            }
+        }
+
+        /// <summary>
+        /// Checks if the Jira Username is in the form of a email address
+        /// </summary>
+        /// <returns> true if it is and false if not</returns>
+        private static bool ValidateJiraUsername()
+        {
+            try {
+                var addr = new System.Net.Mail.MailAddress(_source.JiraUsername!);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+        
+        /// <summary>
+        /// Checks if the Jira Api Token is empty and if yes asks the user to type in a Api Token
+        /// </summary>
+        private static void CheckApiToken()
+        {
+            while (true)
+            {
+                if (ValidateApiToken())
+                {
+                    Console.WriteLine("Success !!!");
+                    return;
+                }
+
+                Console.WriteLine("No valid Api Token \nPlease define one:");
+                _source.ApiToken = Console.ReadLine();
+            }
+        }
+        
+        /// <summary>
+        /// Checks if the Api Token is set
+        /// </summary>
+        /// <returns> true if it is set and false if not</returns>
+        private static bool ValidateApiToken()
+        {
+            if (_source.ApiToken != null && _source.ApiToken.Equals(""))
+            {
+                return false;
+            }
+            
+            Console.WriteLine("Success !!!");
+            return true;
+        }
+        
+        /// <summary>
+        /// Checks if the Access Workload Interval is between 1 and 60 if not asks the user to type in a new one
+        /// </summary>
+        private static void CheckWorkloadInterval()
+        {
+            while (true)
+            {
+                try
+                {
+                    var interval = Int32.Parse(_source.AccessWorkloadInterval!);
+                    if (interval > 0 && interval <= 60)
+                    {
+                        Console.WriteLine("Success !!!"); 
+                        return;
+                    }
+                    Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
+                    _source.AccessWorkloadInterval = Console.ReadLine();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
+                    _source.AccessWorkloadInterval = Console.ReadLine();
+                }
             }
         }
         
