@@ -23,7 +23,7 @@ To start the software it is necessary to edit the config.json file which is loca
 
 The config.json file has the following parameters:<br>
 
-##Necessary:<br>
+## Necessary:<br>
 
 AdbPath: the path to the platform-tools adb executable file                         (e.g. “C:\\Program FIles\\platform-tools\\adb.exe)
 
@@ -31,7 +31,7 @@ FfmpegPath: the path to the Ffmpeg executable
 
 VideoDirPath: the path where the video files are stored (directory separator appended)
 
-##Optional:
+## Optional:
 
 AccessWorkloadInterval: Interval the CPU and Memory is refreshed (1 - 60s). If nothing is entered it will be 5 seconds.
 
