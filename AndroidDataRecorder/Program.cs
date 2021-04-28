@@ -15,14 +15,9 @@ namespace AndroidDataRecorder
             Config.LoadConfig();
             
             //Create the razor pages
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 
-            TableResources res = new TableResources();
-
-            foreach (var lit in res.GetList("emulator-5554"))
-            {
-                Console.WriteLine(lit.serial + " " + lit.timestamp);
-            }
+            
 
 
             
