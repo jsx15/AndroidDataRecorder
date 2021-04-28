@@ -55,9 +55,13 @@ namespace AndroidDataRecorder.Misc
             return MarkerId.ToString();
         }
 
+        /// <summary>
+        /// overrides ToString()
+        /// </summary>
+        /// <returns>string in log format</returns>
         public override string ToString()
         {
-            return "####\n####  "+ timeStamp +" MarkerID:  " + MarkerId + "  MarkerMessage:  " + message + "\n####";
+            return timeStamp +" MarkerID:  " + MarkerId + "  MarkerMessage:  " + message;
         }
     }
 

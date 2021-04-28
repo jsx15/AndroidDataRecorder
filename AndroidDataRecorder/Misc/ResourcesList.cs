@@ -25,8 +25,8 @@ namespace AndroidDataRecorder.Misc
 
         public override string ToString()
         {
-            return "##\n##" + timestamp + "Device serial: " + serial + " Device name: " + deviceName + " CPU load: " +
-                   cpu + " Memory usage: " + memory + " Battery status: " + battery + "\n##";
+            return timestamp + "Device serial: " + serial + " Device name: " + deviceName + " CPU load: " +
+                   cpu + " Memory usage: " + memory + " Battery status: " + battery;
         }
     }
 }
