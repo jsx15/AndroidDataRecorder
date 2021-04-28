@@ -116,6 +116,11 @@
                                 }
                             }
                         </InputSelect>
+                        <br>
+                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.FileFormat">
+                            <option>@TicketCreator.FileFormat.TextFile</option>
+                            <option>@TicketCreator.FileFormat.JsonFile</option>
+                        </InputSelect>
                         
                     </div>
                 </div>
@@ -179,7 +184,7 @@
         
         try
         {
-            _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
+            _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, _ticketModel.FileFormat, _ticketModel.Title, _ticketModel.Description);
         }
         catch (IssueTypeNotSupported)
         {
@@ -261,12 +266,18 @@
          * Project key
          */
         public string ProjectKey { get; set; }
+        
+        /*
+         * File type
+         */
+        public TicketCreator.FileFormat FileFormat { get; set; } 
 
         public TicketModel(IssueType type, IssuePriority prio, string key)
         {
             Type = type;
             Priority = prio;
             ProjectKey = key;
+            FileFormat = TicketCreator.FileFormat.TextFile;
         }
         
         public TicketModel() {}
