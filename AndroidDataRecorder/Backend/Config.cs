@@ -131,18 +131,18 @@ namespace AndroidDataRecorder.Backend
         {
             while (true)
             {
-                if (_source.VideoDirPath != null &&
-                    !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar))
-                {
-                    _source.VideoDirPath += System.IO.Path.DirectorySeparatorChar;
-                }
-                if (!Directory.Exists(_source.VideoDirPath))
+                if (_source.VideoDirPath != null && (!Directory.Exists(_source.VideoDirPath) || !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar)))
                 {
                     Console.WriteLine("No valid path to the video directory \nPlease define one:");
                     _source.VideoDirPath = Console.ReadLine();
                 }
                 else
                 {
+                    if (_source.VideoDirPath != null &&
+                        !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar))
+                    {
+                        _source.VideoDirPath += System.IO.Path.DirectorySeparatorChar;
+                    }
                     Console.WriteLine("Success !!!");
                     return;
                 }
@@ -256,7 +256,6 @@ namespace AndroidDataRecorder.Backend
                 return false;
             }
             
-            Console.WriteLine("Success !!!");
             return true;
         }
         
