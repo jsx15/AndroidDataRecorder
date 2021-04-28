@@ -21,7 +21,7 @@
 <section id="ticket_card">
     <div class="card text-center">
         <div class="card-header" style="color: white">
-            JIRA Issue
+            JIRA Backlog Entry
         </div>
 
         <div class="card-body">
@@ -75,10 +75,12 @@
 
             <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
                 <div class="row">
-                    <div class="col-md-6 text-left">
+                    <div class="col-md-4 text-left">
+                        <h3>Entry Title:</h3>
                         <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
                     </div>
-                    <div class="col-md-6 text-left">
+                    <div class="col-md-4 text-left">
+                        <h3>Issue Type:</h3>
                         <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
                             @if (_tc is not null)
                             {
@@ -94,12 +96,15 @@
                 <br>
 
                 <div class="row text-left">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <h3>Entry Description:</h3>
                         <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <h3>Priority:</h3>
                         <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
-                            @if (_tc is not null) {
+                            @if (_tc is not null)
+                            {
                                 @foreach (var priority in _tc.PriorityList)
                                 {
                                     <option value="@priority.Id">@priority</option>
@@ -107,6 +112,7 @@
                             }
                         </IssuePriorityInputSelect>
                         <br>
+                        <h3>Project Key:</h3>
                         <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.ProjectKey">
                             @if (_tc is not null)
                             {
@@ -116,14 +122,15 @@
                                 }
                             }
                         </InputSelect>
-                        
+
                     </div>
                 </div>
 
                 <br>
-
-                <div class="d-flex flex-row-reverse">
+                <div class="row">
+                    <div class="col text-center">
                     <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                    </div>
                 </div>
             </EditForm>
 

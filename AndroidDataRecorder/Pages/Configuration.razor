@@ -11,74 +11,85 @@
 
 <br>
 
-<section id="device_information">
-    <div class="row">
-        <div class="col-md">
-            <div class="row">
-                <div class="col-md">
-                    <div class="card justify-content-center side-cards">
-                        <div class="card-header text-center" style="background: darkred; color: white">
-                            DANGER ZONE
-                        </div>
-                        <div class="card-body">
-                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="RestartAdb">Restart ADB server</button>
-                            <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="KillAdb">Kill ADB server</button>
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <div class="card text-center card-text h-100 " style="height: auto">
+            <div class="card-header" style="color: white">
+                Add Device
+            </div>
+            <div class="card-body text-left ">
+                <div class="row">
+                    <div class="col">
+                        <EditForm Model="_device" OnSubmit="AddButtonPressed">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <label style="font-size: x-large; vertical-align: middle">IP-address:</label>
+                                </div>
+                                <div class="col">
+                                    <InputText type="text" class="form-control" placeholder="192.168.100.5" @bind-Value="_device.IpAddress"/>
+                                </div>
+                                
+                            </div>
+                                    
+                            <br>
+                            <div class="row justify-content-center">
+                                <button type="submit" class="btn btn-success">Add Device</button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <h3>Known Devices</h3>
+                        <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive-md ">
+                            <table class="table table-bordered table-striped mb-0">
+                                <tbody>
+                                @foreach (var item in Config.GetKnownDevices())
+                                {
+                                    <tr>
+                                        <td>
+                                            @item
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button>
+                                            <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-
-        <div class="col-md-6">
-            <div class="card text-center card-text h-100">
-                <div class="card-header" style="color: white">
-                    Add Device
-                </div>
-                <div class="card-body text-left side-cards">
-                    <EditForm Model="_device" OnSubmit="AddButtonPressed">
-                        <div class="row">
-                            <label>IP-address:</label>
-                            <InputText type="text" class="form-control" placeholder="192.168.100.5" @bind-Value="_device.IpAddress"/>
-                        </div>
-
-                        <br>
-                        <div class="row justify-content-center">
-                            <button type="submit" class="btn btn-success">Add Device</button>
-                        </div>
-                    </EditForm>
-                    <br>
-
-                    <h4 class="text-center">Known Devices</h4>
-                    <div class="table-wrapper-scroll-y known-devices-table table-hover" style="overflow-x: hidden">
-                        <table class="table table-bordered mb-0 text-left">
-                            <tbody>
-                            @foreach (var item in Config.GetKnownDevices())
-                            {
-                                <tr>
-                                    <td>
-                                        @item
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button>
-                                        <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
-                                    </td>
-                                </tr>
-                            }
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer text-right">
-                    Version 1.0.@_adbVersion
-                </div>
+            <div class="card-footer text-right">
+                ADB Version 1.0.@_adbVersion
             </div>
         </div>
     </div>
-</section>
+    <div class="col-md-2"></div>
+</div>
 
 <br>
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <div class="card justify-content-center">
+            <div class="card-header text-center" style="background: darkred; color: white">
+                DANGER ZONE
+            </div>
+            <div class="card-body">
+                <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="RestartAdb">Restart ADB server</button>
+                <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="KillAdb">Kill ADB server</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
 
 
 @code {
@@ -119,6 +130,10 @@
                     // Add device to config file
                     Config.AddKnownDevice(address.ToString());
                     ToastService.ShowSuccess("Device with IP-Address: " + address + " successfully added!", "Success");
+                }
+                else
+                {
+                    ToastService.ShowError("Connection failed", "Error");
                 }
             }
         }

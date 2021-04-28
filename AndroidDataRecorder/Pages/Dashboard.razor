@@ -37,7 +37,7 @@
                                 <tr>
                                     <td class="text-left" style="vertical-align: middle">
                                         <input type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@MarkerList.GetDeviceSerial().Equals(item.Serial)/>
-                                        <label for="@item">@item.Name - @item.Serial - Connection: @DeviceStates.ConnectionType(item)</label>
+                                        <label for="@item">@item.Name - @item.Serial</label>
                                     </td>
                                     <td class="text-right">
                                         <button class="btn p-2 @LoggingButtonColor(item)" @onclick="() => OnLoggingButtonClick(item)">@LoggingText(item) Logging</button>
@@ -58,12 +58,12 @@
         <div class="col-md">
             <div class="card text-center side-cards">
                 <div class="card-header" style="color: white">
-                    Functions
+                    Marker
                 </div>
                 <EditForm Model="_markerModel" OnSubmit="GetMarkerTime">
                     <div class="card-body text-left">
                         <div class="row col">
-                            <InputTextArea class="form-text" style="width: 800px" id="message" @bind-Value="_markerModel.MarkerMessage" placeholder="Enter description..."></InputTextArea>
+                            <InputTextArea class="form-text" style="width: 720px" id="message" @bind-Value="_markerModel.MarkerMessage" placeholder="Enter description..."></InputTextArea>
                         </div>
                         
                         <br>
@@ -87,7 +87,7 @@
 <br>
 
 <section id="SystemStatus">
-    <div class="card" style="height: available">
+    <div class="card" style="height: 30rem">
             <div class="card-header text-center" style="color: white">
                 System Stats
             </div>
@@ -123,37 +123,6 @@
                             </table>
                         </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<br>
-
-<section id="testsection">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="text-center" style="color: white">Marker</h3>
-        </div>
-        <div class="card-body">
-            <div style="height: 250px" class="table-wrapper-scroll-y scroll-bar">
-                <table class="table table-bordered table-striped">
-                    <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Message</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
-                    {
-                        <tr>
-                            <td style="width: 30%">@marker.timeStamp</td>
-                            <td>@marker.message</td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
