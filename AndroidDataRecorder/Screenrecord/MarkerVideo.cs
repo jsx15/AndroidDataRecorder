@@ -67,7 +67,7 @@ namespace AndroidDataRecorder.Screenrecord
             var videoPath = Config.GetVideoDirPath + deviceSerial + Path.DirectorySeparatorChar;
 
             //create resulting video name
-            var videoName = "marker_" + markerId + deviceName;
+            var videoName = "marker_" + markerId + "_" + deviceName;
 
             //create path of the text file
             var textFilePath = videoPath + "list_marker_" + markerId + ".txt";
@@ -78,17 +78,28 @@ namespace AndroidDataRecorder.Screenrecord
             //check if there is a file in this range
             if (fileList.Count == 0) return;
 
-            //get last or newest file of this list
-            var fileInfo = new FileInfo(fileList[^1]);
-
-            //wait till recording of this file is done
-            while (HandleFiles.IsFileLocked(fileInfo)) {}
+            //check every file in time range if it´s in use
+            for(var i = 0; i<fileList.Count;i++)
+            {
+                //wait while file in use
+                while (Screenrecord.FilesInUse.Contains(fileList[i]))
+                {
+                }
+                
+                //check if file exists -> maybe timeout while recording
+                if (!File.Exists(fileList[i])) fileList.Remove(fileList[i]);
+            }
 
             //concatenate all video parts
             HandleFiles.ConcVideoFiles(fileList, Config.GetVideoDirPath, textFilePath, videoName);
 
             //delete text file
             HandleFiles.DeleteFile(textFilePath);
+
+            //concat thread is done
+            RecController.ThreadCounter--;
+            
+            Console.WriteLine("Thread stopped concatenate video");
         }
     }
 }

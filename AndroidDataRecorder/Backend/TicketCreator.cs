@@ -31,33 +31,22 @@ namespace AndroidDataRecorder.Backend
         /// API token for logging in
         /// </summary>
         private readonly String _apiToken = Config.GetApiToken();
-
-        /// <summary>
-        /// Assignee field for Issue determined by username
-        /// </summary>
-        // private string _assignee;
         
         /// <summary>
-        /// Supported issue/ticket types
+        /// List of IssuePriorities
         /// </summary>
-        public enum TicketType
-        {
-            Bug,
-            Story,
-            Task,
-        }
+        public List<IssuePriority> PriorityList;
 
         /// <summary>
-        /// Supported issue/ticket priorities
+        /// List of ProjectKeys
         /// </summary>
-        public enum TicketPriority
-        {
-            Highest,
-            High,
-            Medium,
-            Low,
-            Lowest,
-        }
+        public List<string> KeyList;
+
+        /// <summary>
+        /// List of IssueTypes
+        /// </summary>
+        public List<IssueType> IssueTypeList;
+        
         /// <summary>
         /// Supported output file formats
         /// </summary>
@@ -73,6 +62,11 @@ namespace AndroidDataRecorder.Backend
         public TicketCreator()
         {
             _jira = Jira.CreateRestClient(_jiraServerUrl, _jiraUsername, _apiToken);
+            PriorityList = GetPriorities();
+            IssueTypeList = GetIssueTypes();
+            KeyList = GetProjectKeys();
+
+
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Tickets")))
             {
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Tickets"));
@@ -80,12 +74,39 @@ namespace AndroidDataRecorder.Backend
         }
         
         /// <summary>
-        /// Get a List of all project keys
+        /// method to get ProjectKeys 
         /// </summary>
-        /// <returns>List with all project keys</returns>
-        public List<string> GetMyProjects()
+        /// <returns>returns List of Keys</returns>
+        private List<string> GetProjectKeys()
         {
-            return _jira.Projects.GetProjectsAsync().Result.Select(pro => pro.Key).ToList();
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var token = tokenSource.Token;
+            var tmp = _jira.Projects.GetProjectsAsync(token).Result;
+            return tmp.Select(pro => pro.Key).ToList();
+        }
+        
+        /// <summary>
+        /// method to get ProjectPriorities
+        /// </summary>
+        /// <returns>returns List of IssuePriorities</returns>
+        private List<IssuePriority> GetPriorities()
+        {
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var token = tokenSource.Token;
+            var tmp = _jira.Priorities.GetPrioritiesAsync(token).Result;
+            return tmp.OrderBy(x => x.Id).ToList();
+        }
+
+        /// <summary>
+        /// method to get ProjectIssueTypes
+        /// </summary>
+        /// <returns>returns List of IssueTypes</returns>
+        private List<IssueType> GetIssueTypes()
+        {
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var token = tokenSource.Token;
+            var tmp = _jira.IssueTypes.GetIssueTypesAsync(token).Result;
+            return tmp.OrderBy(x => x.Name).ToList();
         }
 
         /// <summary>
@@ -98,15 +119,23 @@ namespace AndroidDataRecorder.Backend
         /// <param name="format">Output file format</param>
         /// <param name="summary">Summary of the created issue/ticket</param>
         /// <param name="description">Issue/ticket description</param>
-        public void CreateTicket(List<Filter> combinedInfos, String projectKey, TicketType type,
-            TicketPriority priority, FileFormat format, String summary, [Optional] String description)
+        public void CreateTicket(List<Filter> combinedInfos, String projectKey, IssueType type,
+            IssuePriority priority, FileFormat format, String summary, [Optional] String description)
         {
             var issue = _jira.CreateIssue(projectKey);
-            issue.Type = type.ToString();
-            issue.Priority = priority.ToString();
+            issue.Type = type;
+            issue.Priority = priority;
             issue.Summary = summary;
             issue.Description = description;
-            issue.SaveChanges();
+            try
+            {
+                issue.SaveChanges();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new IssueTypeNotSupported();
+            }
+
             String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
                 @"Tickets" + Path.DirectorySeparatorChar + GetDate()));
 
@@ -116,7 +145,8 @@ namespace AndroidDataRecorder.Backend
             {
                 foreach (var info in combinedInfos)
                 {
-                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.marker.devicename + "_" + info.marker.MarkerId + ".txt"));
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.marker.devicename+ "_" +
+                        info.marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".txt"));
                     CreateMarkerFile(info , fileName); 
                     issue.AddAttachment(fileName);
                 }
@@ -125,10 +155,16 @@ namespace AndroidDataRecorder.Backend
                 foreach (var info in combinedInfos)
                 {
                     String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.marker.devicename + "_" 
-                        + info.marker.MarkerId + ".json"));
+                        + info.marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".json"));
                     CreateMarkerJson(info , fileName); 
                     issue.AddAttachment(fileName);
                 }
+            }
+
+            foreach (var filename in from filter in combinedInfos where filter.CreateVideo select Config.GetVideoDirPath + "marker_" + filter.marker.MarkerId + "_" +
+                filter.marker.devicename + ".mp4")
+            {
+                issue.AddAttachment(filename);
             }
         }
         
@@ -143,7 +179,7 @@ namespace AndroidDataRecorder.Backend
 
             List<TicketEntry> list = new List<TicketEntry>();
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
-            //info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
             list.Add(new TicketEntry(info.marker.timeStamp,info.marker.ToString()));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
@@ -190,7 +226,7 @@ namespace AndroidDataRecorder.Backend
 
             List<TicketEntry> list = new List<TicketEntry>();
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.ToString())));
-            //info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp, resourcesList.ToString())));
             list.Add(new TicketEntry(info.marker.timeStamp,info.marker.ToString()));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
@@ -217,10 +253,8 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         /// <returns>alternative string value for DateTime.Now.ToString()</returns>
         private string GetDate()
-        {
-            String temp = DateTime.Now.ToString().Replace("/", "_");
-
-            return temp.Replace(" ", "_");
+        { 
+            return DateTime.Now.ToString("MM-dd-yy_HH-mm-ss");
         }
         
         private class TicketEntry

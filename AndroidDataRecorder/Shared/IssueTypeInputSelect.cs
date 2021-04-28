@@ -1,12 +1,13 @@
 #nullable enable
 using System;
 using AndroidDataRecorder.Misc;
+using Atlassian.Jira;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 
 namespace AndroidDataRecorder.Shared
 {
-    public class MarkerInputSelect<TValue> : InputSelect<TValue>
+    public class IssueTypeInputSelect<TValue> : InputSelect<TValue>
     {
         /// <summary>
         /// If value is marker use GetMarkerID instead of toString
@@ -15,7 +16,12 @@ namespace AndroidDataRecorder.Shared
         /// <returns>MarkerID</returns>
         protected override string? FormatValueAsString(TValue? value)
         {
-            return typeof(TValue) == typeof(Marker) ? (value as Marker)?.GetMarkerId() : base.FormatValueAsString(value);
+            if (typeof(TValue) == typeof(IssueType))
+            {
+                return (value as IssueType)?.Id;
+
+            }
+            return base.FormatValueAsString(value);
         }
         
         /// <summary>
@@ -29,11 +35,11 @@ namespace AndroidDataRecorder.Shared
         {
             try
             {
-                if (typeof(TValue) == typeof(Marker))
+                if (typeof(TValue) == typeof(IssueType))
                 {
                     validationErrorMessage = null;
-                    Database.TableMarker data = new Database.TableMarker();
-                    result = (TValue) (object)data.GetList().Find(x => x.MarkerId.Equals(Convert.ToInt32(value)))!;
+
+                    result = (TValue) (object) new IssueType(value);
 
                     return true;
                 }

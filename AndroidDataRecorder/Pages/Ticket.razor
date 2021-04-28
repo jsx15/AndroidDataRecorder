@@ -2,9 +2,15 @@
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Services
 @using AndroidDataRecorder.Backend
+@using Atlassian.Jira
+@using System.IO
+@using AndroidDataRecorder.Database
+@using System.Threading
+@using AndroidDataRecorder.Screenrecord
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
+@inject IToastService ToastService;
 
 
 <header>
@@ -29,22 +35,30 @@
                                 <tr>
                                     <td>
                                         <div class="row">
-                                            <div class="col">
+                                            <div class="col-4">
                                                 Marker @filter.marker.timeStamp
+                                            </div>
+                                            <div class="col-4">
+                                                <EditForm Model="@filter" OnSubmit="@HandleSubmit">
+                                                    <label>
+                                                        Create Video:
+                                                        <InputCheckbox type="checkbox" @bind-Value="filter.CreateVideo"/>
+                                                    </label>
+                                                    
+                                                </EditForm>
+                                            </div>
+                                            <div class="col-4 text-right">
+                                                <button @onclick="() => DeleteButton(filter)" class="btn btn-danger">
+                                                    <span style="vertical-align: middle" class="oi oi-circle-x"></span>
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col">
+                                            <div class="col-4">
                                                 Log Entries: @filter.Logs.Count
                                             </div>
-                                            <div class="col">
+                                            <div class="col-4">
                                                 Timespan: @CalculateTimeSpan(filter.timeSpanMinus, filter.timeSpanPlus) minutes
-                                            </div>
-                                            <div class="col">
-                                                <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
-                                                    <label>Include Video</label>
-                                                    <InputCheckbox class="form-check" @bind-Value="_ticketModel.checkBoxVideo">test</InputCheckbox>
-                                                </EditForm>
                                             </div>
                                         </div>
                                     </td>
@@ -65,12 +79,15 @@
                         <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
                     </div>
                     <div class="col-md-6 text-left">
-                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
-                            @foreach (var type in Enum.GetValues(typeof(TicketCreator.TicketType)))
+                        <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
+                            @if (_tc is not null)
                             {
-                                <option>@type</option>
+                                @foreach (var type in _tc.IssueTypeList)
+                                {
+                                    <option value="@type.Id">@type</option>
+                                }
                             }
-                        </InputSelect>
+                        </IssueTypeInputSelect>
                     </div>
                 </div>
 
@@ -78,22 +95,35 @@
 
                 <div class="row text-left">
                     <div class="col-md-6">
-                        <InputTextArea class="form-text" style="width: 500px" id="message" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
+                        <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
                     </div>
                     <div class="col-md-6">
-                        <InputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Priority">
-                            @foreach (var priority in Enum.GetValues(typeof(TicketCreator.TicketPriority)))
+                        <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
+                            @if (_tc is not null) {
+                                @foreach (var priority in _tc.PriorityList)
+                                {
+                                    <option value="@priority.Id">@priority</option>
+                                }
+                            }
+                        </IssuePriorityInputSelect>
+                        <br>
+                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.ProjectKey">
+                            @if (_tc is not null)
                             {
-                                <option>@priority</option>
+                                @foreach (var projectKey in _tc.KeyList)
+                                {
+                                    <option>@projectKey</option>
+                                }
                             }
                         </InputSelect>
+                        
                     </div>
                 </div>
 
                 <br>
 
                 <div class="d-flex flex-row-reverse">
-                    <button class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
                 </div>
             </EditForm>
 
@@ -108,25 +138,60 @@
     /*
      * Instance of the ticket model class
      */
-    private readonly TicketModel _ticketModel = new TicketModel();
+    private TicketModel _ticketModel;
 
     /*
      * This is just for testing, okay?
      */
     private List<Filter> _filters = new List<Filter>();
 
+    /*
+     * True if ticketcreator is not valid
+     */
+    private bool _createTicketButtonDisable;
+    
+    /*
+     * Resources data table
+     */
+    readonly TableResources _dataResources = new TableResources();
 
+    /*
+     * Connection to Jira
+     */
+    TicketCreator _tc;
+    
     private void HandleSubmit()
     {
-        TicketCreator tc = new TicketCreator();
+        foreach (var filter in _filters.Where(filter => filter.CreateVideo))
+        {
+            RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
+        }
 
-        tc.CreateTicket(_filters, "ADR", _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
+        while (RecController.ThreadCounter != 0)
+        {
+            Thread.Sleep(500);
+        }
+        
+        foreach (var filter in _filters)
+        {
+            filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
+        }
+        
+        try
+        {
+            _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
+        }
+        catch (IssueTypeNotSupported)
+        {
+            ToastService.ShowError("Issue type not supported", "Error");
+            return;
+        }
         
         _filters.Clear();
         LogBridge.Filters.Clear();
         
-        _ticketModel.Description = String.Empty;
-        _ticketModel.Title = String.Empty;
+        _ticketModel.Description = string.Empty;
+        _ticketModel.Title = string.Empty;
         
     }
 
@@ -138,7 +203,32 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        try
+        {
+            _tc = new TicketCreator();
+        }
+        catch (IOException)
+        {
+            ToastService.ShowError("Ticket directory could not be created", "Error");
+            _createTicketButtonDisable = true;
+            _ticketModel = new TicketModel();
+            return;
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("No internet connection", "Error");
+            _createTicketButtonDisable = true;
+            _ticketModel = new TicketModel();
+            return;
+        }
+        _ticketModel = new TicketModel(_tc.IssueTypeList.First(), _tc.PriorityList.First(), _tc.KeyList.First());
         _filters = LogBridge.Filters.ToList();
+    }
+
+    private void DeleteButton(Filter filter)
+    {
+        _filters.Remove(filter);
+        LogBridge.Filters.Remove(filter);
     }
 
     /*
@@ -160,17 +250,26 @@
         /*
          * Priority of the jira ticket
          */
-        public TicketCreator.TicketPriority Priority { get; set; }
+        public IssuePriority Priority { get; set; }
 
         /*
          * Type of the jira ticket
          */
-        public TicketCreator.TicketType Type { get; set; }
-
+        public IssueType Type { get; set; }
+        
         /*
-         * This is just for testing, okay?
+         * Project key
          */
-        public bool checkBoxVideo;
+        public string ProjectKey { get; set; }
+
+        public TicketModel(IssueType type, IssuePriority prio, string key)
+        {
+            Type = type;
+            Priority = prio;
+            ProjectKey = key;
+        }
+        
+        public TicketModel() {}
     }
 
 }

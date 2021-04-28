@@ -210,14 +210,14 @@ namespace AndroidDataRecorder.Backend
                     for (int i = 0; i < 5; i++)
                     {
                         _tableResIntens.InsertValues(_device.Serial, _device.Name,
-                            double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
+                            System.Math.Round((double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture) / _cpuTotal) * 100, 2),
                             double.Parse(memFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             fiveProcesses[i].ToString(), time);
                     }
 
                     //Invoke the DeviceWorkloadChanged event and wait 30 seconds
                     AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(_device));
-                    Thread.Sleep(2000);
+                    Thread.Sleep(Config.GetAccessWorkloadInterval());
                 }
             }
             catch (Exception e)
