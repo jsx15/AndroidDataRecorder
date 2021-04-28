@@ -82,7 +82,7 @@ namespace AndroidDataRecorder.Database
             command.CommandText =
                 @"SELECT * FROM Resources
                     WHERE Serial LIKE @serial
-                   ORDER BY ResID DESC LIMIT 15 ";
+                   ORDER BY Timestamp DESC LIMIT 15 ";
             command.Parameters.AddWithValue("@Serial", serial);
 
             // fill the list with the actual values of database
