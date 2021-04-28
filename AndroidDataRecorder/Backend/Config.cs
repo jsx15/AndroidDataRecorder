@@ -131,7 +131,7 @@ namespace AndroidDataRecorder.Backend
         {
             while (true)
             {
-                if (_source.VideoDirPath != null && (!Directory.Exists(_source.VideoDirPath) || !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar)))
+                if (!Directory.Exists(_source.VideoDirPath))
                 {
                     Console.WriteLine("No valid path to the video directory \nPlease define one:");
                     _source.VideoDirPath = Console.ReadLine();
