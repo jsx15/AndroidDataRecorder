@@ -7,6 +7,7 @@
 @using AndroidDataRecorder.Database
 @using System.Threading
 @using AndroidDataRecorder.Screenrecord
+@using System.Diagnostics
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -123,15 +124,20 @@
                 <br>
 
                 <div class="d-flex flex-row-reverse">
-                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">
+                        Create Ticket
+                    </button>
+                    
+                    <div style="visibility: @Spinner; margin: auto 0 auto auto;" class="spinner-border spinner-border-sm" role="status">
+                        <span class="sr-only">Loading ...</span>
+                    </div>
                 </div>
             </EditForm>
-
+            
         </div>
 
     </div>
-
-
+    
 </section>
 
 @code {
@@ -154,29 +160,36 @@
      * Resources data table
      */
     readonly TableResources _dataResources = new TableResources();
+    
+    /*
+     * Visibility of spinner
+     */
+    private string Spinner { get; set; } = "hidden";
 
     /*
      * Connection to Jira
      */
     TicketCreator _tc;
     
-    private void HandleSubmit()
+    private async void HandleSubmit()
     {
+        Spinner = "visible";
         foreach (var filter in _filters.Where(filter => filter.CreateVideo))
         {
             RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
         }
-
+        
         while (RecController.ThreadCounter != 0)
         {
-            Thread.Sleep(500);
+            Console.WriteLine("ThreadCounter:" + RecController.ThreadCounter);
+            await Task.Delay(500);
         }
-        
+
         foreach (var filter in _filters)
         {
             filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
         }
-        
+
         try
         {
             _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
@@ -186,13 +199,26 @@
             ToastService.ShowError("Issue type not supported", "Error");
             return;
         }
+        catch (Exception)
+        {
+            ToastService.ShowError("Ticket not created", "Error");
+            return;
+        }
+        finally
+        {
+            Spinner = "hidden";
+        }
         
+
+
         _filters.Clear();
         LogBridge.Filters.Clear();
         
         _ticketModel.Description = string.Empty;
         _ticketModel.Title = string.Empty;
+        ToastService.ShowSuccess("Ticket created", "Success");
         
+        StateHasChanged();
     }
 
     private double CalculateTimeSpan(double start, double stop)
