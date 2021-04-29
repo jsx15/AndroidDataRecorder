@@ -128,14 +128,7 @@ namespace AndroidDataRecorder.Backend
             issue.Priority = priority;
             issue.Summary = summary;
             issue.Description = description;
-            try
-            {
-                issue.SaveChanges();
-            }
-            catch (InvalidOperationException)
-            {
-                throw new IssueTypeNotSupported();
-            }
+            issue.SaveChanges();
 
             String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
                 @"Tickets" + Path.DirectorySeparatorChar + GetDate()));
