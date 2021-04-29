@@ -220,7 +220,13 @@
         _monitor.DeviceDisconnected += OnDeviceDisconnected;
         _monitor.DeviceConnected += DeviceChanged;
         _monitor.Start();
-        
+
+        //Fill the Intensive resources list when the page is initialized if possible
+        if (MarkerList.ActiveDeviceData != null)
+        {
+            _intensResourcesList = _dataResIntens.GetList(MarkerList.GetDeviceSerial());
+            InvokeAsync(StateHasChanged);
+        }
 
         //EventHandler: IntensiveResources called every 30 seconds
         AdbServer.Instance.DeviceWorkloadChanged += IntensiveResources;

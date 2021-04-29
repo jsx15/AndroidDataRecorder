@@ -103,7 +103,7 @@
     {
         base.OnInitialized();
 
-    //Eventhandler: CPU chart is refreshed every 30 seconds
+        //Eventhandler: CPU chart is refreshed in the workload interval
         AdbServer.Instance.DeviceWorkloadChanged += FillChartWithCpuData;
     }
     

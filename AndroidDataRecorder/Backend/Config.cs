@@ -319,7 +319,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Gets the accessWorkloadInterval and convert it to int. Then returns it in milliseconds
         /// </summary>
-        public static int GetAccessWorkloadInterval() => int.Parse(_source.AccessWorkloadInterval);
+        public static int GetAccessWorkloadInterval() => 1000 * int.Parse(_source.AccessWorkloadInterval);
 
         /// <summary>
         /// Change the value in adbPath
