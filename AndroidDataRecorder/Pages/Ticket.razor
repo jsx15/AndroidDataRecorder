@@ -7,6 +7,8 @@
 @using AndroidDataRecorder.Database
 @using System.Threading
 @using AndroidDataRecorder.Screenrecord
+@using System.Diagnostics
+@using System.ComponentModel.DataAnnotations
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -73,10 +75,12 @@
             <br>
 
 
-            <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+            <EditForm Model="@_ticketModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="() =>OnInvalidSubmit() ">
+                <DataAnnotationsValidator />
                 <div class="row">
                     <div class="col-md-6 text-left">
                         <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
+                        <ValidationMessage For="@(() => _ticketModel.Title)" />
                     </div>
                     <div class="col-md-6 text-left">
                         <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
@@ -99,7 +103,8 @@
                     </div>
                     <div class="col-md-6">
                         <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
-                            @if (_tc is not null) {
+                            @if (_tc is not null)
+                            {
                                 @foreach (var priority in _tc.PriorityList)
                                 {
                                     <option value="@priority.Id">@priority</option>
@@ -128,15 +133,20 @@
                 <br>
 
                 <div class="d-flex flex-row-reverse">
-                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">
+                        Create Ticket
+                    </button>
+
+                    <div style="visibility: @Spinner; margin: auto 0 auto auto;" class="spinner-border spinner-border-sm" role="status">
+                        <span class="sr-only">Loading ...</span>
+                    </div>
                 </div>
             </EditForm>
-
+            
         </div>
 
     </div>
-
-
+    
 </section>
 
 @code {
@@ -159,45 +169,61 @@
      * Resources data table
      */
     readonly TableResources _dataResources = new TableResources();
+    
+    /*
+     * Visibility of spinner
+     */
+    private string Spinner { get; set; } = "hidden";
 
     /*
      * Connection to Jira
      */
     TicketCreator _tc;
     
-    private void HandleSubmit()
+    private async void HandleSubmit()
     {
+        Spinner = "visible";
         foreach (var filter in _filters.Where(filter => filter.CreateVideo))
         {
             RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
         }
-
+        
         while (RecController.ThreadCounter != 0)
         {
-            Thread.Sleep(500);
+            Console.WriteLine("ThreadCounter:" + RecController.ThreadCounter);
+            await Task.Delay(500);
         }
-        
+
         foreach (var filter in _filters)
         {
             filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
         }
-        
+
         try
         {
             _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, _ticketModel.FileFormat, _ticketModel.Title, _ticketModel.Description);
         }
-        catch (IssueTypeNotSupported)
+        catch (Exception ex)
         {
-            ToastService.ShowError("Issue type not supported", "Error");
+            ToastService.ShowError("Ticket not created", "Error");
+            Spinner = "hidden";
             return;
         }
-        
+
+        Spinner = "hidden";
         _filters.Clear();
         LogBridge.Filters.Clear();
-        
+
         _ticketModel.Description = string.Empty;
         _ticketModel.Title = string.Empty;
-        
+        ToastService.ShowSuccess("Ticket created", "Success");
+
+        StateHasChanged();
+    }
+    
+    private void OnInvalidSubmit()
+    {
+        ToastService.ShowError("Ticket not created", "Error");
     }
 
     private double CalculateTimeSpan(double start, double stop)
@@ -245,6 +271,7 @@
         /*
          * Description of the jira ticket
          */
+        [Required(ErrorMessage = "Title is missing")]
         public string Title { get; set; }
 
         /*

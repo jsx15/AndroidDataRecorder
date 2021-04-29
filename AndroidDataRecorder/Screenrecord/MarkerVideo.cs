@@ -76,7 +76,11 @@ namespace AndroidDataRecorder.Screenrecord
             var fileList = GetVideoFiles(videoPath, startTime, endTime, videoLength);
 
             //check if there is a file in this range
-            if (fileList.Count == 0) return;
+            if (fileList.Count == 0)
+            {
+                RecController.ThreadCounter--;
+                return;
+            }
 
             //check every file in time range if it´s in use
             for(var i = 0; i<fileList.Count;i++)

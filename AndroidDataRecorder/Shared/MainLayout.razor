@@ -8,7 +8,7 @@
 @inject IToastService ToastService;
 
 <div class="page">
-    <div class="@NavMenuCssClass">
+    <div class="@NavMenuCssClass sidebar">
         <div class="navbar">
             <btn class="icon btn" @onclick="ToggleNavMenu">
                 <span class="oi oi-menu"></span>
@@ -69,10 +69,10 @@
     /*
      * Adjusting CSS
      */
-    private string NavMenuCssClass => _collapseNavMenu ? "sidebar-min" : "sidebar";
+    private string NavMenuCssClass => _collapseNavMenu ? "sidebar-min" : "";
     private string Content => _collapseNavMenu ? "content-max" : "content-min";
 
-    private bool _eventTimer = false;
+    private bool _eventTimer;
 
     /*
      * Toggle navigation menu
