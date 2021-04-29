@@ -76,7 +76,7 @@
      <tr>
       <td>System.Data.SQLite</td>
       <td>The official SQLite database engine for both x86 and x64 along with the ADO.NET provider.  This package includes support for LINQ and Entity Framework 6.</td>
-      <tdSQLite Development Team</td>
+      <td>SQLite Development Team</td>
       <td>December 24, 2020</td>
       <td>1.0.113.7</td>
       <td>https://www.nuget.org/packages/System.Data.SQLite</td>
