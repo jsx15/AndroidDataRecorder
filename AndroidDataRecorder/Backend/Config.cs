@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
-using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
 {
@@ -36,8 +33,8 @@ namespace AndroidDataRecorder.Backend
 
             if (!ValidateJiraUsername() || !ValidateApiToken() || !ValidateJiraServerUrl())
             {
-                Console.WriteLine("At least one of the Ticket creation variables is not set \nShould they be adjusted? Type y for yes");
-                if (Console.ReadLine().Equals("y"))
+                Console.WriteLine("At least one of the Ticket creation variables is not set \nShould they be adjusted? [y/N]");
+                if (Console.ReadLine()!.Equals("y"))
                 {
                     CheckJiraServerUrl();
                     CheckJiraUsername();
@@ -47,9 +44,9 @@ namespace AndroidDataRecorder.Backend
             
             CheckWorkloadInterval();
             CheckAdbPath();
-            
+
             SaveConfig();
-            
+
             ConnectKnownDevices();
         }
 
@@ -88,7 +85,16 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckAdbPath()
         {
-            while (true)
+            if (ValidateAdbPath()) return;
+            do
+            {
+                Console.WriteLine("No valid path to the adb.exe \nPlease define one:");
+                if (_source != null) _source.AdbPath = Console.ReadLine();
+            } while (!ValidateAdbPath());
+            
+            Console.WriteLine("Success !!!");
+            
+            /*while (true)
             {
                 try
                 {
@@ -96,11 +102,28 @@ namespace AndroidDataRecorder.Backend
                     Console.WriteLine("Success !!!");
                     return;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Console.WriteLine("No valid path to the adb.exe \nPlease define one:");
                     if (_source != null) _source.AdbPath = Console.ReadLine();
                 }
+            }*/
+        }
+
+        /// <summary>
+        /// Checks if the path to adb.exe is correct
+        /// </summary>
+        /// <returns> true if yes and false if not </returns>
+        private static bool ValidateAdbPath()
+        {
+            try
+            {
+                if (_source != null) AdbServer.InitializeAdbServer(_source.AdbPath);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
         
@@ -109,7 +132,15 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckFfmpegPath()
         {
-            while (true)
+            if (File.Exists(_source.FfmpegPath)) return;
+            do
+            {
+                Console.WriteLine("No valid path to the ffmpeg.exe \nPlease define one:");
+                _source.FfmpegPath = Console.ReadLine();
+            } while (!File.Exists(_source.FfmpegPath));
+                
+            Console.WriteLine("Success !!!");
+            /*while (true)
             {
                 if (!File.Exists(_source.FfmpegPath))
                 {
@@ -121,7 +152,7 @@ namespace AndroidDataRecorder.Backend
                     Console.WriteLine("Success !!!");
                     return;
                 }
-            }
+            }*/
         }
         
         /// <summary>
@@ -129,7 +160,21 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckVideoDirPath()
         {
-            while (true)
+            if (Directory.Exists(_source.VideoDirPath)) return;
+            do
+            {
+                Console.WriteLine("No valid path to the video directory \nPlease define one:");
+                _source.VideoDirPath = Console.ReadLine();
+            } while (!Directory.Exists(_source.VideoDirPath));
+                
+            if (_source.VideoDirPath != null &&
+                !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar))
+            {
+                _source.VideoDirPath += System.IO.Path.DirectorySeparatorChar;
+            }
+            Console.WriteLine("Success !!!");
+
+            /*while (true)
             {
                 if (!Directory.Exists(_source.VideoDirPath))
                 {
@@ -146,7 +191,7 @@ namespace AndroidDataRecorder.Backend
                     Console.WriteLine("Success !!!");
                     return;
                 }
-            }
+            }*/
         }
 
         /// <summary>
@@ -154,7 +199,16 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckJiraServerUrl()
         {
-            while (true)
+            if (ValidateJiraServerUrl()) return;
+            do
+            {
+                Console.WriteLine("No valid URL to the Jira server \nPlease define one:");
+                _source.JiraServerUrl = Console.ReadLine();
+            } while (!ValidateJiraServerUrl());
+            
+            Console.WriteLine("Success !!!");
+            
+            /*while (true)
             {
                 //Creating the HttpWebRequest and Setting the Request method HEAD
                 if (ValidateJiraServerUrl())
@@ -165,7 +219,7 @@ namespace AndroidDataRecorder.Backend
                 
                 Console.WriteLine("No valid URL to the Jira server \nPlease define one:");
                 _source.JiraServerUrl = Console.ReadLine();
-            }
+            }*/
         }
 
         /// <summary>
@@ -197,7 +251,16 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckJiraUsername()
         {
-            while (true)
+            if (ValidateJiraUsername()) return;
+            do
+            {
+                Console.WriteLine("No valid Jira Username \nPlease define one:");
+                _source.JiraUsername = Console.ReadLine();
+            } while (!ValidateJiraUsername());
+            
+            Console.WriteLine("Success !!!");
+            
+            /*while (true)
             {
                 if (ValidateJiraUsername())
                 {
@@ -207,7 +270,7 @@ namespace AndroidDataRecorder.Backend
                 
                 Console.WriteLine("No valid Jira Username \nPlease define one:"); 
                 _source.JiraUsername = Console.ReadLine();
-            }
+            }*/
         }
 
         /// <summary>
@@ -216,8 +279,9 @@ namespace AndroidDataRecorder.Backend
         /// <returns> true if it is and false if not</returns>
         private static bool ValidateJiraUsername()
         {
-            try {
-                var addr = new System.Net.Mail.MailAddress(_source.JiraUsername!);
+            try
+            {
+                var unused = new System.Net.Mail.MailAddress(_source.JiraUsername!);
             }
             catch
             {
@@ -232,7 +296,16 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckApiToken()
         {
-            while (true)
+            if (ValidateApiToken()) return;
+            do
+            {
+                Console.WriteLine("No valid Api Token \nPlease define one:");
+                _source.ApiToken = Console.ReadLine();
+            } while (!ValidateApiToken());
+
+            Console.WriteLine("Success !!!");
+            
+            /*while (true)
             {
                 if (ValidateApiToken())
                 {
@@ -242,7 +315,7 @@ namespace AndroidDataRecorder.Backend
 
                 Console.WriteLine("No valid Api Token \nPlease define one:");
                 _source.ApiToken = Console.ReadLine();
-            }
+            }*/
         }
         
         /// <summary>
@@ -264,7 +337,16 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void CheckWorkloadInterval()
         {
-            while (true)
+            if (ValidateWorkloadInterval()) return;
+            do
+            {
+                Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
+                _source.AccessWorkloadInterval = Console.ReadLine();
+            } while (!ValidateWorkloadInterval());
+            
+            Console.WriteLine("Success !!!"); 
+            
+            /*while (true)
             {
                 try
                 {
@@ -277,11 +359,28 @@ namespace AndroidDataRecorder.Backend
                     Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
                     _source.AccessWorkloadInterval = Console.ReadLine();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
                     _source.AccessWorkloadInterval = Console.ReadLine();
                 }
+            }*/
+        }
+
+        /// <summary>
+        /// Checks if the workload interval is set and in correct format 
+        /// </summary>
+        /// <returns> true if it is set and false if not </returns>
+        private static bool ValidateWorkloadInterval()
+        {
+            try
+            {
+                var interval = Int32.Parse(_source.AccessWorkloadInterval!);
+                return interval > 0 && interval <= 60;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
         
@@ -333,10 +432,11 @@ namespace AndroidDataRecorder.Backend
                 //The interval should be between 1 and 60 seconds
                 if (interval > 0 && interval <= 60) return 1000 * interval;
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                // ignored
             }
-            
+
             return 5000;
         }
 
