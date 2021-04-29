@@ -1,3 +1,4 @@
+using AndroidDataRecorder.Services;
 using Blazored.Toast;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +16,8 @@ namespace AndroidDataRecorder
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddBlazoredToast();
+            services.AddSingleton<MarkerBridge>();
+            services.AddSingleton<LogBridge>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

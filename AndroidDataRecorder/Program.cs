@@ -1,8 +1,8 @@
 using System;
 using AndroidDataRecorder.Backend;
+using AndroidDataRecorder.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-
 
 namespace AndroidDataRecorder
 {
@@ -11,15 +11,19 @@ namespace AndroidDataRecorder
         public static void Main(string[] args)
         {
 
-
+            //Load data from the Config file and start the adb server
             Config.LoadConfig();
+            
+            //Create the razor pages
             CreateHostBuilder(args).Build().Run();
 
-            Database.Database db = new Database.Database();
-            db.ConectionToDatabase();
             
+
+
             
+
         }
+        
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)

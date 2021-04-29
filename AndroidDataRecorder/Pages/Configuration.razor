@@ -1,8 +1,6 @@
 ﻿@page "/Config"
 @using System.Net
 @using AndroidDataRecorder.Backend
-@using AndroidDataRecorder.Misc
-@using SharpAdbClient
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 
 @inject IToastService ToastService;
@@ -16,35 +14,6 @@
 <section id="device_information">
     <div class="row">
         <div class="col-md">
-            <div class="card text-center side-cards">
-                <div class="card-header" style="color: white">
-                    Attached Devices
-                </div>
-                <div class="card-body">
-                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-hover">
-                        <table class="table table-bordered mb-0 text-left">
-                            <tbody>
-                            @foreach (var item in _attachedDeviceList)
-                            {
-                                <tr>
-                                    <td>
-                                        <input style="vertical-align: middle" type="radio" name="technology" id="@item" value="@item" @onchange="RadioSelection" checked=@MarkerList.GetDeviceName().Equals(item.Name)/>
-                                        <label for="@item">@item.Name - Connection: @DeviceStates.ConnectionType(item)</label>
-                                        <button class="btn btn-danger float-right" @onclick="() => DisconnectDevice(item)">Disconnect</button>
-                                    </td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
-                        <label>Selected device is @MarkerList.GetDeviceName()</label>
-                    </div>
-                </div>
-                <div class="card-footer">
-                </div>
-            </div>
-
-            <br>
-
             <div class="row">
                 <div class="col-md">
                     <div class="card justify-content-center side-cards">
@@ -67,27 +36,17 @@
                     Add Device
                 </div>
                 <div class="card-body text-left side-cards">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p>IP-Address: </p>
+                    <EditForm Model="_device" OnSubmit="AddButtonPressed">
+                        <div class="row">
+                            <label>IP-address:</label>
+                            <InputText type="text" class="form-control" placeholder="192.168.100.5" @bind-Value="_device.IpAddress"/>
                         </div>
-                        <div class="col-md-8">
-                            <input type="email" class="form-control" id="IP-Address" aria-describedby="IP-Address" placeholder="134.913.491.349" @bind="ipAddress">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p>Port: </p>
-                        </div>
-                        <div class="col-md-8">
-                            <input type="email" class="form-control" id="Port" aria-describedby="Port" placeholder="5555" @bind="portAddress">
-                        </div>
-                    </div>
-                    <br>
-                    <div class="row justify-content-center">
-                        <button type="submit" class="btn btn-success" @onclick="AddButtonPressed">Add Device</button>
-                    </div>
 
+                        <br>
+                        <div class="row justify-content-center">
+                            <button type="submit" class="btn btn-success">Add Device</button>
+                        </div>
+                    </EditForm>
                     <br>
 
                     <h4 class="text-center">Known Devices</h4>
@@ -98,16 +57,11 @@
                             {
                                 <tr>
                                     <td>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <p>
-                                                    @item
-                                                </p>
-                                            </div>
-                                            <div class="col-6 text-right">
-                                                <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button> <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
-                                            </div>
-                                        </div>
+                                        @item
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" @onclick="() => AttachDevice(item)">Attach</button>
+                                        <button class="btn btn-danger" @onclick="() => RemoveDevice(item)">Remove</button>
                                     </td>
                                 </tr>
                             }
@@ -128,76 +82,44 @@
 
 
 @code {
-    
-    /*
-     * List of attached devices
-     */
-    static List<DeviceData> _attachedDeviceList;
-
-    /*
-     * Marker list
-     */
-    readonly MarkerList _markerList = new MarkerList();
-
     /*
      * ADB version used
      */
     private int _adbVersion;
-
-    /*
-     * Monitor to detect changes on connected devices
-     */
-    DeviceMonitor _monitor;
     
+    /*
+     * Model for Editform
+     */
+    private Device _device = new Device();
+
     /*
      * Set device list
      */
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _attachedDeviceList = AdbServer.GetConnectedDevices();
         _adbVersion = AdbServer.GetAdbVersion();
-        
-        _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
-        _monitor.DeviceChanged += DeviceChanged;
-        _monitor.DeviceDisconnected += DeviceChanged;
-        _monitor.DeviceConnected += DeviceChanged;
-        _monitor.Start();
     }
     
-    /*
-     * Change selected device
-     */
-    void RadioSelection(ChangeEventArgs args)
-    {
-        // Find device by name (args only return string)
-        _markerList.SetDevice(_attachedDeviceList.Find(x => x.ToString().Equals(args.Value)));
-    }
-
-    /*
-     * Binded values
-     */
-    private string ipAddress;
-    private string portAddress;
-
+    
+    
     /*
      * Add device to known devices
      */
     void AddButtonPressed()
     {
-        
         try
         {
             // Check for 3 dots and valid range
-            if (ipAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(ipAddress, out var address))
+            if (_device.IpAddress.Count(c => c == '.') == 3 && IPAddress.TryParse(_device.IpAddress, out var address))
             {
-                ToastService.ShowSuccess("Device with IP-Address: " + address + " at port: " + portAddress + " successfully added!", "Success");
-                
-                // Add device to config file
-                Config.AddKnownDevice(address.ToString());
-                
                 // Attach device to ADB
-                AdbServer.ConnectWirelessClient(address.ToString());
+                if (AdbServer.ConnectWirelessClient(address.ToString()))
+                {
+                    // Add device to config file
+                    Config.AddKnownDevice(address.ToString());
+                    ToastService.ShowSuccess("Device with IP-Address: " + address + " successfully added!", "Success");
+                }
             }
         }
         catch (Exception)
@@ -206,7 +128,7 @@
             ToastService.ShowError("Could not add device!", "Error");
         }
     }
-    
+
     /*
      * Restart ADB server
      */
@@ -214,7 +136,7 @@
     {
         AdbServer.RestartAdbServer();
     }
-    
+
     /*
      * Kill ADB Server
      */
@@ -223,30 +145,12 @@
         AdbServer.KillAdbServer();
     }
 
-    /*jx15
+    /*
      * Attach device
      */
     private void AttachDevice(string address)
     {
         AdbServer.ConnectWirelessClient(address);
-    }
-
-    /*
-     * Disconnect only wireless devices -> remove them from attached devices
-     * USB devices cannot be disconnected
-     */
-    private void DisconnectDevice(DeviceData device)
-    {
-        if (DeviceStates.ConnectionType(device) is DeviceStates.ConnectionTypes.Wifi)
-        {
-            var split = device.ToString().Split(':');
-            AdbServer.DisconnectWirelessClient(split[0]);
-            _attachedDeviceList = AdbServer.GetConnectedDevices();
-        }
-        else
-        {
-            ToastService.ShowError("Only Wifi devices can be disconnected", "Error");
-        }
     }
 
     /*
@@ -257,14 +161,8 @@
         Config.DeleteKnownDevice(address);
     }
 
-    /*
-     * Refresh device list on device changes
-     */
-    private void DeviceChanged(object sender, DeviceDataEventArgs e)
+    private class Device
     {
-        _attachedDeviceList = AdbServer.GetConnectedDevices();
-        InvokeAsync(StateHasChanged);
+        public string IpAddress;
     }
-    
-
 }

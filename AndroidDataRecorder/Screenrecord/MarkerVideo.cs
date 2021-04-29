@@ -67,7 +67,7 @@ namespace AndroidDataRecorder.Screenrecord
             var videoPath = Config.GetVideoDirPath + deviceSerial + Path.DirectorySeparatorChar;
 
             //create resulting video name
-            var videoName = "marker_" + markerId + deviceName;
+            var videoName = "marker_" + markerId + "_" + deviceName;
 
             //create path of the text file
             var textFilePath = videoPath + "list_marker_" + markerId + ".txt";
@@ -95,6 +95,11 @@ namespace AndroidDataRecorder.Screenrecord
 
             //delete text file
             HandleFiles.DeleteFile(textFilePath);
+
+            //concat thread is done
+            RecController.ThreadCounter--;
+            
+            Console.WriteLine("Thread stopped concatenate video");
         }
     }
 }

@@ -1,0 +1,14 @@
+﻿.my-custom-scrollbar {
+    position: relative;
+    height: auto;
+    overflow: auto;
+}
+
+.table-wrapper-scroll-y {
+    display: block;
+}
+
+.card-header{
+    font-size: 2vw;
+    background-color: #295C07;
+}

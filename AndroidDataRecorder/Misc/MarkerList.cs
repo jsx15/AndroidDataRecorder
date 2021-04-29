@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using AndroidDataRecorder.Database;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Misc
@@ -9,7 +9,7 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// List for all markers
         /// </summary>
-        public static List<Marker> Markers = new List<Marker>();
+        public static List<Marker> Markers { get; set; }
 
         /// <summary>
         /// Selected device
@@ -19,16 +19,17 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// Database
         /// </summary>
-        private readonly Database.Database _data = new Database.Database();
+        private readonly TableMarker _data = new TableMarker();
 
         /// <summary>
         /// Constructor
         /// </summary>
         public MarkerList()
         {
+            Markers = new List<Marker>(); 
             if (ActiveDeviceData != null)
             {
-                Markers = _data.ListWithMarker(ActiveDeviceData.Name);
+                Markers = _data.GetList(ActiveDeviceData.Serial);
             }
         }
 
@@ -37,7 +38,7 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public void Update()
         {
-            Markers = _data.ListWithMarker(ActiveDeviceData.Name);
+            Markers = _data.GetList(ActiveDeviceData.Serial);
         }
 
         /// <summary>
@@ -59,41 +60,9 @@ namespace AndroidDataRecorder.Misc
             return ActiveDeviceData is not null ? ActiveDeviceData.Name : "";
         }
 
-        /// <summary>
-        /// Device connection type
-        /// </summary>
-        /// <returns>Connection of selected device(Wifi or Usb)</returns>
-        public static string DeviceConnectionType()
+        public static string GetDeviceSerial()
         {
-            try
-            {
-                return DeviceStates.ConnectionType(ActiveDeviceData).ToString();
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-        }
-
-        /// <summary>
-        /// Determine the ip address
-        /// </summary>
-        /// <returns>IP Address of selected device</returns>
-        public static string IpAddress()
-        {
-            try
-            {
-                return DeviceStates.IpAddress(ActiveDeviceData);
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-        }
-
-        public static string DeviceStatus()
-        {
-            return ActiveDeviceData is not null ? "connected" : "not connected";
+            return ActiveDeviceData is not null ? ActiveDeviceData.Serial : "";
         }
     }
 }

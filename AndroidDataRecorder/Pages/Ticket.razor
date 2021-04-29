@@ -1,0 +1,286 @@
+﻿@page "/ticket"
+@using AndroidDataRecorder.Misc
+@using AndroidDataRecorder.Services
+@using AndroidDataRecorder.Backend
+@using Atlassian.Jira
+@using System.IO
+@using AndroidDataRecorder.Database
+@using System.Threading
+@using AndroidDataRecorder.Screenrecord
+
+@inject MarkerBridge MarkerBridge;
+@inject LogBridge LogBridge;
+@inject IToastService ToastService;
+
+
+<header>
+    <h1 class="text-center" style="color: white">Ticket</h1>
+    <br>
+</header>
+
+<section id="ticket_card">
+    <div class="card text-center">
+        <div class="card-header" style="color: white">
+            JIRA Issue
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive-md " style="overflow-x: hidden">
+                        <table class="table table-bordered table-striped mb-0">
+                            <tbody class="text-left logtable">
+                            @foreach (var filter in _filters)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                Marker @filter.marker.timeStamp
+                                            </div>
+                                            <div class="col-4">
+                                                <EditForm Model="@filter" OnSubmit="@HandleSubmit">
+                                                    <label>
+                                                        Create Video:
+                                                        <InputCheckbox type="checkbox" @bind-Value="filter.CreateVideo"/>
+                                                    </label>
+                                                    
+                                                </EditForm>
+                                            </div>
+                                            <div class="col-4 text-right">
+                                                <button @onclick="() => DeleteButton(filter)" class="btn btn-danger">
+                                                    <span style="vertical-align: middle" class="oi oi-circle-x"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                Log Entries: @filter.Logs.Count
+                                            </div>
+                                            <div class="col-4">
+                                                Timespan: @CalculateTimeSpan(filter.timeSpanMinus, filter.timeSpanPlus) minutes
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+
+            <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+                <div class="row">
+                    <div class="col-md-6 text-left">
+                        <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
+                    </div>
+                    <div class="col-md-6 text-left">
+                        <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
+                            @if (_tc is not null)
+                            {
+                                @foreach (var type in _tc.IssueTypeList)
+                                {
+                                    <option value="@type.Id">@type</option>
+                                }
+                            }
+                        </IssueTypeInputSelect>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="row text-left">
+                    <div class="col-md-6">
+                        <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
+                    </div>
+                    <div class="col-md-6">
+                        <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
+                            @if (_tc is not null) {
+                                @foreach (var priority in _tc.PriorityList)
+                                {
+                                    <option value="@priority.Id">@priority</option>
+                                }
+                            }
+                        </IssuePriorityInputSelect>
+                        <br>
+                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.ProjectKey">
+                            @if (_tc is not null)
+                            {
+                                @foreach (var projectKey in _tc.KeyList)
+                                {
+                                    <option>@projectKey</option>
+                                }
+                            }
+                        </InputSelect>
+                        <br>
+                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.FileFormat">
+                            <option>@TicketCreator.FileFormat.TextFile</option>
+                            <option>@TicketCreator.FileFormat.JsonFile</option>
+                        </InputSelect>
+                        
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="d-flex flex-row-reverse">
+                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">Create Ticket</button>
+                </div>
+            </EditForm>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+@code {
+    /*
+     * Instance of the ticket model class
+     */
+    private TicketModel _ticketModel;
+
+    /*
+     * This is just for testing, okay?
+     */
+    private List<Filter> _filters = new List<Filter>();
+
+    /*
+     * True if ticketcreator is not valid
+     */
+    private bool _createTicketButtonDisable;
+    
+    /*
+     * Resources data table
+     */
+    readonly TableResources _dataResources = new TableResources();
+
+    /*
+     * Connection to Jira
+     */
+    TicketCreator _tc;
+    
+    private void HandleSubmit()
+    {
+        foreach (var filter in _filters.Where(filter => filter.CreateVideo))
+        {
+            RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
+        }
+
+        while (RecController.ThreadCounter != 0)
+        {
+            Thread.Sleep(500);
+        }
+        
+        foreach (var filter in _filters)
+        {
+            filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
+        }
+        
+        try
+        {
+            _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, _ticketModel.FileFormat, _ticketModel.Title, _ticketModel.Description);
+        }
+        catch (IssueTypeNotSupported)
+        {
+            ToastService.ShowError("Issue type not supported", "Error");
+            return;
+        }
+        
+        _filters.Clear();
+        LogBridge.Filters.Clear();
+        
+        _ticketModel.Description = string.Empty;
+        _ticketModel.Title = string.Empty;
+        
+    }
+
+    private double CalculateTimeSpan(double start, double stop)
+    {
+        return start + stop;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        try
+        {
+            _tc = new TicketCreator();
+        }
+        catch (IOException)
+        {
+            ToastService.ShowError("Ticket directory could not be created", "Error");
+            _createTicketButtonDisable = true;
+            _ticketModel = new TicketModel();
+            return;
+        }
+        catch (Exception)
+        {
+            ToastService.ShowError("No internet connection", "Error");
+            _createTicketButtonDisable = true;
+            _ticketModel = new TicketModel();
+            return;
+        }
+        _ticketModel = new TicketModel(_tc.IssueTypeList.First(), _tc.PriorityList.First(), _tc.KeyList.First());
+        _filters = LogBridge.Filters.ToList();
+    }
+
+    private void DeleteButton(Filter filter)
+    {
+        _filters.Remove(filter);
+        LogBridge.Filters.Remove(filter);
+    }
+
+    /*
+     * Model class
+     */
+    private class TicketModel
+
+    {
+        /*
+         * Description of the jira ticket
+         */
+        public string Title { get; set; }
+
+        /*
+         * Message of the jira ticket
+         */
+        public string Description { get; set; }
+
+        /*
+         * Priority of the jira ticket
+         */
+        public IssuePriority Priority { get; set; }
+
+        /*
+         * Type of the jira ticket
+         */
+        public IssueType Type { get; set; }
+        
+        /*
+         * Project key
+         */
+        public string ProjectKey { get; set; }
+        
+        /*
+         * File type
+         */
+        public TicketCreator.FileFormat FileFormat { get; set; } 
+
+        public TicketModel(IssueType type, IssuePriority prio, string key)
+        {
+            Type = type;
+            Priority = prio;
+            ProjectKey = key;
+            FileFormat = TicketCreator.FileFormat.TextFile;
+        }
+        
+        public TicketModel() {}
+    }
+
+}

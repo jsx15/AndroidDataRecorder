@@ -1,6 +1,8 @@
 ﻿@page "/marker"
 @using AndroidDataRecorder.Misc
 @using AndroidDataRecorder.Database
+@using AndroidDataRecorder.Services
+@inject MarkerBridge MarkerBridge
 
 <header>
     <h1 class="text-center" style="color: white">Marker</h1>
@@ -11,6 +13,17 @@
 <main class="justify-content-center">
     <section id="marker_list">
         <div class="card">
+            <div class="col m-2 w-25">
+                <EditForm Model="_filterModel">
+                    Device:
+                    <InputSelect class="form-control" ValueExpression="() => _filterModel.DeviceSerial" Value="@_filterModel.DeviceSerial" ValueChanged="((string value) => DeviceChanged(value))">
+                        @foreach (var dev in _dataDevice.DeviceList())
+                        {
+                            <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
+                        }
+                    </InputSelect>
+                </EditForm>
+            </div>
             <table class="table table-bordered table-striped">
                 <thead>
                 <tr>
@@ -20,14 +33,15 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
+
+                @foreach (var element in _markers)
                 {
-                    <tr>
-                        <td>@marker.markerId</td>
-                        <td>@marker.timeStamp</td>
-                        <td class="w-75">@marker.message</td>
+                    <tr style="background: @element.Color" @onclick="() => RowSelected(element)">
+                        <td>@element.Marker.MarkerId</td>
+                        <td>@element.Marker.timeStamp</td>
+                        <td class="w-75">@element.Marker.message</td>
                         <td class="text-center">
-                            <button @onclick="() => DeleteButton(marker.markerId)" class="btn btn-danger">
+                            <button @onclick="() => DeleteButton(element.Marker.MarkerId)" @onclick:stopPropagation="true" class="btn btn-danger">
                                 <span style="vertical-align: middle" class="oi oi-circle-x"></span>
                             </button>
                         </td>
@@ -35,30 +49,113 @@
                 }
                 </tbody>
             </table>
+            
+            <br>
 
+            <div class="card-footer text-center">
+                <a href="/logger" class="btn btn-success" style="width: 150px">Apply</a>
+            </div>
         </div>
     </section>
 </main>
 
 @code {
     /*
-     * Database
+     * Table marker instance
      */
-    Database _data = new Database();
+    readonly TableMarker _dataMarker = new TableMarker();
+    
+    /*
+     * Table marker instance
+     */
+    readonly TableDevices _dataDevice = new TableDevices();
 
     /*
-     * Markerlist
+     * Table class
      */
-    MarkerList _markerList = new MarkerList();
+    private class TableElement
+    {
+        public Marker Marker { get; }
+        public string Color => Selected ? "#CBFFF8" : "white";
+        public bool Selected;
+
+        public TableElement(Marker newMarker)
+        {
+            Marker = newMarker;
+            Selected = false;
+        }
+    }
+
+    /*
+     * List that is shown
+     */
+    private List<TableElement> _markers = new List<TableElement>();
+
+    /*
+     * Fill element list
+     */
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        
+        MarkerBridge.selectedMarkers.Clear();
+        
+        _filterModel.DeviceSerial = _dataDevice.DeviceList().First().serial;
+        foreach (var mar in _dataMarker.GetList(_filterModel.DeviceSerial))
+        {   
+            _markers.Add(new TableElement(mar));
+        }
+        
+    }
+
+    /*
+     * Row selected
+     */
+    private void RowSelected(TableElement element)
+    {
+        if (element.Selected)
+        {
+            MarkerBridge.selectedMarkers.Remove(element.Marker);
+        }
+        else
+        {
+            MarkerBridge.selectedMarkers.Add(element.Marker);
+        }
+        element.Selected = !element.Selected;
+    }
 
     /*
      * Delete button for marker
      */
-
-    private void DeleteButton(int markerid)
+    private void DeleteButton(int markerId)
     {
-        _data.DeleteMarker(markerid);
-        _markerList.Update();
+        _dataMarker.DeleteRow(markerId);
     }
+
+    /*
+     * Refresh list on device change
+     */
+    private void DeviceChanged(string e)
+    {
+        MarkerBridge.selectedMarkers.Clear();
+        _markers.Clear();
+        
+        _filterModel.DeviceSerial = e;
+        
+        foreach (var mar in _dataMarker.GetList(_filterModel.DeviceSerial))
+        {   
+            _markers.Add(new TableElement(mar));
+        }
+    }
+    
+    /*
+     * Class for Editcontext
+     */
+    private class FilterModel
+    {
+        public string DeviceSerial;
+    }
+    private readonly FilterModel _filterModel = new FilterModel();
+
 
 }

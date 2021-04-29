@@ -1,5 +1,11 @@
-@using Blazored.Toast.Configuration
+@using AndroidDataRecorder.Services
+@using System.Collections.Specialized
+@using System.Threading
+@using AndroidDataRecorder.Backend
 @inherits LayoutComponentBase
+
+@inject LogBridge LogBridge;
+@inject IToastService ToastService;
 
 <div class="page">
     <div class="@NavMenuCssClass">
@@ -16,19 +22,6 @@
                 <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
                     <span class="oi oi-home"></span>
                     <span class="item-text pl-2">Status</span>
-
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="/Logger" Match="NavLinkMatch.All">
-                    <span class="oi oi-book"></span>
-                    <span class="item-text pl-2">Logger</span>
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="/Screen" Match="NavLinkMatch.All">
-                    <span class="oi oi-monitor"></span>
-                    <span class="item-text pl-2">Screen</span>
                 </NavLink>
             </li>
             <li class="nav-item px-3">
@@ -38,11 +31,25 @@
                 </NavLink>
             </li>
             <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/Logger" Match="NavLinkMatch.All">
+                    <span class="oi oi-book"></span>
+                    <span class="item-text pl-2">Logger</span>
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="/ticket" Match="NavLinkMatch.All">
+                    <span class="oi oi-arrow-left"></span>
+                    <span class="item-text pl-2">Ticket</span>
+                    <span class="p-2 item-text">@LogBridge.Filters.Count</span>
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
                 <NavLink class="nav-link" href="/Config" Match="NavLinkMatch.All">
                     <span class="oi oi-cog"></span>
                     <span class="item-text pl-2">Config</span>
                 </NavLink>
             </li>
+            
         </ul>
     </div>
 
@@ -58,20 +65,52 @@
      * Bool for showing navigation menu
      */
     private bool _collapseNavMenu;
-
+    
     /*
      * Adjusting CSS
      */
     private string NavMenuCssClass => _collapseNavMenu ? "sidebar-min" : "sidebar";
     private string Content => _collapseNavMenu ? "content-max" : "content-min";
 
+    private bool _eventTimer = false;
+
     /*
      * Toggle navigation menu
      */
-
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        LogBridge.Filters.CollectionChanged += OnLogBridgeChanged;
+        AdbServer.Instance.MultipleSameDevices += OnSameDevice;
+    }
+
+    private void OnLogBridgeChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnSameDevice(object sender, EventArgs e)
+    {
+        if (!_eventTimer)
+        {
+            ToastService.ShowWarning("Device connected multiple times. Please restart ADB Server", "Warning");
+            new Thread(() =>
+            {
+                ToggleEventTimer();
+                Thread.Sleep(500);
+                ToggleEventTimer();
+            }).Start();
+        }
+    }
+
+    private void ToggleEventTimer()
+    {
+        _eventTimer = !_eventTimer;
     }
 
 }

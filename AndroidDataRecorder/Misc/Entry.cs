@@ -1,5 +1,5 @@
 using System;
-using AndroidDataRecorder.Screenrecord;
+using System.Data.SqlTypes;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -9,6 +9,11 @@ namespace AndroidDataRecorder.Misc
         /// Name of source
         /// </summary>
         public string devicename { get; set; }
+        
+        /// <summary>
+        /// Serialnumber of the device
+        /// </summary>
+        public string deviceSerial { get; set; }
 
         /// <summary>
         /// Message inside the entry

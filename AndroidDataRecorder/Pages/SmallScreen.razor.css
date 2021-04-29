@@ -1,13 +1,9 @@
 .top-row {
-    height: 150px;
-}
-
-.second-row {
-    height: 170px;
+    height: 50px;
 }
 
 .master {
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .btn-primary:active {

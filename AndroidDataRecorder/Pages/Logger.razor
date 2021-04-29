@@ -1,9 +1,13 @@
 @page "/logger"
 @using AndroidDataRecorder.Misc
-@using AndroidDataRecorder.Backend
 @using AndroidDataRecorder.Database
+@using AndroidDataRecorder.Services
+
+
 
 @inject IToastService ToastService;
+@inject MarkerBridge MarkerBridge;
+@inject LogBridge LogBridge;
 
 <header>
     <h1 class="text-center" style="color: white">Logger</h1>
@@ -12,55 +16,80 @@
 
 <section id="application">
     <div class="card filter-card">
-        <div class="card-header text-center" style="color: white; font-size: Large">
+        <div class="card-header text-center logger" style="color: white; font-size: Large">
             Filter
         </div>
         <div class="card-body">
-            <EditForm Model="@_filtering" OnSubmit="@Submit">
-                <div class="row">
-                    <div class="col">
-                        Marker:
-                        <InputSelect class="form-control" @bind-Value="@_filtering.TimeStamp">
-                            @foreach (var marker in Enumerable.Reverse(MarkerList.Markers))
-                            {
-                                <option>@marker.timeStamp</option>
-                            }
-                        </InputSelect>
+            @foreach(var filterModel in _filterList) {
+                
+                <EditForm Model="filterModel" OnSubmit="() => Submit(filterModel)">
+                    <div class="row">
+                        <div class="col">
+                            Marker:
+                            <MarkerInputSelect class="form-control" ValueExpression="() => filterModel.marker" Value="filterModel.marker" ValueChanged="(Marker value) => MarkerChanged(value, filterModel)">
+                                @if (filterModel.marker == null)
+                                {
+                                    <option value="0"></option>
+                                }
+                                @foreach (var mar in _dataMarker.GetList(filterModel.DeviceSerial).OrderBy(x => x.timeStamp))
+                                {
+                                    <option value="@mar.MarkerId">@mar.timeStamp | @mar.message</option>
+                                }
+                            </MarkerInputSelect>
+                        </div>
+                        <div class="col">
+                            Device:
+                            <InputSelect class="form-control" ValueExpression="() => filterModel.DeviceSerial" Value="@filterModel.DeviceSerial" ValueChanged="(string value) => DeviceChanged(value, filterModel)">
+                                <option value=@string.Empty>*</option>
+                                @foreach (var dev in _dataDevice.DeviceList())
+                                {
+                                    <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col w-auto">
+                            Timespan - (Minutes):
+                            <InputSelect class="form-control" @bind-Value="@filterModel.timeSpanMinus">
+                                @foreach (var minute in timeSpanMinutes)
+                                {
+                                    <option>@minute</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col w-auto">
+                            Timespan + (Minutes):
+                            <InputSelect class="form-control" @bind-Value="@filterModel.timeSpanPlus">
+                                @foreach (var minute in timeSpanMinutes)
+                                {
+                                    <option>@minute</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col w-auto">
+                            Loglevel:
+                            <InputSelect class="form-control" @bind-Value="@filterModel.Level">
+                                <option value="">Select...</option>
+                                @foreach (var level in loglevels)
+                                {
+                                    <option>@level</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col text-right d-flex">
+                            <button type="submit" class="mr-1 align-self-end btn btn-md btn-primary">Apply filter</button>
+                            <button class="mr-1 align-self-end btn btn-md btn-primary" @onclick="() => AddFilterToBridge(filterModel)">Add to Ticket</button>
+                        </div>
                     </div>
-                    <div class="col">
-                        Timespan - (Minutes):
-                        <InputSelect class="form-control" @bind-Value="@_filtering.timeSpanMinus">
-                            @foreach (var minute in timeSpanMinutes)
-                            {
-                                <option>@minute</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="col">
-                        Timespan + (Minutes):
-                        <InputSelect class="form-control" @bind-Value="@_filtering.timeSpanPlus">
-                            @foreach (var minute in timeSpanMinutes)
-                            {
-                                <option>@minute</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="col">
-                        Loglevel:
-                        <InputSelect class="form-control" @bind-Value="@_filtering.Level">
-                            <option value="">Select...</option>
-                            @foreach (var level in loglevels)
-                            {
-                                <option>@level</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="col text-right d-flex">
-                        <button type="submit" class="align-self-end btn btn-md btn-primary">Apply filter</button>
-                    </div>
-                </div>
-            </EditForm>
+                </EditForm>
 
+                <br>
+
+            }
+            <button class="btn btn-primary text-center" @onclick="AddFilter">Add Filter</button>
+            
+            <div class="card-footer text-right">
+                <a href="/ticket" class="btn btn-success">Go to ticket creation</a>
+            </div>
         </div>
     </div>
 </section>
@@ -68,53 +97,57 @@
 <br>
 
 <section id="Logger_table">
-          <div class="card text-center">
-              <div class="card-header" style="color: white">
-                  Log Table
-              </div>
-              
-              <div class="card-body">
-                  <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive-md ">
-                      <table class="table table-bordered table-striped mb-0">
-                      <thead>
+    @foreach (var filter in _filterList)
+    {
+        <div class="card text-center">
+            <div class="card-header logger-card-header" style="color: white">
+                Log Table of @TimeStampForLogTable(filter)
+            </div>
+
+            <div class="card-body">
+                <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive-md ">
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead>
                         <tr>
-                          <th scope="col">Device Name</th>
-                          <th scope="col">System Timestamp</th>
-                          <th scope="col">Device Timestamp</th>
-                          <th scope="col">PID</th>
-                          <th scope="col">TID</th>
-                          <th scope="col">Loglevel</th>
-                          <th scope="col">App</th>
-                          <th scope="col">Message</th>
+                            <th scope="col">Device Name</th>
+                            <th scope="col">System Timestamp</th>
+                            <th scope="col">Device Timestamp</th>
+                            <th scope="col">PID</th>
+                            <th scope="col">TID</th>
+                            <th scope="col">Loglevel</th>
+                            <th scope="col">App</th>
+                            <th scope="col">Message</th>
                         </tr>
-                      </thead>
-                      <tbody class="text-left logtable">
-                      @foreach (var log in Enumerable.Reverse(_logs))
-                      {
-                          <tr>
-                              <td>@log.devicename</td>
-                              <td>@log.timeStamp</td>
-                              <td>@log.DeviceTimestamp</td>
-                              <td>@log.Pid</td>
-                              <td>@log.Tid</td>
-                              <td>@log.LogLevel</td>
-                              <td>@log.App</td>
-                              <td class="text-left">@log.message</td>
-                          </tr>
-                      }
-                      </tbody>
+                        </thead>
+                        <tbody class="text-left logtable">
+                        @foreach (var log in Enumerable.Reverse(filter.Logs))
+                        {
+                            <tr>
+                                <td>@log.devicename</td>
+                                <td>@log.timeStamp</td>
+                                <td>@log.DeviceTimestamp</td>
+                                <td>@log.Pid</td>
+                                <td>@log.Tid</td>
+                                <td>@log.LogLevel</td>
+                                <td>@log.App</td>
+                                <td class="text-left">@log.message</td>
+                            </tr>
+                        }
+                        </tbody>
                     </table>
-                  </div>
-              </div>
-              <div class="card-footer text-muted">
-                  <p style="color: #1e7e34"></p>
-              </div>
-          </div>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <p style="color: #1e7e34"></p>
+            </div>
+        </div>
+        
+        <br>
+    }
 </section>
 
 
 @code {
-    
     /*
      * List with the Loglevels for the dropdown button
      */
@@ -123,71 +156,122 @@
     /*
      * List for the possible timespan minmutes
      */
-    List<double> timeSpanMinutes = new List<double>{0.5,1,2,3,4,5,6};
+    List<double> timeSpanMinutes = new List<double>{0,0.5,1,2,3,4,5,6};
 
     /*
-     * List for LogEntries
+     * Table Logs instance
      */
-    private static List<LogEntry> _logs = new List<LogEntry>();
+    private readonly TableLogs _dataLogs = new TableLogs();
     
     /*
-     * Database instance
+     * Table Logs instance
      */
-    private readonly Database data = new Database();
+    private readonly TableMarker _dataMarker = new TableMarker();
+    
+    /*
+     * Table Logs instance
+     */
+    private readonly TableDevices _dataDevice = new TableDevices();
 
     /*
      *instance of Filtering class 
      */
-    readonly Filtering _filtering = new Filtering();
-
+    readonly List<Filter> _filterList = new List<Filter>();
+    
     /*
-     * OnClick for the filter button
+     * Markers that were selected on the marker page
      */
-    public void Submit()
+    List<Marker> _localSelectedMarkers = new List<Marker>();
+    
+    /*
+     * OnClick for the apply filter button
+     */
+    private void Submit(Filter filtering)
     {
         try
         {    
             //Check if a value is null
-            if (_filtering.TimeStamp == null || _filtering.timeSpanMinus == null || _filtering.timeSpanPlus == null || _filtering.Level == null)
+            if (filtering.Level == null)
             {
-                ToastService.ShowError("Unable to search!", "Error");
+                ToastService.ShowError("Filter level not set", "Error");
             }
             else
             {
                 //fill the Logs list with filtered log data
-                _logs = data.LogListFilterByTimestampAndLogLevel(
-                    _filtering.TimeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(_filtering.timeSpanMinus * 60))),
-                    _filtering.TimeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(_filtering.timeSpanPlus * 60))), _filtering.Level);
+                filtering.Logs = _dataLogs.GetList( filtering.marker.deviceSerial,
+                    filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
+                    filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
+
+                // TODO Method returns all Resources instead of a timespan
+                // filtering.Resources = _data.ResourcesLists(filtering.DeviceSerial);
             }
             
         }
-        catch (Exception e)
+        catch (Exception)
         {
             ToastService.ShowError("Unable to search","Error");
         }
     }
     
     /*
-     * Model Class for the dropdowns in filtering
+     * Copy selected markers 
      */
-    private class Filtering
+    protected override void OnInitialized()
     {
-        /*
-         * TimeStamp in DateTime format
-         */
-        public DateTime TimeStamp { get; set; }
+        base.OnInitialized();
         
-        /*
-         * The Loglevel
-         */
-        public string Level { get; set; }
+        _localSelectedMarkers = MarkerBridge.selectedMarkers.ToList();
         
-        /*
-         * TimeSpan for the marker --> plus or minus minutes
-         */
-        public double timeSpanMinus;
-        public double timeSpanPlus;
-        
+        foreach (var mar in _localSelectedMarkers)
+        {
+            _filterList.Add(new Filter(mar, mar.deviceSerial));
+        }
     }
-    
+
+    /*
+     * Add filter
+     */
+    private void AddFilter()
+    {
+        _filterList.Add(new Filter());
+        StateHasChanged();
+    }
+
+    /*
+     * Add filter to bridge to ticket page
+     */
+    private void AddFilterToBridge(Filter filter)
+    {
+        LogBridge.Filters.Add(filter);
+        ToastService.ShowSuccess("Filter added to Ticket", "Success");
+    }
+
+    /*
+     * Convert timestamp
+     */
+    private string TimeStampForLogTable(Filter filter)
+    {
+        return filter.marker?.timeStamp.ToString();
+    }
+
+    /*
+     * Device in dropdown changed
+     */
+    private void DeviceChanged(string serial, Filter filterModel)
+    {
+        filterModel.DeviceSerial = serial;
+        filterModel.marker = !serial.Equals(string.Empty) ? _dataMarker.GetList(serial).First() : null;
+        filterModel.Logs.Clear();
+    }
+
+    /*
+     * Marker in dropdown changed
+     */
+    private void MarkerChanged(Marker marker, Filter filterModel)
+    {
+        filterModel.marker = marker;
+        filterModel.DeviceSerial = marker.deviceSerial;
+        filterModel.Logs.Clear();
+    }
+
 }
