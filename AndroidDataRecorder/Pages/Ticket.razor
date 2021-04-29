@@ -8,6 +8,7 @@
 @using System.Threading
 @using AndroidDataRecorder.Screenrecord
 @using System.Diagnostics
+@using System.ComponentModel.DataAnnotations
 
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
@@ -74,10 +75,12 @@
             <br>
 
 
-            <EditForm Model="@_ticketModel" OnSubmit="@HandleSubmit">
+            <EditForm Model="@_ticketModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="() =>OnInvalidSubmit() ">
+                <DataAnnotationsValidator />
                 <div class="row">
                     <div class="col-md-6 text-left">
                         <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
+                        <ValidationMessage For="@(() => _ticketModel.Title)" />
                     </div>
                     <div class="col-md-6 text-left">
                         <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
@@ -100,7 +103,8 @@
                     </div>
                     <div class="col-md-6">
                         <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
-                            @if (_tc is not null) {
+                            @if (_tc is not null)
+                            {
                                 @foreach (var priority in _tc.PriorityList)
                                 {
                                     <option value="@priority.Id">@priority</option>
@@ -117,7 +121,7 @@
                                 }
                             }
                         </InputSelect>
-                        
+
                     </div>
                 </div>
 
@@ -127,7 +131,7 @@
                     <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">
                         Create Ticket
                     </button>
-                    
+
                     <div style="visibility: @Spinner; margin: auto 0 auto auto;" class="spinner-border spinner-border-sm" role="status">
                         <span class="sr-only">Loading ...</span>
                     </div>
@@ -194,31 +198,27 @@
         {
             _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, TicketCreator.FileFormat.TextFile, _ticketModel.Title, _ticketModel.Description);
         }
-        catch (IssueTypeNotSupported)
-        {
-            ToastService.ShowError("Issue type not supported", "Error");
-            return;
-        }
-        catch (Exception)
+        catch (Exception ex)
         {
             ToastService.ShowError("Ticket not created", "Error");
+            Spinner = "hidden";
             return;
         }
-        finally
-        {
-            Spinner = "hidden";
-        }
-        
 
-
+        Spinner = "hidden";
         _filters.Clear();
         LogBridge.Filters.Clear();
-        
+
         _ticketModel.Description = string.Empty;
         _ticketModel.Title = string.Empty;
         ToastService.ShowSuccess("Ticket created", "Success");
-        
+
         StateHasChanged();
+    }
+    
+    private void OnInvalidSubmit()
+    {
+        ToastService.ShowError("Ticket not created", "Error");
     }
 
     private double CalculateTimeSpan(double start, double stop)
@@ -266,6 +266,7 @@
         /*
          * Description of the jira ticket
          */
+        [Required(ErrorMessage = "Title is missing")]
         public string Title { get; set; }
 
         /*
@@ -297,5 +298,7 @@
         
         public TicketModel() {}
     }
+
+    
 
 }
