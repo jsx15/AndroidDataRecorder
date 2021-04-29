@@ -14,18 +14,27 @@
 <table>
   <thead>
     <tr>
-      <th>Spalte 1</th>
-      <th>Spalte 2</th>
-      <th>Spalte 3</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Author</th>
+      <th>Published</th>
+      <th>Version</th>
+      <th>Link</th>
     </tr>
   </thead>
   <tbody>
     <tr>
+      <td>Atlassian.SDK</td>
+      <td>Blazored.Toast</td>
+      <td>Inhalt</td>
       <td>Inhalt</td>
       <td>Inhalt</td>
       <td>Inhalt</td>
     </tr>
     <tr>
+      <td>Inhalt</td>
+      <td>Inhalt</td>
+      <td>Inhalt</td>
       <td>Inhalt</td>
       <td>Inhalt</td>
       <td>Inhalt</td>
