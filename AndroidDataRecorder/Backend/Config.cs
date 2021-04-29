@@ -93,21 +93,6 @@ namespace AndroidDataRecorder.Backend
             } while (!ValidateAdbPath());
             
             Console.WriteLine("Success !!!");
-            
-            /*while (true)
-            {
-                try
-                {
-                    if (_source != null) AdbServer.InitializeAdbServer(_source.AdbPath);
-                    Console.WriteLine("Success !!!");
-                    return;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("No valid path to the adb.exe \nPlease define one:");
-                    if (_source != null) _source.AdbPath = Console.ReadLine();
-                }
-            }*/
         }
 
         /// <summary>
@@ -140,19 +125,6 @@ namespace AndroidDataRecorder.Backend
             } while (!File.Exists(_source.FfmpegPath));
                 
             Console.WriteLine("Success !!!");
-            /*while (true)
-            {
-                if (!File.Exists(_source.FfmpegPath))
-                {
-                    Console.WriteLine("No valid path to the ffmpeg.exe \nPlease define one:");
-                    _source.FfmpegPath = Console.ReadLine();
-                }
-                else
-                {
-                    Console.WriteLine("Success !!!");
-                    return;
-                }
-            }*/
         }
         
         /// <summary>
@@ -173,25 +145,6 @@ namespace AndroidDataRecorder.Backend
                 _source.VideoDirPath += System.IO.Path.DirectorySeparatorChar;
             }
             Console.WriteLine("Success !!!");
-
-            /*while (true)
-            {
-                if (!Directory.Exists(_source.VideoDirPath))
-                {
-                    Console.WriteLine("No valid path to the video directory \nPlease define one:");
-                    _source.VideoDirPath = Console.ReadLine();
-                }
-                else
-                {
-                    if (_source.VideoDirPath != null &&
-                        !_source.VideoDirPath.EndsWith(System.IO.Path.DirectorySeparatorChar))
-                    {
-                        _source.VideoDirPath += System.IO.Path.DirectorySeparatorChar;
-                    }
-                    Console.WriteLine("Success !!!");
-                    return;
-                }
-            }*/
         }
 
         /// <summary>
@@ -207,19 +160,6 @@ namespace AndroidDataRecorder.Backend
             } while (!ValidateJiraServerUrl());
             
             Console.WriteLine("Success !!!");
-            
-            /*while (true)
-            {
-                //Creating the HttpWebRequest and Setting the Request method HEAD
-                if (ValidateJiraServerUrl())
-                {
-                    Console.WriteLine("Success !!!");
-                    return;
-                }
-                
-                Console.WriteLine("No valid URL to the Jira server \nPlease define one:");
-                _source.JiraServerUrl = Console.ReadLine();
-            }*/
         }
 
         /// <summary>
@@ -259,18 +199,6 @@ namespace AndroidDataRecorder.Backend
             } while (!ValidateJiraUsername());
             
             Console.WriteLine("Success !!!");
-            
-            /*while (true)
-            {
-                if (ValidateJiraUsername())
-                {
-                    Console.WriteLine("Success !!!");
-                    return;
-                }
-                
-                Console.WriteLine("No valid Jira Username \nPlease define one:"); 
-                _source.JiraUsername = Console.ReadLine();
-            }*/
         }
 
         /// <summary>
@@ -304,18 +232,6 @@ namespace AndroidDataRecorder.Backend
             } while (!ValidateApiToken());
 
             Console.WriteLine("Success !!!");
-            
-            /*while (true)
-            {
-                if (ValidateApiToken())
-                {
-                    Console.WriteLine("Success !!!");
-                    return;
-                }
-
-                Console.WriteLine("No valid Api Token \nPlease define one:");
-                _source.ApiToken = Console.ReadLine();
-            }*/
         }
         
         /// <summary>
@@ -344,27 +260,7 @@ namespace AndroidDataRecorder.Backend
                 _source.AccessWorkloadInterval = Console.ReadLine();
             } while (!ValidateWorkloadInterval());
             
-            Console.WriteLine("Success !!!"); 
-            
-            /*while (true)
-            {
-                try
-                {
-                    var interval = Int32.Parse(_source.AccessWorkloadInterval!);
-                    if (interval > 0 && interval <= 60)
-                    {
-                        Console.WriteLine("Success !!!"); 
-                        return;
-                    }
-                    Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
-                    _source.AccessWorkloadInterval = Console.ReadLine();
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("The Access Workload Interval must be between 1 and 60 seconds \nPlease define a new one:");
-                    _source.AccessWorkloadInterval = Console.ReadLine();
-                }
-            }*/
+            Console.WriteLine("Success !!!");
         }
 
         /// <summary>
@@ -375,7 +271,7 @@ namespace AndroidDataRecorder.Backend
         {
             try
             {
-                var interval = Int32.Parse(_source.AccessWorkloadInterval!);
+                var interval = int.Parse(_source.AccessWorkloadInterval!);
                 return interval > 0 && interval <= 60;
             }
             catch (Exception)
@@ -423,22 +319,7 @@ namespace AndroidDataRecorder.Backend
         /// <summary>
         /// Gets the accessWorkloadInterval and convert it to int. Then returns it in milliseconds
         /// </summary>
-        /// <returns> Returns the value but if not possible returns a default interval of 5000 ms </returns>
-        public static int GetAccessWorkloadInterval()
-        {
-            try
-            {
-                var interval = Int32.Parse(_source.AccessWorkloadInterval);
-                //The interval should be between 1 and 60 seconds
-                if (interval > 0 && interval <= 60) return 1000 * interval;
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-
-            return 5000;
-        }
+        public static int GetAccessWorkloadInterval() => int.Parse(_source.AccessWorkloadInterval);
 
         /// <summary>
         /// Change the value in adbPath
