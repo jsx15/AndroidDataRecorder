@@ -4,29 +4,36 @@
 @using Plotly.Blazor
 @using Plotly.Blazor.LayoutLib
 @using Title = Plotly.Blazor.LayoutLib.YAxisLib.Title
+@using AndroidDataRecorder.Backend
+@using AndroidDataRecorder.Screenrecord
 
 @layout PiLayout
 
 <div class="master">
     <div class="row p-1">
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <div class="card">
                 <button class="btn @BtnColor text-center top-row" @onclick="ToggleBtn">@LoggingBtnText</button>
             </div>
         </div>
-        <div class="col-sm-6" style="height: 50px">
+        <div class="col-sm-4" style="height: 50px">
             <div class="card">
                 <button class="btn btn-primary text-center top-row" @onclick="CreateMarker">Set Marker</button>
             </div>
         </div>
+         <div class="col-sm-4">
+                    <div class="card">
+                        <button class="btn @RecordingBtnColor text-center top-row" @onclick="OnRecordingButtonClicked">@RecordingBtnText</button>
+                    </div>
+                </div>
     </div>
 
     <div class="row">
         <div class="col text-center">
             <button class="btn" style="height: 320px" @onclick="OnChartButtonClicked">
                 <div class="card">
-                    Click on the card to change the device. Current Device is 
-                    <PerformanceChart PlotlyLayout="layout" DeviceSerial="@_deviceserial"></PerformanceChart>
+                    Click on the card to change the device. Current Device is @_deviceSerial
+                    <PerformanceChart PlotlyLayout="_layout" DeviceSerial="@_deviceSerial"></PerformanceChart>
                 </div>
             </button>
         </div>
@@ -40,6 +47,11 @@
      * Bool for logging button
      */
     private bool _toggleLoggingBtn;
+    
+    /*
+     * Bool for recording button
+     */
+    private bool _toggleRecordingBtn;
 
     /*
      * Database
@@ -54,21 +66,30 @@
     /*
      * Current shown device
      */
-    string _deviceserial;
-
+    string _deviceSerial;
+    
+    /*
+     * Counter for device position in connected devices
+     */
+    int _deviceCount;
+    
     /*
      * Adjusting CSS
      */
-    private string BtnColor => _toggleLoggingBtn ? "btn-danger" : "btn-success";
+    private string BtnColor => _toggleLoggingBtn ? "btn-success" : "btn-danger";
 
-    private string LoggingBtnText => _toggleLoggingBtn ? "Stop Logging" : "Start Logging";
+    private string LoggingBtnText => _toggleLoggingBtn ? "Start Logging" : "Stop Logging";
+    
+    private string RecordingBtnColor => _toggleRecordingBtn ? "btn-danger" : "btn-success";
+    
+    private string RecordingBtnText => _toggleRecordingBtn ? "Stop Recording" : "Start Recording";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         if (MarkerList.ActiveDeviceData is not null)
         {
-            _deviceserial = MarkerList.ActiveDeviceData.Serial;
+            _deviceSerial = MarkerList.ActiveDeviceData.Serial;
         }
     }
     /*
@@ -77,22 +98,73 @@
     private void ToggleBtn()
     {
         _toggleLoggingBtn = !_toggleLoggingBtn;
+        if (_toggleLoggingBtn)
+        {
+            foreach (var dev in AdbServer.GetConnectedDevices())
+            {
+                AdbServer.StopLogging(dev);
+            }
+        }
+        else
+        {
+            foreach (var dev in AdbServer.GetConnectedDevices())
+            {
+                AdbServer.InitializeLogging(dev);
+            }
+        }
+
+
     }
 
+    /*
+     * Set marker for all devices
+     * Message: Marker from pi
+     */
     private void CreateMarker()
     {
-    // New Databasemethod
         _dataMarker.InsertValues(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
 
         _markerList.Update();
     }
 
+    /*
+     * Stop/Start recording for all connected device
+     */
+    private void OnRecordingButtonClicked()
+    {
+        _toggleRecordingBtn = !_toggleRecordingBtn;
+        if (_toggleRecordingBtn)
+        {
+            Console.WriteLine("Recording started for all devices");
+            foreach (var dev in AdbServer.GetConnectedDevices())
+            {
+                RecController.StartScrRec(dev, 30000);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Recording stopped for all devices");
+            foreach (var dev in AdbServer.GetConnectedDevices())
+            {
+                RecController.StopScrRec(dev);
+            }
+        }
+        
+        
+    }
+
+    /*
+     * Switch shown device
+     */
     private void OnChartButtonClicked()
     {
-        Console.WriteLine("clicked");
+        _deviceCount %= AdbServer.GetConnectedDevices().Count;
+        _deviceSerial = AdbServer.GetConnectedDevices()[_deviceCount].Serial;
+        _deviceCount++;
+        
     }
-    
-    Layout layout = new Layout()
+
+    readonly Layout _layout = new Layout()
     {
         AutoSize = true,
         Width = 700,

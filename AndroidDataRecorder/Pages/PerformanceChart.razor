@@ -32,42 +32,7 @@
      */
     [Parameter]
     public Layout PlotlyLayout { get; set; }
-    /*{
-        AutoSize = true,
-        Width = 700,
-        Height = 250,
-       
-        Title = new Plotly.Blazor.LayoutLib.Title()
-        {
-            Text = "CPU/Memory usage"
-        },
-        
-        YAxis = new List<YAxis>()
-        {
-            new YAxis()
-            {
-                Title = new Title()
-                {
-                    Text = "Usage in %"
-                },
-                
-                Range = new List<object> {0, 100},
-            }
-        },
-        
-        XAxis = new List<XAxis>()
-        {
-            new XAxis()
-            {
-                Title = new Plotly.Blazor.LayoutLib.XAxisLib.Title()
-                {
-                    Text = "Timestamp",
-                },
-                
-            }
-        }
-    };
-    */
+    
     /*
      * IList for the chart data
      */
@@ -97,7 +62,7 @@
     /*
      * Database 
      */
-    readonly AndroidDataRecorder.Database.TableResources _data = new AndroidDataRecorder.Database.TableResources();
+    readonly Database.TableResources _data = new Database.TableResources();
 
     protected override void OnInitialized()
     {
@@ -113,12 +78,12 @@
     private void FillChartWithCpuData(object sender, DeviceDataEventArgs e)
     {
         if (!(_chart.Data.FirstOrDefault() is Scatter scatter)) return;
-        scatter.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
-        scatter.Y = _data.GetList(DeviceSerial).Select(x => (object) x.cpu).TakeLast(15).ToList();
+        scatter.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).ToList();
+        scatter.Y = _data.GetList(DeviceSerial).Select(x => (object) x.cpu).ToList();
         
         if (!(_chart.Data[1] is Scatter scatterMemory)) return;
-        scatterMemory.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).TakeLast(15).ToList();
-        scatterMemory.Y = _data.GetList(DeviceSerial).Select(x => (object) x.memory).TakeLast(15).ToList();
+        scatterMemory.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).ToList();
+        scatterMemory.Y = _data.GetList(DeviceSerial).Select(x => (object) x.memory).ToList();
         
         _chart.React();
     }

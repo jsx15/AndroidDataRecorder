@@ -214,10 +214,11 @@
         {
             _tc.CreateTicket(_filters, _ticketModel.ProjectKey, _ticketModel.Type, _ticketModel.Priority, _ticketModel.FileFormat, _ticketModel.Title, _ticketModel.Description);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             ToastService.ShowError("Ticket not created", "Error");
             Spinner = "hidden";
+            StateHasChanged();
             return;
         }
 
