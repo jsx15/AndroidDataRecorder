@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using AndroidDataRecorder.Backend;
 using SharpAdbClient;
 using AdbServer = AndroidDataRecorder.Backend.AdbServer;
 
