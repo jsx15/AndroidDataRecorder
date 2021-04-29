@@ -1,0 +1,1 @@
+## AndroidDataRecorder TERMS OF SERVICE
