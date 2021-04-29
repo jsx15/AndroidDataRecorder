@@ -180,12 +180,12 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private void AccessWorkload()
         {
-            try
+            while(!_token.IsCancellationRequested && AdbServer.GetConnectedDevices().Exists(x => x.Serial.Equals(_device.Serial)))
             {
-                while(!_token.IsCancellationRequested && AdbServer.GetConnectedDevices().Exists(x => x.Serial.Equals(_device.Serial)))
+                var receiver = new ConsoleOutputReceiver();
+
+                try
                 {
-                    var receiver = new ConsoleOutputReceiver();
-                    
                     //Get the cpu usage and the five most expensive processes
                     AdbServer.GetClient().ExecuteRemoteCommand(_cpuUsageCommand, _device, receiver);
                     var cpu = GetCpuUsage(receiver.ToString());
@@ -217,12 +217,13 @@ namespace AndroidDataRecorder.Backend
 
                     //Invoke the DeviceWorkloadChanged event and wait 30 seconds
                     AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(_device));
-                    Thread.Sleep(Config.GetAccessWorkloadInterval());
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                
+                Thread.Sleep(Config.GetAccessWorkloadInterval());
             }
         }
 
