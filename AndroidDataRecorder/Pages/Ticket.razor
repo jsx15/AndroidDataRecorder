@@ -23,7 +23,7 @@
 <section id="ticket_card">
     <div class="card text-center">
         <div class="card-header" style="color: white">
-            JIRA Issue
+            JIRA Backlog Entry
         </div>
 
         <div class="card-body">
@@ -78,11 +78,13 @@
             <EditForm Model="@_ticketModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="() =>OnInvalidSubmit() ">
                 <DataAnnotationsValidator />
                 <div class="row">
-                    <div class="col-md-6 text-left">
+                    <div class="col-md-4 text-left">
+                        <h3>Entry Title:</h3>
                         <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
                         <ValidationMessage For="@(() => _ticketModel.Title)" />
                     </div>
-                    <div class="col-md-6 text-left">
+                    <div class="col-md-2 text-left">
+                        <h3>Issue Type:</h3>
                         <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
                             @if (_tc is not null)
                             {
@@ -93,15 +95,8 @@
                             }
                         </IssueTypeInputSelect>
                     </div>
-                </div>
-
-                <br>
-
-                <div class="row text-left">
-                    <div class="col-md-6">
-                        <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-2 text-left">
+                        <h3>Priority:</h3>
                         <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
                             @if (_tc is not null)
                             {
@@ -111,7 +106,18 @@
                                 }
                             }
                         </IssuePriorityInputSelect>
-                        <br>
+                    </div>
+                </div>
+                
+                <br>
+
+                <div class="row text-left">
+                    <div class="col-md-4">
+                        <h3>Entry Description:</h3>
+                        <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
+                    </div>
+                    <div class="col-md-2">
+                        <h3>Project Key:</h3>
                         <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.ProjectKey">
                             @if (_tc is not null)
                             {
@@ -121,26 +127,31 @@
                                 }
                             }
                         </InputSelect>
-                        <br>
+                    </div>
+
+                    <div class="col-md-2 text-left">
+                        <h3>File Format:</h3>
                         <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.FileFormat">
                             <option>@TicketCreator.FileFormat.TextFile</option>
                             <option>@TicketCreator.FileFormat.JsonFile</option>
                         </InputSelect>
-                        
                     </div>
                 </div>
 
                 <br>
-
-                <div class="d-flex flex-row-reverse">
-                    <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">
-                        Create Ticket
-                    </button>
-
-                    <div style="visibility: @Spinner; margin: auto 0 auto auto;" class="spinner-border spinner-border-sm" role="status">
-                        <span class="sr-only">Loading ...</span>
+                
+                <div class="row">
+                    <div class="col text-center">
+                        <button disabled="@_createTicketButtonDisable" class="btn btn-primary m-3" type="submit">
+                                Create Ticket
+                            </button>
+                        
+                            <div style="visibility: @Spinner; margin: auto 0 auto auto;" class="spinner-border spinner-border-sm" role="status">
+                                <span class="sr-only">Loading ...</span>
+                            </div>
                     </div>
                 </div>
+                
             </EditForm>
             
         </div>
