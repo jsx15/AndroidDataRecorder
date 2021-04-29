@@ -19,8 +19,8 @@ namespace AndroidDataRecorder.Screenrecord
         /// <returns>Returns whether the video was started or whether data is missing </returns>
         public static bool StartScrRec(DeviceData device, int videoLength)
         {
-            //check if all important data available
-            if (device == null || device.Name.Equals("")) return false;
+            //check if screenrecord is available for this device
+            if (!Function.ScrRecAvailable(device)) return false;
             
             //check if screen recording for this device is already running
             if (IsRecording(device))
