@@ -105,7 +105,21 @@
         
         MarkerBridge.selectedMarkers.Clear();
 
-        _filterModel.DeviceSerial = MarkerList.ActiveDeviceData is not null ? MarkerList.ActiveDeviceData.Serial : _dataDevice.DeviceList().First().serial;
+        if (MarkerList.ActiveDeviceData is not null)
+        {
+            _filterModel.DeviceSerial = MarkerList.ActiveDeviceData.Serial;
+        }
+        else
+        {
+            try
+            {
+                _filterModel.DeviceSerial = _dataDevice.DeviceList().First().serial;
+            }
+            catch
+            {
+                _filterModel.DeviceSerial = "";
+            }
+        }
         foreach (var mar in _dataMarker.GetList(_filterModel.DeviceSerial))
         {   
             _markers.Add(new TableElement(mar));

@@ -75,7 +75,7 @@
                         </div>
                         <div class="col text-right d-flex">
                             <button type="submit" class="mr-1 align-self-end btn btn-md btn-primary">Apply filter</button>
-                            <button class="mr-1 align-self-end btn btn-md btn-primary" @onclick="() => AddFilterToBridge(filterModel)">Add to Ticket</button>
+                            <button type="button" class="mr-1 align-self-end btn btn-md btn-primary" @onclick="() => AddFilterToBridge(filterModel)">Add to Ticket</button>
                         </div>
                     </div>
                 </EditForm>
@@ -184,7 +184,7 @@
     /*
      * OnClick for the apply filter button
      */
-    private void Submit(Filter filtering)
+    private bool Submit(Filter filtering)
     {
         try
         {    
@@ -199,16 +199,15 @@
                 filtering.Logs = _dataLogs.GetList( filtering.marker.deviceSerial,
                     filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
                     filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
-
-                // TODO Method returns all Resources instead of a timespan
-                // filtering.Resources = _data.ResourcesLists(filtering.DeviceSerial);
             }
             
         }
         catch (Exception)
         {
             ToastService.ShowError("Unable to search","Error");
+            return false;
         }
+        return true;
     }
     
     /*
@@ -240,8 +239,11 @@
      */
     private void AddFilterToBridge(Filter filter)
     {
-        LogBridge.Filters.Add(filter);
-        ToastService.ShowSuccess("Filter added to Ticket", "Success");
+        if (Submit(filter))
+        {
+            LogBridge.Filters.Add(filter);
+            ToastService.ShowSuccess("Filter added to Ticket", "Success");
+        }
     }
 
     /*
