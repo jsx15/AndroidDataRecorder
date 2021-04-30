@@ -302,7 +302,10 @@
         }
         else
         {
-            RecController.StartScrRec(device, 30000);
+            if (!RecController.StartScrRec(device, 30000))
+            {
+                ToastService.ShowError("Recording not supported on device", "Error");
+            }
         }
     }
 
