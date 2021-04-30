@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
+using AndroidDataRecorder.Screenrecord;
 using SharpAdbClient;
 
 namespace AndroidDataRecorder.Backend
@@ -249,6 +250,7 @@ namespace AndroidDataRecorder.Backend
             ThreadPool.SetMaxThreads(GetConnectedDevices().Count, GetConnectedDevices().Count);
             LoggingManager.DeleteEntry(e.Device.Serial);
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
+            RecController.StopScrRec(e.Device);
         }
 
         /// <summary>
