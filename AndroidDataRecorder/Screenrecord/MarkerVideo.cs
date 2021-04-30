@@ -78,7 +78,10 @@ namespace AndroidDataRecorder.Screenrecord
             //check if there is a file in this range
             if (fileList.Count == 0)
             {
+                //No files to concat -> Thread done
                 RecController.ThreadCounter--;
+                
+                //go back
                 return;
             }
 
