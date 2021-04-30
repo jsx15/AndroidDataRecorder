@@ -1,6 +1,7 @@
 ﻿@page "/Config"
 @using System.Net
 @using AndroidDataRecorder.Backend
+@using AndroidDataRecorder.Database
 @using AdbServer = AndroidDataRecorder.Backend.AdbServer
 
 @inject IToastService ToastService;
@@ -77,6 +78,7 @@
             <div class="card-body">
                 <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="RestartAdb">Restart ADB server</button>
                 <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="KillAdb">Kill ADB server</button>
+                <button type="submit" class="btn btn-danger btn-block danger-buttons" @onclick="ClearDatabase">Clear database</button>
             </div>
         </div>
     </div>
@@ -158,6 +160,12 @@
     private void AttachDevice(string address)
     {
         AdbServer.ConnectWirelessClient(address);
+    }
+
+    private void ClearDatabase()
+    {
+        new DeleteAll().Table();
+        ToastService.ShowInfo("Database cleared", "Info");
     }
 
     /*
