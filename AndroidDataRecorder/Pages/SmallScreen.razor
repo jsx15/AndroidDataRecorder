@@ -158,10 +158,13 @@
      */
     private void OnChartButtonClicked()
     {
-        _deviceCount %= AdbServer.GetConnectedDevices().Count;
-        _deviceSerial = AdbServer.GetConnectedDevices()[_deviceCount].Serial;
-        _deviceCount++;
-        
+        if (AdbServer.GetConnectedDevices().Count > 0)
+        {
+            _deviceCount %= AdbServer.GetConnectedDevices().Count;
+            _deviceSerial = AdbServer.GetConnectedDevices()[_deviceCount].Serial;
+            _deviceCount++;
+        }
+
     }
 
     readonly Layout _layout = new Layout()
