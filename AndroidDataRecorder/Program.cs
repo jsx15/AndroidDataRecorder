@@ -1,6 +1,7 @@
 using AndroidDataRecorder.Backend;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using AndroidDataRecorder.Database;
 using RestSharp;
 
 namespace AndroidDataRecorder
@@ -14,6 +15,7 @@ namespace AndroidDataRecorder
             
             //Create the razor pages
             CreateHostBuilder(args).Build().Run();
+            
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
