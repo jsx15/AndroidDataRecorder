@@ -6,32 +6,30 @@
 @inject IToastService ToastService;
 
 <header>
-    <h1 class="text-center" style="color: white">Configuration</h1>
+    <h1 class="text-center">Configuration</h1>
 </header>
 
 <br>
-
 <div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-8">
-        <div class="card text-center card-text h-100 " style="height: auto">
-            <div class="card-header" style="color: white">
+    <div class="col">
+        <div class="card text-center card-text" style="height: auto">
+            <div class="card-header">
                 Add Device
             </div>
-            <div class="card-body text-left ">
+            <div class="card-body">
                 <div class="row">
                     <div class="col">
                         <EditForm Model="_device" OnSubmit="AddButtonPressed">
                             <div class="row">
-                                <div class="col-sm-2">
+                                <div class="col-4">
                                     <label style="font-size: x-large; vertical-align: middle">IP-address:</label>
                                 </div>
                                 <div class="col">
                                     <InputText type="text" class="form-control" placeholder="192.168.100.5" @bind-Value="_device.IpAddress"/>
                                 </div>
-                                
+
                             </div>
-                                    
+
                             <br>
                             <div class="row justify-content-center">
                                 <button type="submit" class="btn btn-success">Add Device</button>
@@ -39,7 +37,8 @@
                         </EditForm>
                     </div>
                 </div>
-                <br>
+            </div>
+            <div class="col">
                 <div class="row">
                     <div class="col">
                         <h3>Known Devices</h3>
@@ -69,14 +68,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-2"></div>
-</div>
 
-<br>
-
-<div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-8">
+    <div class="col">
         <div class="card justify-content-center">
             <div class="card-header text-center" style="background: darkred; color: white">
                 DANGER ZONE
@@ -87,7 +80,6 @@
             </div>
         </div>
     </div>
-    <div class="col-md-2"></div>
 </div>
 
 

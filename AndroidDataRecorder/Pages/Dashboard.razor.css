@@ -2,11 +2,6 @@
     size: auto;
 }
 
-.card-header{
-    font-size: 2vw;
-    background-color: #295C07;
-}
-
 .side-cards {
     height: 20rem;
 }
@@ -36,12 +31,6 @@
 }
 .table-wrapper-scroll-y {
     display: block;
-}
-
-.table-custom-head {
-    background-color: #295C07;
-    font-size: 2vw;
-    color: white;
 }
 
 .my-custom-scrollbar {

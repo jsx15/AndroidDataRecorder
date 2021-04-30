@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #2F4858;
+    background-color: #e5e8eb;
     height: 100vh;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .sidebar {
-    background-color: darkred;
+    background: linear-gradient(to bottom, #2f4858, #375668, #2f4858);
     height: 100%; /* Full-height: remove this if you want "auto" height */
     width: 11em; /* Set the width of the sidebar */
     position: fixed; /* Fixed Sidebar (stay in place on scroll) */
@@ -30,7 +30,7 @@
     position: absolute;
     width: auto;
     right: 0;
-    background-color: #2F4858;
+    background-color: #e5e8eb
 }
 
 .content-max {

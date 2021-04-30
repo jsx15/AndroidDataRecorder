@@ -30,6 +30,17 @@ a, .btn-link {
     color: red;
 }
 
+h1 {
+    color: #2f4858;
+}
+
+.card-header{
+    font-size: 2vw;
+    /*background-color: #2f4858;*/
+    background: linear-gradient(to bottom, #2f4858, #375668, #2f4858);
+    color: white;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

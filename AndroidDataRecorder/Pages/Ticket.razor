@@ -16,13 +16,13 @@
 
 
 <header>
-    <h1 class="text-center" style="color: white">Ticket</h1>
+    <h1 class="text-center">Ticket</h1>
     <br>
 </header>
 
 <section id="ticket_card">
     <div class="card text-center">
-        <div class="card-header" style="color: white">
+        <div class="card-header">
             JIRA Backlog Entry
         </div>
 
@@ -75,17 +75,17 @@
             <br>
 
 
-            <EditForm Model="@_ticketModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="() =>OnInvalidSubmit() ">
+            <EditForm Model="@_ticketModel" OnValidSubmit="@HandleSubmit" OnInvalidSubmit="@OnInvalidSubmit">
                 <DataAnnotationsValidator />
                 <div class="row">
-                    <div class="col-md-4 text-left">
+                    <div class="col-6 text-left">
                         <h3>Entry Title:</h3>
-                        <InputText class="form-text" style="width: 500px" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
+                        <InputText class="form-text w-75" id="description" @bind-Value="_ticketModel.Title" placeholder="Enter title..."></InputText>
                         <ValidationMessage For="@(() => _ticketModel.Title)" />
                     </div>
-                    <div class="col-md-2 text-left">
+                    <div class="col-2 text-left">
                         <h3>Issue Type:</h3>
-                        <IssueTypeInputSelect class="form-control" style="width: 250px" id="priority" @bind-Value="_ticketModel.Type">
+                        <IssueTypeInputSelect class="form-control" id="priority" @bind-Value="_ticketModel.Type">
                             @if (_tc is not null)
                             {
                                 @foreach (var type in _tc.IssueTypeList)
@@ -95,9 +95,9 @@
                             }
                         </IssueTypeInputSelect>
                     </div>
-                    <div class="col-md-2 text-left">
+                    <div class="col-2 text-left">
                         <h3>Priority:</h3>
-                        <IssuePriorityInputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.Priority">
+                        <IssuePriorityInputSelect class="form-control" @bind-Value="_ticketModel.Priority">
                             @if (_tc is not null)
                             {
                                 @foreach (var priority in _tc.PriorityList)
@@ -112,13 +112,13 @@
                 <br>
 
                 <div class="row text-left">
-                    <div class="col-md-4">
+                    <div class="col-6">
                         <h3>Entry Description:</h3>
-                        <InputTextArea class="form-text" style="width: 500px" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
+                        <InputTextArea class="form-text w-75" @bind-Value="_ticketModel.Description" placeholder="Enter description..."></InputTextArea>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-2">
                         <h3>Project Key:</h3>
-                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.ProjectKey">
+                        <InputSelect class="form-control"@bind-Value="_ticketModel.ProjectKey">
                             @if (_tc is not null)
                             {
                                 @foreach (var projectKey in _tc.KeyList)
@@ -129,9 +129,9 @@
                         </InputSelect>
                     </div>
 
-                    <div class="col-md-2 text-left">
+                    <div class="col-2 text-left">
                         <h3>File Format:</h3>
-                        <InputSelect class="form-control" style="width: 250px" @bind-Value="_ticketModel.FileFormat">
+                        <InputSelect class="form-control" @bind-Value="_ticketModel.FileFormat">
                             <option>@TicketCreator.FileFormat.TextFile</option>
                             <option>@TicketCreator.FileFormat.JsonFile</option>
                         </InputSelect>

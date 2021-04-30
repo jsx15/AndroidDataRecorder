@@ -5,7 +5,7 @@
 @inject MarkerBridge MarkerBridge
 
 <header>
-    <h1 class="text-center" style="color: white">Marker</h1>
+    <h1 class="text-center">Marker</h1>
 </header>
 
 <br>
@@ -13,7 +13,11 @@
 <main class="justify-content-center">
     <section id="marker_list">
         <div class="card">
-            <div class="col m-2 w-25">
+            <div class="card-header text-center logger">
+                List
+            </div>
+            <div class="card-body">
+            <div class="col-4 m-2 w-100">
                 <EditForm Model="_filterModel">
                     Device:
                     <InputSelect class="form-control" ValueExpression="() => _filterModel.DeviceSerial" Value="@_filterModel.DeviceSerial" ValueChanged="((string value) => DeviceChanged(value))">
@@ -24,32 +28,33 @@
                     </InputSelect>
                 </EditForm>
             </div>
-            <table class="table table-bordered table-striped">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Time</th>
-                    <th>Message</th>
-                </tr>
-                </thead>
-                <tbody>
-
-                @foreach (var element in _markers)
-                {
-                    <tr style="background: @element.Color" @onclick="() => RowSelected(element)">
-                        <td>@element.Marker.MarkerId</td>
-                        <td>@element.Marker.timeStamp</td>
-                        <td class="w-75">@element.Marker.message</td>
-                        <td class="text-center">
-                            <button @onclick="() => DeleteButton(element.Marker.MarkerId)" @onclick:stopPropagation="true" class="btn btn-danger">
-                                <span style="vertical-align: middle" class="oi oi-circle-x"></span>
-                            </button>
-                        </td>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Time</th>
+                        <th>Message</th>
                     </tr>
-                }
-                </tbody>
-            </table>
-            
+                    </thead>
+                    <tbody>
+
+                    @foreach (var element in _markers)
+                    {
+                        <tr style="background: @element.Color" @onclick="() => RowSelected(element)">
+                            <td>@element.Marker.MarkerId</td>
+                            <td>@element.Marker.timeStamp</td>
+                            <td class="w-75">@element.Marker.message</td>
+                            <td class="text-center">
+                                <button @onclick="() => DeleteButton(element.Marker.MarkerId)" @onclick:stopPropagation="true" class="btn btn-danger">
+                                    <span style="vertical-align: middle" class="oi oi-circle-x"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+
             <br>
 
             <div class="card-footer text-center">

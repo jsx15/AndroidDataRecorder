@@ -3,20 +3,18 @@
 @using AndroidDataRecorder.Database
 @using AndroidDataRecorder.Services
 
-
-
 @inject IToastService ToastService;
 @inject MarkerBridge MarkerBridge;
 @inject LogBridge LogBridge;
 
 <header>
-    <h1 class="text-center" style="color: white">Logger</h1>
+    <h1 class="text-center">Logger</h1>
     <br>
 </header>
 
 <section id="application">
     <div class="card filter-card">
-        <div class="card-header text-center logger" style="color: white; font-size: Large">
+        <div class="card-header text-center logger">
             Filter
         </div>
         <div class="card-body">
@@ -87,7 +85,7 @@
             }
             <button class="btn btn-primary text-center" @onclick="AddFilter">Add Filter</button>
             
-            <div class="card-footer text-right">
+            <div class="card-footer text-right mt-1">
                 <a href="/ticket" class="btn btn-success">Go to ticket creation</a>
             </div>
         </div>

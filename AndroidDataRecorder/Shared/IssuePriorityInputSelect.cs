@@ -14,7 +14,7 @@ namespace AndroidDataRecorder.Shared
         /// </summary>
         /// <param name="value"></param>
         /// <returns>MarkerID</returns>
-        protected override string? FormatValueAsString(TValue value)
+        protected override string? FormatValueAsString(TValue? value)
         {
             if (typeof(TValue) == typeof(IssuePriority))
             {
@@ -31,16 +31,15 @@ namespace AndroidDataRecorder.Shared
         /// <param name="result"></param>
         /// <param name="validationErrorMessage"></param>
         /// <returns>Marker</returns>
+#pragma warning disable 8765
         protected override bool TryParseValueFromString(string? value, out TValue result, out string? validationErrorMessage)
+#pragma warning restore 8765
         {
             try
             {
                 if (typeof(TValue) == typeof(IssuePriority))
                 {
                     validationErrorMessage = null;
-                    //Database.TableMarker data = new Database.TableMarker();
-                    //result = (TValue) (object)data.GetList().Find(x => x.MarkerId.Equals(Convert.ToInt32(value)))!;
-
                     result = (TValue) (object) new IssuePriority(value);
 
                     return true;

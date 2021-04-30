@@ -14,7 +14,7 @@ namespace AndroidDataRecorder.Shared
         /// </summary>
         /// <param name="value"></param>
         /// <returns>MarkerID</returns>
-        protected override string? FormatValueAsString(TValue value)
+        protected override string? FormatValueAsString(TValue? value)
         {
             if (typeof(TValue) == typeof(IssueType))
             {
@@ -31,7 +31,9 @@ namespace AndroidDataRecorder.Shared
         /// <param name="result"></param>
         /// <param name="validationErrorMessage"></param>
         /// <returns>Marker</returns>
+#pragma warning disable 8765
         protected override bool TryParseValueFromString(string? value, out TValue result, out string? validationErrorMessage)
+#pragma warning restore 8765
         {
             try
             {
