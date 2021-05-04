@@ -36,11 +36,6 @@ The config.json file has the following parameters:
       <td>the path where the video files are stored (directory seperator appended)</td>
       <td>C:\\User\\Documents\</td>
     </tr>
-    <tr>
-      <td>TicketDirPath</td>
-      <td>the path where the ticket files are stored</td>
-      <td>C:\\User\\Documents\</td>
-    </tr>
   </tbody>
 </table>
 
@@ -166,7 +161,9 @@ All filtered markers with their log data previously added to a ticket appear in 
 The name as well as the description of the entry can be entered in the input field provided for this purpose below the list. The priority of the entry can be selected from a dropdown as well as the type of the task. The project key, means the project for which the ticket is intended, can also be selected from a drop-down list (**Note:** The project keys, the task type and the priority levels are retrieved from JIRA and displayed there).
 
 #### What happens when a ticket is created?
-All log data and resource usage data associated with the markers are attached to the JIRA Backlog entry as a .txt or .json file. One log file is created and attached per marker. This means that if 3 markers are attached, the backlog entry will contain 3 log files. If **Include Video** is selected, a .mp4 file will also be attached. The text file is named after the device and the unique marker ID. The video file is named after the marker id and the device name.
+All log data and resource usage data associated with the markers are attached to the JIRA Backlog entry as a .txt or .json file. One log file is created and attached per marker. This means that if 3 markers are attached, the backlog entry will contain 3 log files. If **Include Video** is selected, a .mp4 file will also be attached. The text file is named after the device and the unique marker ID. The video file is named after the marker id and the device name. 
+
+The ticket .txt or .json file can be found in the Documents directory. The video is saved in your configured video directory.
 
 ![backlogentry](https://github.com/jsx15/AndroidDataRecorder/blob/main/screenshots/ticketpage.PNG)
 
