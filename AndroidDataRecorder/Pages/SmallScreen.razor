@@ -122,9 +122,10 @@
      */
     private void CreateMarker()
     {
-        _dataMarker.InsertValues(MarkerList.GetDeviceSerial(), MarkerList.GetDeviceName(), DateTime.Now, "Marker from pi");
-
-        _markerList.Update();
+        foreach (var dev in AdbServer.GetConnectedDevices())
+        {
+            _dataMarker.InsertValues(dev.Serial, dev.Name, DateTime.Now, "Marker from pi");
+        }
     }
 
     /*
