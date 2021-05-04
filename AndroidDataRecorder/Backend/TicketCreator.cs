@@ -68,9 +68,9 @@ namespace AndroidDataRecorder.Backend
             KeyList = GetProjectKeys();
 
 
-            if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, @"Tickets")))
+            if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"Tickets")))
             {
-                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, @"Tickets"));
+                Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"Tickets"));
             }
         }
         
@@ -130,7 +130,7 @@ namespace AndroidDataRecorder.Backend
             issue.Description = description;
             issue.SaveChanges();
 
-            String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory,
+            String ticketDirPath = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 @"Tickets" + Path.DirectorySeparatorChar + GetDate()));
 
             Directory.CreateDirectory(ticketDirPath);
