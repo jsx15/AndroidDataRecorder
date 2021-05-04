@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
+using AndroidDataRecorder.Misc;
 using AndroidDataRecorder.Screenrecord;
 using SharpAdbClient;
 
@@ -137,11 +138,14 @@ namespace AndroidDataRecorder.Backend
         public static List<DeviceData> GetConnectedDevices()
         {
             var deviceList = new List<DeviceData>();
-            foreach (var device in Client.GetDevices())
+            if (Server.GetStatus().IsRunning)
             {
-                if (device.State != DeviceState.NoPermissions)
+                foreach (var device in Client.GetDevices())
                 {
-                    deviceList.Add(device);
+                    if (device.State != DeviceState.NoPermissions)
+                    {
+                        deviceList.Add(device);
+                    }
                 }
             }
 
@@ -156,7 +160,16 @@ namespace AndroidDataRecorder.Backend
         {
             try
             {
-                Server.RestartServer();
+                foreach (var dev in GetConnectedDevices())
+                {
+                    StopLogging(dev);
+                    RecController.StopScrRec(dev);
+                }
+                MarkerList.ActiveDeviceData = null;
+                
+                Client.KillAdb();
+                Thread.Sleep(500);
+                Config.OnRestart();
             }
             catch (Exception e)
             {
@@ -175,7 +188,14 @@ namespace AndroidDataRecorder.Backend
         {
             try
             {
+                foreach (var dev in GetConnectedDevices())
+                {
+                    StopLogging(dev);
+                    RecController.StopScrRec(dev);
+                }
+                MarkerList.ActiveDeviceData = null;
                 Client.KillAdb();
+                
             }
             catch (Exception e)
             {
@@ -252,6 +272,10 @@ namespace AndroidDataRecorder.Backend
             LoggingManager.DeleteEntry(e.Device.Serial);
             Console.WriteLine($"The device {e.Device} has disconnected from this PC");
             RecController.StopScrRec(e.Device);
+            if (MarkerList.ActiveDeviceData is not null && MarkerList.ActiveDeviceData.Serial.Equals(e.Device.Serial))
+            {
+                MarkerList.ActiveDeviceData = null;
+            }
         }
 
         /// <summary>

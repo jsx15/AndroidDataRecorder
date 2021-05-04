@@ -188,7 +188,6 @@
 
         _monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
         _monitor.DeviceChanged += DeviceChanged;
-        _monitor.DeviceDisconnected += OnDeviceDisconnected;
         _monitor.DeviceConnected += DeviceChanged;
         _monitor.Start();
 
@@ -364,14 +363,6 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private void OnDeviceDisconnected(object sender, DeviceDataEventArgs e)
-    {
-        if (MarkerList.ActiveDeviceData is not null && MarkerList.ActiveDeviceData.Serial.Equals(e.Device.Serial))
-        {
-            MarkerList.ActiveDeviceData = null;
-        }
-    }
-    
     /*
      * Layout for performance chart
      */

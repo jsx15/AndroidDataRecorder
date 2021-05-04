@@ -49,6 +49,17 @@ namespace AndroidDataRecorder.Backend
 
             ConnectKnownDevices();
         }
+        
+        
+        public static void OnRestart()
+        {
+            _source = JsonConvert.DeserializeObject<Source>(File.ReadAllText(Path, Encoding.Default));
+            CheckAdbPath();
+
+            SaveConfig();
+
+            ConnectKnownDevices();
+        }
 
         /// <summary>
         /// Write the content of the source class object into the config.json file
