@@ -33,7 +33,7 @@ namespace AndroidDataRecorder.Backend
         {
             private CustomMonitor() {}
             private static readonly object Padlock = new object(); 
-            private static CustomMonitor _instance = null;
+            private static CustomMonitor _instance;
             public event EventHandler<DeviceDataEventArgs> DeviceWorkloadChanged;
             public event EventHandler<EventArgs> MultipleSameDevices;
             
@@ -61,7 +61,7 @@ namespace AndroidDataRecorder.Backend
             /// <param name="e"> The DeviceDataEvent that is invoked </param>
             public void OnDeviceWorkloadChanged(DeviceDataEventArgs e)
             {
-                DeviceWorkloadChanged?.Invoke((object) this, e);
+                DeviceWorkloadChanged?.Invoke(this, e);
             }
             
             /// <summary>
@@ -70,7 +70,7 @@ namespace AndroidDataRecorder.Backend
             /// <param name="e"> The Event that is invoked </param>
             public void OnMultipleSameDevicesConnected(EventArgs e)
             {
-                MultipleSameDevices?.Invoke((object) this, e);
+                MultipleSameDevices?.Invoke(this, e);
             }
         }
 
@@ -79,7 +79,7 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         public static void InitializeAdbServer(string path)
         {
-            var result = Server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
+            Server.StartServer(Path.GetFullPath(Path.Combine(path)), restartServerIfNewer: false);
             var monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
             Instance = CustomMonitor.Instance;
             monitor.DeviceConnected += OnDeviceConnected;
@@ -126,6 +126,7 @@ namespace AndroidDataRecorder.Backend
             }
             catch (Exception)
             {
+                // ignored
             }
         }
 
@@ -194,7 +195,7 @@ namespace AndroidDataRecorder.Backend
             var accessData = new AccessData(device);
             var cts = new CancellationTokenSource();
             LoggingManager.AddEntry(device.Serial, cts);
-            ThreadPool.QueueUserWorkItem(new WaitCallback(accessData.CheckDeviceState), cts.Token);
+            ThreadPool.QueueUserWorkItem(accessData.CheckDeviceState, cts.Token);
         }
 
         /// <summary>

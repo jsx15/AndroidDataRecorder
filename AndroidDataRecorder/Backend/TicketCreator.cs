@@ -185,8 +185,8 @@ namespace AndroidDataRecorder.Backend
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.devicename,
                 entry.deviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.message)));
             
-            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
-                resourcesList.deviceName, resourcesList.serial, resourcesList.cpu, resourcesList.memory, resourcesList.battery)));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.Timestamp,
+                resourcesList.DeviceName, resourcesList.Serial, resourcesList.Cpu, resourcesList.Memory, resourcesList.Battery)));
             
             list.Add(new TicketEntry(info.marker.timeStamp, info.marker.devicename, info.marker.deviceSerial,
                 info.marker.message, info.marker.MarkerId));
@@ -238,8 +238,8 @@ namespace AndroidDataRecorder.Backend
             info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.devicename,
                 entry.deviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.message)));
             
-            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
-                resourcesList.deviceName, resourcesList.serial, resourcesList.cpu, resourcesList.memory, resourcesList.battery)));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.Timestamp,
+                resourcesList.DeviceName, resourcesList.Serial, resourcesList.Cpu, resourcesList.Memory, resourcesList.Battery)));
             
             list.Add(new TicketEntry(info.marker.timeStamp, info.marker.devicename, info.marker.deviceSerial,
                 info.marker.message, info.marker.MarkerId));
