@@ -19,9 +19,9 @@ namespace AndroidDataRecorder.Misc
         /// <param name="message">Marker message</param>
         public Marker( string deviceName, DateTime time, string message)
         {
-            base.devicename = deviceName;
-            base.timeStamp = time;
-            base.message = message;
+            base.Devicename = deviceName;
+            base.TimeStamp = time;
+            base.Message = message;
         }
         
         /// <summary>
@@ -35,10 +35,10 @@ namespace AndroidDataRecorder.Misc
         public Marker(string serial, int markerId, string deviceName, DateTime time, string message)
         {
             this.MarkerId = markerId;
-            base.deviceSerial = serial;
-            base.devicename = deviceName;
-            base.timeStamp = time;
-            base.message = message;
+            base.DeviceSerial = serial;
+            base.Devicename = deviceName;
+            base.TimeStamp = time;
+            base.Message = message;
         }
         
         /// <summary>
@@ -61,7 +61,7 @@ namespace AndroidDataRecorder.Misc
         /// <returns>string in log format</returns>
         public override string ToString()
         {
-            return timeStamp +" MarkerID:  " + MarkerId + "  MarkerMessage:  " + message;
+            return TimeStamp +" MarkerID:  " + MarkerId + "  MarkerMessage:  " + Message;
         }
     }
 

@@ -5,9 +5,7 @@
 @using Atlassian.Jira
 @using System.IO
 @using AndroidDataRecorder.Database
-@using System.Threading
 @using AndroidDataRecorder.Screenrecord
-@using System.Diagnostics
 @using System.ComponentModel.DataAnnotations
 
 @inject MarkerBridge MarkerBridge;
@@ -38,7 +36,7 @@
                                     <td>
                                         <div class="row">
                                             <div class="col-4">
-                                                Marker @filter.marker.timeStamp
+                                                Marker @filter.Marker.TimeStamp
                                             </div>
                                             <div class="col-4">
                                                 <EditForm Model="@filter" OnSubmit="@HandleSubmit">
@@ -118,7 +116,7 @@
                     </div>
                     <div class="col-2">
                         <h3>Project Key:</h3>
-                        <InputSelect class="form-control"@bind-Value="_ticketModel.ProjectKey">
+                        <InputSelect class="form-control" @bind-Value="_ticketModel.ProjectKey">
                             @if (_tc is not null)
                             {
                                 @foreach (var projectKey in _tc.KeyList)
@@ -196,7 +194,7 @@
         Spinner = "visible";
         foreach (var filter in _filters.Where(filter => filter.CreateVideo))
         {
-            RecController.StartCreatingVideo(filter.marker, filter.marker.timeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.marker.timeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
+            RecController.StartCreatingVideo(filter.Marker, filter.Marker.TimeStamp.Subtract(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanMinus*60))), filter.Marker.TimeStamp.Add(new TimeSpan(0,0,Convert.ToInt32(filter.timeSpanPlus*60))), 30000);
         }
         
         while (RecController.ThreadCounter != 0)
@@ -207,7 +205,7 @@
 
         foreach (var filter in _filters)
         {
-            filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.marker.timeStamp.AddMinutes(-filter.timeSpanMinus), filter.marker.timeStamp.AddMinutes(filter.timeSpanPlus));
+            filter.Resources = _dataResources.GetList(filter.DeviceSerial, filter.Marker.TimeStamp.AddMinutes(-filter.timeSpanMinus), filter.Marker.TimeStamp.AddMinutes(filter.timeSpanPlus));
         }
 
         try

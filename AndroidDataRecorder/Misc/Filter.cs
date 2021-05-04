@@ -1,10 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data.SqlTypes;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.WebEncoders.Testing;
-using SharpAdbClient;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -13,7 +7,7 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// Marker
         /// </summary>
-        public Marker marker { get; set; }
+        public Marker Marker { get; set; }
 
         /// <summary>
         /// Loglevel
@@ -31,20 +25,20 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public List<LogEntry> Logs = new List<LogEntry>();
 
-        /*
-         * Resources usage of device
-         */
+        /// <summary>
+        /// Resources usage of device
+        /// </summary>
         public List<ResourcesList> Resources = new List<ResourcesList>();
 
-        /*
-         * Serial of device
-         * Initialization is empty for blazor dropdown
-         */
+        /// <summary>
+        /// Serial of device
+        /// Initialization is empty for blazor dropdown
+        /// </summary>
         public string DeviceSerial = "";
         
-        /*
-         * Bool for video
-         */
+        /// <summary>
+        /// Bool for video
+        /// </summary>
         public bool CreateVideo;
 
         /// <summary>
@@ -54,7 +48,7 @@ namespace AndroidDataRecorder.Misc
         /// <<param name="deviceSerial">serial of the device</param>
         public Filter(Marker mar, string deviceSerial)
         {
-         marker = mar;
+         Marker = mar;
          DeviceSerial = deviceSerial;
         }
         
@@ -63,7 +57,7 @@ namespace AndroidDataRecorder.Misc
         /// </summary>
         public Filter()
         {
-         marker = new Marker();
+         Marker = new Marker();
         }
     }
 }

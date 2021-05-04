@@ -78,12 +78,12 @@
     private void FillChartWithCpuData(object sender, DeviceDataEventArgs e)
     {
         if (!(_chart.Data.FirstOrDefault() is Scatter scatter)) return;
-        scatter.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).ToList();
-        scatter.Y = _data.GetList(DeviceSerial).Select(x => (object) x.cpu).ToList();
+        scatter.X = _data.GetList(DeviceSerial).Select(x => (object) x.Timestamp).ToList();
+        scatter.Y = _data.GetList(DeviceSerial).Select(x => (object) x.Cpu).ToList();
         
         if (!(_chart.Data[1] is Scatter scatterMemory)) return;
-        scatterMemory.X = _data.GetList(DeviceSerial).Select(x => (object) x.timestamp).ToList();
-        scatterMemory.Y = _data.GetList(DeviceSerial).Select(x => (object) x.memory).ToList();
+        scatterMemory.X = _data.GetList(DeviceSerial).Select(x => (object) x.Timestamp).ToList();
+        scatterMemory.Y = _data.GetList(DeviceSerial).Select(x => (object) x.Memory).ToList();
         
         _chart.React();
     }

@@ -45,22 +45,22 @@ namespace AndroidDataRecorder.Misc
         public LogEntry(string deviceserial, string deviceName, DateTime systemTimestamp, DateTime deviceTimestamp, 
             int pid, int tid, string logLevel, string app, string logMessage)
         {
-            deviceSerial = deviceserial;
-            devicename = deviceName;
-            deviceSerial = deviceserial;
-            timeStamp = systemTimestamp;
+            DeviceSerial = deviceserial;
+            Devicename = deviceName;
+            DeviceSerial = deviceserial;
+            TimeStamp = systemTimestamp;
             DeviceTimestamp = deviceTimestamp;
             Pid = pid;
             Tid = tid;
             LogLevel = logLevel;
             App = app;
-            message = logMessage;
+            Message = logMessage;
         }
         
         public override string ToString()
         {
-            return ""+ deviceSerial +" "+ devicename + " " + timeStamp + " " + DeviceTimestamp + " " + Pid + " " + Tid + " " + LogLevel +
-                   " " + App + ": " + message;
+            return ""+ DeviceSerial +" "+ Devicename + " " + TimeStamp + " " + DeviceTimestamp + " " + Pid + " " + Tid + " " + LogLevel +
+                   " " + App + ": " + Message;
         }
 
     }

@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using AndroidDataRecorder.Misc;
-using AndroidDataRecorder.Pages;
 
 namespace AndroidDataRecorder.Services
 {

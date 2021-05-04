@@ -24,14 +24,14 @@
                     <div class="row">
                         <div class="col">
                             Marker:
-                            <MarkerInputSelect class="form-control" ValueExpression="() => filterModel.marker" Value="filterModel.marker" ValueChanged="(Marker value) => MarkerChanged(value, filterModel)">
-                                @if (filterModel.marker == null)
+                            <MarkerInputSelect class="form-control" ValueExpression="() => filterModel.Marker" Value="filterModel.Marker" ValueChanged="(Marker value) => MarkerChanged(value, filterModel)">
+                                @if (filterModel.Marker == null)
                                 {
                                     <option value="0"></option>
                                 }
-                                @foreach (var mar in _dataMarker.GetList(filterModel.DeviceSerial).OrderBy(x => x.timeStamp))
+                                @foreach (var mar in _dataMarker.GetList(filterModel.DeviceSerial).OrderBy(x => x.TimeStamp))
                                 {
-                                    <option value="@mar.MarkerId">@mar.timeStamp | @mar.message</option>
+                                    <option value="@mar.MarkerId">@mar.TimeStamp | @mar.Message</option>
                                 }
                             </MarkerInputSelect>
                         </div>
@@ -41,7 +41,7 @@
                                 <option value=@string.Empty>*</option>
                                 @foreach (var dev in _dataDevice.DeviceList())
                                 {
-                                    <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
+                                    <option value="@dev.Serial">@dev.DeviceName - @dev.Serial</option>
                                 }
                             </InputSelect>
                         </div>
@@ -121,14 +121,14 @@
                         @foreach (var log in Enumerable.Reverse(filter.Logs))
                         {
                             <tr>
-                                <td>@log.devicename</td>
-                                <td>@log.timeStamp</td>
+                                <td>@log.Devicename</td>
+                                <td>@log.TimeStamp</td>
                                 <td>@log.DeviceTimestamp</td>
                                 <td>@log.Pid</td>
                                 <td>@log.Tid</td>
                                 <td>@log.LogLevel</td>
                                 <td>@log.App</td>
-                                <td class="text-left">@log.message</td>
+                                <td class="text-left">@log.Message</td>
                             </tr>
                         }
                         </tbody>
@@ -196,9 +196,9 @@
             else
             {
                 //fill the Logs list with filtered log data
-                filtering.Logs = _dataLogs.GetList( filtering.marker.deviceSerial,
-                    filtering.marker.timeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
-                    filtering.marker.timeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
+                filtering.Logs = _dataLogs.GetList( filtering.Marker.DeviceSerial,
+                    filtering.Marker.TimeStamp.Subtract(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanMinus * 60))),
+                    filtering.Marker.TimeStamp.Add(new TimeSpan(0, 0, Convert.ToInt32(filtering.timeSpanPlus * 60))), filtering.Level);
             }
             
         }
@@ -221,7 +221,7 @@
         
         foreach (var mar in _localSelectedMarkers)
         {
-            _filterList.Add(new Filter(mar, mar.deviceSerial));
+            _filterList.Add(new Filter(mar, mar.DeviceSerial));
         }
     }
 
@@ -251,7 +251,7 @@
      */
     private string TimeStampForLogTable(Filter filter)
     {
-        return filter.marker?.timeStamp.ToString();
+        return filter.Marker?.TimeStamp.ToString();
     }
 
     /*
@@ -260,7 +260,7 @@
     private void DeviceChanged(string serial, Filter filterModel)
     {
         filterModel.DeviceSerial = serial;
-        filterModel.marker = !serial.Equals(string.Empty) ? _dataMarker.GetList(serial).First() : null;
+        filterModel.Marker = !serial.Equals(string.Empty) ? _dataMarker.GetList(serial).First() : null;
         filterModel.Logs.Clear();
     }
 
@@ -269,8 +269,8 @@
      */
     private void MarkerChanged(Marker marker, Filter filterModel)
     {
-        filterModel.marker = marker;
-        filterModel.DeviceSerial = marker.deviceSerial;
+        filterModel.Marker = marker;
+        filterModel.DeviceSerial = marker.DeviceSerial;
         filterModel.Logs.Clear();
     }
 

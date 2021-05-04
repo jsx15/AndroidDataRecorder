@@ -1,5 +1,4 @@
 using System;
-using System.Data.SqlTypes;
 
 namespace AndroidDataRecorder.Misc
 {
@@ -8,21 +7,21 @@ namespace AndroidDataRecorder.Misc
         /// <summary>
         /// Name of source
         /// </summary>
-        public string devicename { get; set; }
+        public string Devicename { get; set; }
         
         /// <summary>
         /// Serialnumber of the device
         /// </summary>
-        public string deviceSerial { get; set; }
+        public string DeviceSerial { get; set; }
 
         /// <summary>
         /// Message inside the entry
         /// </summary>
-        public string message { get; set; }
+        public string Message { get; set; }
 
         /// <summary>
         /// Timestamp of the entry
         /// </summary>
-        public DateTime timeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }

@@ -86,7 +86,7 @@ namespace AndroidDataRecorder.Screenrecord
             ThreadCounter++;
             
             //Thread to start video creation
-            new Thread (()=> MarkerVideo.CreateVideo(marker.devicename,marker.deviceSerial,startTime,endTime,marker.MarkerId,videoLength)).Start();
+            new Thread (()=> MarkerVideo.CreateVideo(marker.Devicename,marker.DeviceSerial,startTime,endTime,marker.MarkerId,videoLength)).Start();
             
             Console.WriteLine("Thread started to create concatenate video");
         }

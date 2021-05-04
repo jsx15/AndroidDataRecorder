@@ -1,12 +1,12 @@
 using System;
-using System.Data.SqlTypes;
 
 namespace AndroidDataRecorder.Misc
 {
     [Serializable]
     public class IssueTypeNotSupported : Exception
     {
-        public IssueTypeNotSupported() : base() { }
+        public IssueTypeNotSupported()
+        { }
         public IssueTypeNotSupported(string message) : base(message) { }
         public IssueTypeNotSupported(string message, Exception inner) : base(message, inner) { }
         

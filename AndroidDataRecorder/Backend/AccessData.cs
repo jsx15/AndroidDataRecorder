@@ -87,7 +87,7 @@ namespace AndroidDataRecorder.Backend
                             {
                                 watch.Stop();
                                 _device = d;
-                                if(!_tableDevices.DeviceList().Exists(x => x.serial.Equals(_device.Serial))) _tableDevices.InsertValues(_device.Serial, _device.Name);
+                                if(!_tableDevices.DeviceList().Exists(x => x.Serial.Equals(_device.Serial))) _tableDevices.InsertValues(_device.Serial, _device.Name);
                                 new Thread(SaveApps).Start();
                                 InitializeProcess();
                             }
@@ -131,7 +131,7 @@ namespace AndroidDataRecorder.Backend
             
                 //Decide which command to use for accessing the cpu usage by checking the devices build version
                 AdbServer.GetClient().ExecuteRemoteCommand("getprop ro.build.version.release", _device, receiver);
-                _cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top -b -n 1" : "top -b -m 5 -n 1";
+                _cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top  1" : "top -b -m 5 -n 1";
             
                 //Start the logging and accessing of the workload
                 new Thread(() => SaveLogs(proc)).Start();
@@ -214,10 +214,10 @@ namespace AndroidDataRecorder.Backend
                     _tableResources.InsertValues(_device.Serial, _device.Name, cpu, mem, _batteryLevel, time);
 
                     //Insert the five most expensive processes into ResIntens
-                    for (int i = 0; i < 5; i++)
+                    for (var i = 0; i < 5; i++)
                     {
                         _tableResIntens.InsertValues(_device.Serial, _device.Name,
-                            System.Math.Round((double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture) / _cpuTotal) * 100, 2),
+                            Math.Round((double.Parse(cpuFiveProcesses[i].ToString(), CultureInfo.InvariantCulture) / _cpuTotal) * 100, 2),
                             double.Parse(memFiveProcesses[i].ToString(), CultureInfo.InvariantCulture),
                             fiveProcesses[i].ToString(), time);
                     }

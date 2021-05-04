@@ -1,20 +1,19 @@
-﻿using System;
-
+﻿
 namespace AndroidDataRecorder.Misc
 {
     public class AppList
     {
         
-        public string appName { get; set; }
+        public string AppName { get; set; }
         
-        public string serialFK { get; set; }
+        public string SerialFk { get; set; }
         
         public AppList(){}
 
-        public AppList(string _appName, string _serialFk)
+        public AppList(string appName, string serialFk)
         {
-            appName = _appName;
-            serialFK = _serialFk;
+            AppName = appName;
+            SerialFk = serialFk;
         }
         
     }

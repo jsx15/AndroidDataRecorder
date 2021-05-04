@@ -139,8 +139,8 @@ namespace AndroidDataRecorder.Backend
             {
                 foreach (var info in combinedInfos)
                 {
-                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.marker.devicename+ "_" +
-                        info.marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".txt"));
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.Marker.Devicename+ "_" +
+                        info.Marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".txt"));
                     CreateMarkerFile(info , fileName, projectKey); 
                     issue.AddAttachment(fileName);
                 }
@@ -148,15 +148,15 @@ namespace AndroidDataRecorder.Backend
             {
                 foreach (var info in combinedInfos)
                 {
-                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.marker.devicename + "_" 
-                        + info.marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".json"));
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.Marker.Devicename + "_" 
+                        + info.Marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".json"));
                     CreateMarkerJson(info , fileName); 
                     issue.AddAttachment(fileName);
                 }
             }
 
-            foreach (var filename in from filter in combinedInfos where filter.CreateVideo select Config.GetVideoDirPath + "marker_" + filter.marker.MarkerId + "_" +
-                filter.marker.devicename + ".mp4")
+            foreach (var filename in from filter in combinedInfos where filter.CreateVideo select Config.GetVideoDirPath + "marker_" + filter.Marker.MarkerId + "_" +
+                filter.Marker.Devicename + ".mp4")
             {
                 issue.AddAttachment(filename);
             }
@@ -182,14 +182,14 @@ namespace AndroidDataRecorder.Backend
             
             List<TicketEntry> list = new List<TicketEntry>();
             
-            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.devicename,
-                entry.deviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.message)));
+            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.TimeStamp, entry.Devicename,
+                entry.DeviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.Message)));
             
-            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
-                resourcesList.deviceName, resourcesList.serial, resourcesList.cpu, resourcesList.memory, resourcesList.battery)));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.Timestamp,
+                resourcesList.DeviceName, resourcesList.Serial, resourcesList.Cpu, resourcesList.Memory, resourcesList.Battery)));
             
-            list.Add(new TicketEntry(info.marker.timeStamp, info.marker.devicename, info.marker.deviceSerial,
-                info.marker.message, info.marker.MarkerId));
+            list.Add(new TicketEntry(info.Marker.TimeStamp, info.Marker.Devicename, info.Marker.DeviceSerial,
+                info.Marker.Message, info.Marker.MarkerId));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
             
@@ -206,10 +206,10 @@ namespace AndroidDataRecorder.Backend
                 {
                     sw.WriteLine("####");
 
-                    sw.WriteLine("#Logs from Device: {0}", info.marker.devicename);
+                    sw.WriteLine("#Logs from Device: {0}", info.Marker.Devicename);
                     sw.WriteLine("#at {0} minutes before and {1} after Marker with ID: {2}",
-                        info.timeSpanMinus, info.timeSpanPlus, info.marker.MarkerId);
-                    sw.WriteLine("#Marker message: {0}", info.marker.message);
+                        info.timeSpanMinus, info.timeSpanPlus, info.Marker.MarkerId);
+                    sw.WriteLine("#Marker message: {0}", info.Marker.Message);
                     sw.WriteLine("####");
 
                     foreach (var entry in list )
@@ -235,14 +235,14 @@ namespace AndroidDataRecorder.Backend
 
             List<TicketEntry> list = new List<TicketEntry>();
             
-            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.timeStamp, entry.devicename,
-                entry.deviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.message)));
+            info.Logs.ForEach(entry => list.Add(new TicketEntry(entry.TimeStamp, entry.Devicename,
+                entry.DeviceSerial,entry.DeviceTimestamp, entry.Pid, entry.Tid, entry.LogLevel, entry.App, entry.Message)));
             
-            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.timestamp,
-                resourcesList.deviceName, resourcesList.serial, resourcesList.cpu, resourcesList.memory, resourcesList.battery)));
+            info.Resources.ForEach(resourcesList => list.Add(new TicketEntry(resourcesList.Timestamp,
+                resourcesList.DeviceName, resourcesList.Serial, resourcesList.Cpu, resourcesList.Memory, resourcesList.Battery)));
             
-            list.Add(new TicketEntry(info.marker.timeStamp, info.marker.devicename, info.marker.deviceSerial,
-                info.marker.message, info.marker.MarkerId));
+            list.Add(new TicketEntry(info.Marker.TimeStamp, info.Marker.Devicename, info.Marker.DeviceSerial,
+                info.Marker.Message, info.Marker.MarkerId));
             
             list.Sort((x,y)=> DateTime.Compare(x.timestamp , y.timestamp));
 

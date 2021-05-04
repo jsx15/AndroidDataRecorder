@@ -23,7 +23,7 @@
                     <InputSelect class="form-control" ValueExpression="() => _filterModel.DeviceSerial" Value="@_filterModel.DeviceSerial" ValueChanged="((string value) => DeviceChanged(value))">
                         @foreach (var dev in _dataDevice.DeviceList())
                         {
-                            <option value="@dev.serial">@dev.deviceName - @dev.serial</option>
+                            <option value="@dev.Serial">@dev.DeviceName - @dev.Serial</option>
                         }
                     </InputSelect>
                 </EditForm>
@@ -42,8 +42,8 @@
                     {
                         <tr style="background: @element.Color" @onclick="() => RowSelected(element)">
                             <td>@element.Marker.MarkerId</td>
-                            <td>@element.Marker.timeStamp</td>
-                            <td class="w-75">@element.Marker.message</td>
+                            <td>@element.Marker.TimeStamp</td>
+                            <td class="w-75">@element.Marker.Message</td>
                             <td class="text-center">
                                 <button @onclick="() => DeleteButton(element.Marker.MarkerId)" @onclick:stopPropagation="true" class="btn btn-danger">
                                     <span style="vertical-align: middle" class="oi oi-circle-x"></span>
@@ -113,7 +113,7 @@
         {
             try
             {
-                _filterModel.DeviceSerial = _dataDevice.DeviceList().First().serial;
+                _filterModel.DeviceSerial = _dataDevice.DeviceList().First().Serial;
             }
             catch
             {

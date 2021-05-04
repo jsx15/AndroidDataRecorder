@@ -25,29 +25,7 @@ namespace AndroidDataRecorder.Misc
 
             throw new Exception("Device is null");
         }
-        
-        /// <summary>
-        /// Get ip address of device
-        /// </summary>
-        /// <param name="device">device to parse</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public static string IpAddress(DeviceData device)
-        {
-            if (ConnectionType(device).Equals(ConnectionTypes.Wifi))
-            {
-                if (device.ToString().Contains(':'))
-                {
-                    string[] split = device.ToString().Split(':');
-                    return split[0];
-                }
 
-                return "IP Address could not be determined";
-            }
-
-            throw new Exception("Device is connected via USB");
-        }
-        
         public enum ConnectionTypes
         {
             Wifi,

@@ -84,10 +84,10 @@ namespace AndroidDataRecorder.Database
                     markerList.Add(new Marker()
                     {
                         MarkerId = reader.GetInt32(0),
-                        deviceSerial = reader.GetString(1),
-                        devicename = reader.GetString(2),
-                        timeStamp = reader.GetDateTime(3),
-                        message = reader.GetString(4)
+                        DeviceSerial = reader.GetString(1),
+                        Devicename = reader.GetString(2),
+                        TimeStamp = reader.GetDateTime(3),
+                        Message = reader.GetString(4)
                     });
                 }
             }
@@ -136,10 +136,10 @@ namespace AndroidDataRecorder.Database
                     markerList.Add(new Marker()
                     {
                         MarkerId = reader.GetInt32(0),
-                        deviceSerial = reader.GetString(1),
-                        devicename = reader.GetString(2),
-                        timeStamp = reader.GetDateTime(3),
-                        message = reader.GetString(4)
+                        DeviceSerial = reader.GetString(1),
+                        Devicename = reader.GetString(2),
+                        TimeStamp = reader.GetDateTime(3),
+                        Message = reader.GetString(4)
                     });
                 }
             }

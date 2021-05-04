@@ -2,15 +2,15 @@
 {
     public class DeviceList
     {
-        public string serial { get; set; }
-        public string deviceName { get; set; }
+        public string Serial { get; set; }
+        public string DeviceName { get; set; }
         
         public DeviceList(){}
 
-        public DeviceList(string _serial, string _deviceName)
+        public DeviceList(string serial, string deviceName)
         {
-            serial = _serial;
-            deviceName = _deviceName;
+            Serial = serial;
+            DeviceName = deviceName;
         }
     }
 }
