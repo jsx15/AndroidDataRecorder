@@ -1,5 +1,99 @@
 # AndroidDataRecorder 
 
+## Overview
+This software is a data logger for android devices. It collects log data from one or more connected android devices and stores them into a database. Devices can either be connected via USB or network. For troubleshooting purposes, timestamps (markers) can be set, which allow the log data to be viewed in a self-defined period of time. The software also offers to record the screen of the connected devices and to create a video to a marker. Another function is the creation of issues. A backlog entry is created in JIRA, which contains selected markers, the associated log data for the selected time period, resources usage and, if desired, an MP4 video. So this software makes it easy for the user to find errors when testing android apps.
+This software is designed to run on a Raspberry Pi or a computer of your choice.
+
+## Prerequisities
+Download the latest [Android SDK Platform-Tools](https://developer.android.com/studio/releases/platform-tools)  and [FFMPEG Version](https://ffmpeg.org/download.html).
+
+To start the software it is necessary to edit the config.json file which is located in the “/src” directory.
+
+**!! Please note necessary escape sequences !!**
+
+The config.json file has the following parameters:
+
+### Necessary:
+<table>
+  <thead>
+    <th>Parameter Name</th>
+    <th>Description</th>
+    <th>Example</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AdbPath</td>
+      <td>the path to the platform-tools adb executablefile</td>
+      <td>C:\\Program FIles\\platform-tools\\adb.exe</td>
+    </tr>
+    <tr>
+      <td>FfmpegPath</td>
+      <td>the path to the Ffmpeg executable</td>
+      <td>C:\\Program FIles\\ffmpeg\\ffmpeg.exe</td>
+    </tr>
+    <tr>
+      <td>VideoDirPath</td>
+      <td>the path where the video files are stored (directory seperator appended)</td>
+      <td>C:\\User\\Documents\</td>
+    </tr>
+    <tr>
+      <td>TicketDirPath</td>
+      <td>the path where the ticket files are stored</td>
+      <td>C:\\User\\Documents\</td>
+    </tr>
+  </tbody>
+</table>
+
+### Optional:
+<table>
+  <thead>
+    <th>Parameter Name</th>
+    <th>Description</th>
+    <th>Default Value</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>accessWorkloadInterval</td>
+      <td>Interval the CPU and Memory is refreshed (1-60s)</td>
+      <td>5 seconds</td>
+    </tr>
+    <tr>
+      <td>JiraServerUrl</td>
+      <td>URL to the JIRA Server</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>JiraUsername</td>
+      <td>JIRA Username (e-mail)</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>ApiToken</td>
+      <td>API Token from JIRA</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+  
+# Build
+
+`git clone https://github.com/jsx15/AndroidDataRecorder.git`
+
+`cd ./AndroidDataRecorder/AndroidDataRecorder/`
+
+Build the software using dotnet: <br>
+`dotnet build && dotnet run`
+
+The software is accessible via https://localhost:5001.
+
+## General Instructions
+
+### Working on Raspberry Pi
+The software can also be easily built and run on a Raspberry Pi. 
+
+If the Raspberry Pi has a screen attached there is a special page designed for this screen. The page can be accessed via https://localhost:5001/pi.
+
+
 ## Contributors
 * Konstantin Scholz (SCRUM Master)
 * Robin Enderle
