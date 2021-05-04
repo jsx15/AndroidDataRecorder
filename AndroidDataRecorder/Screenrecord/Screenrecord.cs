@@ -64,7 +64,7 @@ namespace AndroidDataRecorder.Screenrecord
         /// <param name="deviceSerial">device id</param>
         private void PrepareRecord(string deviceSerial)
         {
-            //prepare adb process^^
+            //prepare adb process
             var scProc = new Process
             {
                 StartInfo =
