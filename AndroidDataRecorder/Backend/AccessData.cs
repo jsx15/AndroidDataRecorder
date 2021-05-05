@@ -131,15 +131,15 @@ namespace AndroidDataRecorder.Backend
             
                 //Decide which command to use for accessing the cpu usage by checking the devices build version
                 AdbServer.GetClient().ExecuteRemoteCommand("getprop ro.build.version.release", _device, receiver);
-                _cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top  1" : "top -b -m 5 -n 1";
+                _cpuUsageCommand = Convert.ToInt32(receiver.ToString()) < 9 ? "top -b -n 1" : "top -b -m 5 -n 1";
             
                 //Start the logging and accessing of the workload
                 new Thread(() => SaveLogs(proc)).Start();
                 AccessWorkload();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
+                // ignored
             }
         }
 
@@ -171,12 +171,19 @@ namespace AndroidDataRecorder.Backend
                 if (!string.IsNullOrEmpty(line) && !line.StartsWith("---------"))
                 {
                     line = _device.Serial + " " + _device.Name + " " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " " + line;
-                    
-                    var grokResult = _grok.Parse(line);
-                    _tableLogs.InsertValues(grokResult[0].Value.ToString(), grokResult[1].Value.ToString(), 
-                        Convert.ToDateTime(grokResult[2].Value), Convert.ToDateTime(grokResult[3].Value), 
-                        Convert.ToInt32(grokResult[4].Value), Convert.ToInt32(grokResult[5].Value), 
-                        grokResult[6].Value.ToString(), grokResult[7].Value.ToString(), grokResult[8].Value.ToString());
+
+                    try
+                    {
+                        var grokResult = _grok.Parse(line);
+                        _tableLogs.InsertValues(grokResult[0].Value.ToString(), grokResult[1].Value.ToString(), 
+                            Convert.ToDateTime(grokResult[2].Value), Convert.ToDateTime(grokResult[3].Value), 
+                            Convert.ToInt32(grokResult[4].Value), Convert.ToInt32(grokResult[5].Value), 
+                            grokResult[6].Value.ToString(), grokResult[7].Value.ToString(), grokResult[8].Value.ToString());
+                    }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
                 }
             }
         }
