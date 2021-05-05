@@ -4,6 +4,14 @@
 This software is a data logger for android devices. It collects log data from one or more connected android devices and stores them into a database. Devices can either be connected via USB or network. For troubleshooting purposes, timestamps (markers) can be set, which allow the log data to be viewed in a self-defined period of time. The software also offers to record the screen of the connected devices and to create a video to a marker. Another function is the creation of issues. A backlog entry is created in JIRA, which contains selected markers, the associated log data for the selected time period, resources usage and, if desired, an MP4 video. So this software makes it easy for the user to find errors when testing android apps.
 This software is designed to run on a Raspberry Pi or a computer of your choice.
 
+## Contributors
+* Konstantin Scholz (SCRUM Master)
+* Robin Enderle
+* Erwin Kenner
+* Justin Reisch
+* Jonas Schoeler 
+* Sandra Schuart
+
 # Prerequisities
 Download the latest [Android SDK Platform-Tools](https://developer.android.com/studio/releases/platform-tools)  and [FFMPEG Version](https://ffmpeg.org/download.html).
 
@@ -248,14 +256,6 @@ To connect a device via network it is required to add the device to the known de
 In the Danger Zone, the ADB Server can be killed and restarted if any errors occur. Also the database can be cleared (all data will be lost. Forever!).
 
 ![highway to the danger zone](https://github.com/jsx15/AndroidDataRecorder/blob/main/screenshots/dangerzone.PNG)
-
-## Contributors
-* Konstantin Scholz (SCRUM Master)
-* Robin Enderle
-* Erwin Kenner
-* Justin Reisch
-* Jonas Schoeler 
-* Sandra Schuart
 
 ## TERMS OF SERVICE
 
