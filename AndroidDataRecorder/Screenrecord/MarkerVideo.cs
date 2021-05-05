@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AndroidDataRecorder.Backend;
 
 namespace AndroidDataRecorder.Screenrecord
@@ -63,6 +64,9 @@ namespace AndroidDataRecorder.Screenrecord
         public static void CreateVideo(string deviceName, string deviceSerial, DateTime startTime,
             DateTime endTime, int markerId, int videoLength)
         {
+            //Replace all Invalid filename chars with _
+            deviceSerial = Path.GetInvalidFileNameChars().Aggregate(deviceSerial, (current, c) => current.Replace(c, '_'));
+            
             //create path of the video files
             var videoPath = Config.GetVideoDirPath + deviceSerial + Path.DirectorySeparatorChar;
 

@@ -134,12 +134,15 @@ namespace AndroidDataRecorder.Backend
                 @"Tickets" + Path.DirectorySeparatorChar + GetDate()));
 
             Directory.CreateDirectory(ticketDirPath);
-            
+
             if (format == FileFormat.TextFile)
             {
                 foreach (var info in combinedInfos)
                 {
-                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.Marker.Devicename+ "_" +
+                    var deviceName = info.Marker.Devicename;
+                    deviceName = Path.GetInvalidFileNameChars().Aggregate(deviceName, (current, c) => current.Replace(c, '_'));
+                    
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, deviceName + "_" +
                         info.Marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".txt"));
                     CreateMarkerFile(info , fileName, projectKey); 
                     issue.AddAttachment(fileName);
@@ -148,7 +151,10 @@ namespace AndroidDataRecorder.Backend
             {
                 foreach (var info in combinedInfos)
                 {
-                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, info.Marker.Devicename + "_" 
+                    var deviceName = info.Marker.Devicename;
+                    deviceName = Path.GetInvalidFileNameChars().Aggregate(deviceName, (current, c) => current.Replace(c, '_'));
+                    
+                    String fileName = Path.GetFullPath(Path.Combine(ticketDirPath, deviceName + "_" 
                         + info.Marker.MarkerId + info.Level + (info.timeSpanMinus + info.timeSpanPlus) + ".json"));
                     CreateMarkerJson(info , fileName); 
                     issue.AddAttachment(fileName);
