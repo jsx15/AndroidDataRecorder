@@ -255,7 +255,7 @@ To connect a device via network it is required to add the device to the known de
 
 In the Danger Zone, the ADB Server can be killed and restarted if any errors occur. Also the database can be cleared (all data will be lost. Forever!).
 
-![highway to the danger zone](https://github.com/jsx15/AndroidDataRecorder/blob/main/screenshots/dangerzone.PNG)
+![highway to the danger zone](https://github.com/jsx15/AndroidDataRecorder/blob/main/screenshots/dangerzone.PNG "Highway to the Danger Zone!")
 
 ## TERMS OF SERVICE
 
