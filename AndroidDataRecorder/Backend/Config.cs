@@ -50,7 +50,9 @@ namespace AndroidDataRecorder.Backend
             ConnectKnownDevices();
         }
         
-        
+        /// <summary>
+        /// Is called when the Adb Server is restarted
+        /// </summary>
         public static void OnRestart()
         {
             _source = JsonConvert.DeserializeObject<Source>(File.ReadAllText(Path, Encoding.Default));
@@ -78,16 +80,9 @@ namespace AndroidDataRecorder.Backend
         /// </summary>
         private static void ConnectKnownDevices()
         {
-            try
+            for (int i = 0; i < _source.KnownDevices.Count - 1; i++)
             {
-                for (int i = 0; i < _source.KnownDevices.Count - 1; i++)
-                {
-                    AdbServer.ConnectWirelessClient(_source.KnownDevices[i]);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
+                AdbServer.ConnectWirelessClient(_source.KnownDevices[i]);
             }
         }
 

@@ -26,24 +26,20 @@ namespace AndroidDataRecorder.Screenrecord
                 // Determine whether the directory exists.
                 if (Directory.Exists(path))
                 {
-                    Console.WriteLine("That path exists already.");
-                    
                     //return already existing directory
                     return path;
                 }
                 // Try to create the directory.
                 Directory.CreateDirectory(path);
                 
-                Console.WriteLine("Path created at: "+path);
-                
                 //return created path
                 return path;
             }
             //catch Exception
-            catch (Exception e)
+            catch (Exception)
             {
                 //print exception
-                Console.WriteLine("The process failed: {0}", e);
+                Console.WriteLine("Could not create file ... continuing");
             }
             //return null if failed
             return null;

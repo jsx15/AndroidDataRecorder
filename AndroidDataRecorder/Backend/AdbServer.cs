@@ -106,9 +106,8 @@ namespace AndroidDataRecorder.Backend
             {
                 Client.Connect(ipAddressDevice);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
-                Console.WriteLine(e);
                 return false;
             }
 
@@ -127,7 +126,7 @@ namespace AndroidDataRecorder.Backend
             }
             catch (Exception)
             {
-                // ignored
+                Console.WriteLine("Client could not be disconnected ... continuing");
             }
         }
 
@@ -171,9 +170,8 @@ namespace AndroidDataRecorder.Backend
                 Thread.Sleep(500);
                 Config.OnRestart();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
                 return false;
             }
 
@@ -197,9 +195,8 @@ namespace AndroidDataRecorder.Backend
                 Client.KillAdb();
                 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
                 return false;
             }
 

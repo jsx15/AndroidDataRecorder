@@ -114,8 +114,6 @@ namespace AndroidDataRecorder.Screenrecord
                 //hide screen touch
                 Touches.HideTouches(deviceSerial);
             }
-
-            Console.WriteLine("Record process finished " + _deviceObj.Name);
         }
 
         /// <summary>
@@ -139,8 +137,6 @@ namespace AndroidDataRecorder.Screenrecord
 
             //add file to files in use list
             FilesInUse.Add(file);
-
-            Console.WriteLine("Start recording " + _deviceObj.Name + "   " + file);
 
             //create byte buffer
             var buffer = new byte[50];
@@ -179,8 +175,6 @@ namespace AndroidDataRecorder.Screenrecord
 
             //close input stream
             input.Close();
-
-            Console.WriteLine("Recording stopped " + _deviceObj.Name + "   " + Timestamp.GetTimestamp());
         }
 
         /// <summary>
@@ -211,8 +205,6 @@ namespace AndroidDataRecorder.Screenrecord
                 // catch exception when output is already closed -> closed because timeout
                 catch (ObjectDisposedException)
                 {
-                    Console.WriteLine("Output already closed -> Timeout " + Timestamp.GetTimestamp());
-                    
                     //delete file -> device was in standby -> file not readable
                     File.Delete(path);
                 }
@@ -231,7 +223,6 @@ namespace AndroidDataRecorder.Screenrecord
         {
             //set variable to false
             _record = false;
-            Console.WriteLine("stop recording marked " + _deviceObj.Name);
         }
     }
 }

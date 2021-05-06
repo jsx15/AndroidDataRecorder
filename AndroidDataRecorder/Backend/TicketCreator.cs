@@ -224,9 +224,9 @@ namespace AndroidDataRecorder.Backend
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine("Could not write file ... continuing");
             }
         }
 
@@ -265,9 +265,9 @@ namespace AndroidDataRecorder.Backend
                 
                 File.WriteAllText(file, json);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Could not write file ... continuing");
             }
         }
 

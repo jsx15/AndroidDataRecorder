@@ -109,8 +109,6 @@ namespace AndroidDataRecorder.Screenrecord
 
             //concat thread is done
             RecController.ThreadCounter--;
-            
-            Console.WriteLine("Thread stopped concatenate video");
         }
     }
 }

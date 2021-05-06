@@ -96,7 +96,7 @@ namespace AndroidDataRecorder.Backend
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine("Device not authorized ... continuing");
                 }
             }
             while (watch.Elapsed.Milliseconds < 30000 && watch.IsRunning);
@@ -139,7 +139,7 @@ namespace AndroidDataRecorder.Backend
             }
             catch (Exception)
             {
-                // ignored
+                Console.WriteLine("Error while initializing process ... continuing");
             }
         }
 
@@ -182,7 +182,7 @@ namespace AndroidDataRecorder.Backend
                     }
                     catch (Exception)
                     {
-                        // ignored
+                        Console.WriteLine("Error while logging ... continuing");
                     }
                 }
             }
@@ -232,9 +232,9 @@ namespace AndroidDataRecorder.Backend
                     //Invoke the DeviceWorkloadChanged event and wait 30 seconds
                     AdbServer.CustomMonitor.Instance.OnDeviceWorkloadChanged(new DeviceDataEventArgs(_device));
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine("Error while fetching data ... continuing");
                 }
                 
                 Thread.Sleep(Config.GetAccessWorkloadInterval());
